@@ -1,0 +1,27 @@
+services:
+  postgresql:
+    image: postgres:17-alpine
+    restart: always
+    volumes:
+      - ~/data/postgres/saumon-druid:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=foo
+      - POSTGRES_DB=saumon_druid_development
+    ports:
+      - "5433:5432"
+  redis:
+    image: redis:8-alpine
+    restart: always
+    ports:
+      - "6380:6379"
+  web:
+    build: .
+    volumes:
+      - .:/rails
+    depends_on:
+      - postgresql
+      - redis
+    ports:
+      - "3005:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:foo@postgresql:5432/saumon_druid_development
