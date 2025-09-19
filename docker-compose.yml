@@ -9,11 +9,15 @@ services:
       - POSTGRES_DB=saumon_druid_development
     ports:
       - "5433:5432"
+    networks:
+      - default
   redis:
     image: redis:8-alpine
     restart: always
     ports:
       - "6380:6379"
+    networks:
+      - default
   web:
     build: .
     volumes:
@@ -25,3 +29,10 @@ services:
       - "3005:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:foo@postgresql:5432/saumon_druid_development
+    networks:
+      - saumon_network
+      - default
+
+networks:
+  saumon_network:
+    external: true
