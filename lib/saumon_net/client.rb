@@ -1,4 +1,4 @@
-require 'httparty'
+require "httparty"
 
 module SaumonNet
   class Client
@@ -33,9 +33,9 @@ module SaumonNet
 
     def default_headers
       {
-        'Authorization' => "Bearer #{@configuration.api_token}",
-        'Content-Type' => 'application/json',
-        'Accept' => 'application/json'
+        "Authorization" => "Bearer #{@configuration.api_token}",
+        "Content-Type" => "application/json",
+        "Accept" => "application/json"
       }
     end
 
@@ -85,7 +85,7 @@ module SaumonNet
 
     def parse_error_message(response)
       parsed = parse_response(response)
-      parsed.dig('error') || "HTTP #{response.code}: #{response.message}"
+      parsed.dig("error") || "HTTP #{response.code}: #{response.message}"
     rescue
       "HTTP #{response.code}: #{response.message}"
     end

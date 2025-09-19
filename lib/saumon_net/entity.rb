@@ -41,7 +41,7 @@ module SaumonNet
     def list(page: 1, per_page: 100, since: nil, type: nil)
       query = build_index_query(page: page, per_page: per_page, since: since, type: type)
 
-      @client.get('/api/v1/entities', query: query)
+      @client.get("/api/v1/entities", query: query)
     end
 
     # Retrieves details for a specific entity
@@ -65,7 +65,7 @@ module SaumonNet
 
       loop do
         response = list(page: page, per_page: per_page, since: since, type: type)
-        page_entities = response.dig('data') || []
+        page_entities = response.dig("data") || []
 
         break if page_entities.empty?
 
@@ -75,8 +75,8 @@ module SaumonNet
           entities.concat(page_entities)
         end
 
-        meta = response.dig('meta') || {}
-        break unless meta['has_next_page']
+        meta = response.dig("meta") || {}
+        break unless meta["has_next_page"]
 
         page += 1
       end
@@ -89,7 +89,7 @@ module SaumonNet
     def build_index_query(page:, per_page:, since:, type:)
       query = {
         page: page,
-        per_page: [per_page, 100].min # Ensure max 100 per API docs
+        per_page: [ per_page, 100 ].min # Ensure max 100 per API docs
       }
 
       query[:since] = since if since
