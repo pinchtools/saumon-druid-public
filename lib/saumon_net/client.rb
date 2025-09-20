@@ -85,9 +85,9 @@ module SaumonNet
 
     def parse_error_message(response)
       parsed = parse_response(response)
-      parsed.dig("error") || "HTTP #{response.code}: #{response.message}"
+      parsed.dig("error") || "HTTP #{response.code}"
     rescue
-      "HTTP #{response.code}: #{response.message}"
+      "HTTP #{response.code}"
     end
 
     def parse_response(response)
