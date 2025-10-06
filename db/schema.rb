@@ -10,9 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_141635) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_06_143641) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "an_bodies", force: :cascade do |t|
+    t.bigint "an_body_type_id", null: false
+    t.string "uid", null: false
+    t.string "label"
+    t.string "label_abbr"
+    t.string "label_code"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.datetime "deliver_date"
+    t.string "chamber"
+    t.string "regime"
+    t.string "legislature"
+    t.string "number"
+    t.string "province"
+    t.string "department_code"
+    t.bigint "parent_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["an_body_type_id"], name: "index_an_bodies_on_an_body_type_id"
+    t.index ["parent_id"], name: "index_an_bodies_on_parent_id"
+    t.index ["uid"], name: "index_an_bodies_on_uid", unique: true
+  end
 
   create_table "an_body_types", force: :cascade do |t|
     t.string "code"
@@ -69,5 +92,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_141635) do
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
 
+  add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
+  add_foreign_key "an_bodies", "an_body_types"
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
 end
