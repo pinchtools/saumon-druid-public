@@ -10,8 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 0) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_06_125353) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "an_stakeholders", force: :cascade do |t|
+    t.string "uid"
+    t.string "civility"
+    t.string "first_name"
+    t.string "last_name"
+    t.date "birth_date"
+    t.string "birth_city"
+    t.string "birth_province"
+    t.date "death_date"
+    t.string "occupation"
+    t.string "occupation_category"
+    t.string "occupation_family"
+    t.string "emails", default: [], array: true
+    t.string "urls", default: [], array: true
+    t.string "phone_numbers", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["birth_date"], name: "index_an_stakeholders_on_birth_date"
+    t.index ["first_name"], name: "index_an_stakeholders_on_first_name"
+    t.index ["last_name"], name: "index_an_stakeholders_on_last_name"
+    t.index ["occupation"], name: "index_an_stakeholders_on_occupation"
+    t.index ["occupation_category"], name: "index_an_stakeholders_on_occupation_category"
+    t.index ["occupation_family"], name: "index_an_stakeholders_on_occupation_family"
+    t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
+  end
 end
