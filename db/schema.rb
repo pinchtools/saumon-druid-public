@@ -10,9 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_125353) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_06_132924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "an_stakeholder_addresses", force: :cascade do |t|
+    t.bigint "an_stakeholder_id", null: false
+    t.string "uid", null: false
+    t.string "address_1"
+    t.string "address_2"
+    t.string "street_name"
+    t.string "street_number"
+    t.string "post_code"
+    t.string "city"
+    t.integer "weight"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["an_stakeholder_id"], name: "index_an_stakeholder_addresses_on_an_stakeholder_id"
+    t.index ["uid"], name: "index_an_stakeholder_addresses_on_uid", unique: true
+  end
 
   create_table "an_stakeholders", force: :cascade do |t|
     t.string "uid"
@@ -39,4 +55,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_125353) do
     t.index ["occupation_family"], name: "index_an_stakeholders_on_occupation_family"
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
+
+  add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
 end
