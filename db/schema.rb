@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_143641) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_07_060832) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,7 +92,38 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_143641) do
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
 
+  create_table "an_terms", force: :cascade do |t|
+    t.bigint "an_stakeholder_id", null: false
+    t.bigint "an_body_id", null: false
+    t.bigint "constituency_id"
+    t.bigint "deputy_term_id"
+    t.string "uid", null: false
+    t.string "legislature"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.datetime "publish_date"
+    t.datetime "assumption_date"
+    t.integer "role_rank"
+    t.string "role_code"
+    t.boolean "main", default: false, null: false
+    t.string "origin"
+    t.string "end_reason"
+    t.string "seat"
+    t.string "collaborators", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["an_body_id"], name: "index_an_terms_on_an_body_id"
+    t.index ["an_stakeholder_id"], name: "index_an_terms_on_an_stakeholder_id"
+    t.index ["constituency_id"], name: "index_an_terms_on_constituency_id"
+    t.index ["deputy_term_id"], name: "index_an_terms_on_deputy_term_id"
+    t.index ["uid"], name: "index_an_terms_on_uid", unique: true
+  end
+
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
   add_foreign_key "an_bodies", "an_body_types"
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
+  add_foreign_key "an_terms", "an_bodies"
+  add_foreign_key "an_terms", "an_bodies", column: "constituency_id"
+  add_foreign_key "an_terms", "an_stakeholders"
+  add_foreign_key "an_terms", "an_terms", column: "deputy_term_id"
 end
