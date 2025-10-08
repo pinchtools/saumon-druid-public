@@ -9,6 +9,6 @@
 #   end
 
 ## seed Assemblee Nationale body types
-body_type_list = YAML.load_file(Rails.root.join("db","seeds","an_body_types.yml"))
+body_type_list = YAML.load_file(Rails.root.join("db", "seeds", "an_body_types.yml"))
 
 An::BodyType.upsert_all(body_type_list, unique_by: :code)
