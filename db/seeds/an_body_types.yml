@@ -1,0 +1,280 @@
+-
+  code: "ASSEMBLEE"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: true
+-
+  code: "MISINFO"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "API"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "OFFPAR"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: true
+  has_substitute: false
+-
+  code: "COMNL"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: true
+  has_substitute: false
+-
+  code: "ORGEXTPARL"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "CNPE"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "ORGAINT"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "CMP"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "ASSEXT"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "COMPER"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "CONSTITU"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "CNPS"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "CES"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "CJR"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: true
+-
+  code: "SENAT"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "DELEGBUREAU"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "EUROPE"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "DELEG"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "MINISTERE"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "GA"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "PRESREP"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "GE"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "ASSTOM"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: true
+  has_substitute: false
+-
+  code: "GEVI"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "DEPARTEMENT"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: true
+  has_substitute: false
+-
+  code: "GP"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "REGION"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: true
+  has_substitute: false
+-
+  code: "HCJ"
+  unique_per_date: true
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: true
+  local: false
+  has_substitute: false
+-
+  code: "INTCO"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: true
+  trans_legislature: false
+  local: true
+  has_substitute: false
+-
+  code: "MISINFOCOM"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "COMMUNE"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: true
+  has_substitute: false
+-
+  code: "MISINFOPRE"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "PARPOL"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+-
+  code: "CIRCONSCRIPTION"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
