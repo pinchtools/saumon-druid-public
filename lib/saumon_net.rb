@@ -3,6 +3,9 @@ module SaumonNet
   autoload :Configuration, "saumon_net/configuration"
   autoload :Entities, "saumon_net/entities"
 
+  # Component name for structured logging
+  COMPONENT = "saumon_net"
+
   # Base error class for all SaumonNet errors
   class Error < StandardError; end
 
