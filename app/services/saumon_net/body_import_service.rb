@@ -1,5 +1,5 @@
 module SaumonNet
-  class OrganeImportService < BaseImportService
+  class BodyImportService < BaseImportService
 
     # example of entity data returned by SaumonNet:
     #{"uid" => "ANOD-PO52814",
@@ -91,11 +91,12 @@ module SaumonNet
       type_code = determine_body_type_code(file_details)
 
       An::BodyType.find_by(code: type_code) || begin
-        logger.warn "Unknown body type code",
+        logger.warn({ message: "Unknown body type code",
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           code: type_code,
           entity_uid: file_details["uid"]
+        })
 
         An::BodyType.create!(code: type_code)
       end
@@ -120,11 +121,12 @@ module SaumonNet
 
       Date.parse(date_string)
     rescue ArgumentError => e
-      logger.warn "Failed to parse date",
+      logger.warn({ message: "Failed to parse date",
         component: SaumonNet::COMPONENT,
         session_id: session_id,
         date_string: date_string,
         error: e.message
+      })
       nil
     end
 
@@ -158,24 +160,27 @@ module SaumonNet
       if country
         body.an_countries << country unless body.an_countries.include?(country)
 
-        logger.debug "Associated country with body",
+        logger.debug({ message: "Associated country with body",
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           body_uid: body.uid,
           country_uid: country.uid
+        })
       else
-        logger.warn "Country not found for pays_ref",
+        logger.warn({ message: "Country not found for pays_ref",
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           body_uid: body.uid,
           pays_ref: pays_ref
+        })
       end
     rescue => e
-      logger.error "Failed to create country association",
+      logger.error({ message: "Failed to create country association",
         component: SaumonNet::COMPONENT,
         session_id: session_id,
         body_uid: body&.uid,
         error: e.message
+      })
     end
   end
 end

@@ -12,7 +12,7 @@ module SaumonNet
     end
 
     def import_all
-      logger.info "Starting import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type
+      logger.info({ message: "Starting import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type })
 
       import_entities
 
@@ -22,7 +22,7 @@ module SaumonNet
     end
 
     def import_since(date)
-      logger.info "Starting incremental import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type, since: date
+      logger.info({ message: "Starting incremental import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type, since: date })
 
       import_entities(since: date)
 
@@ -43,23 +43,24 @@ module SaumonNet
         end
       end
     rescue => e
-      logger.error "Import failed", component: SaumonNet::COMPONENT, session_id: session_id, error: e.message, backtrace: e.backtrace
+      logger.error({ message: "Import failed", component: SaumonNet::COMPONENT, session_id: session_id, error: e.message, backtrace: e.backtrace })
       Sentry.capture_exception(e, extra: { session_id: session_id, entity_type: entity_type })
       raise
     end
 
     def process_batch(entities, batch_number)
-      logger.info "Processing batch", component: SaumonNet::COMPONENT, session_id: session_id, batch: batch_number, count: entities.size
+      logger.info({ message: "Processing batch", component: SaumonNet::COMPONENT, session_id: session_id, batch: batch_number, count: entities.size })
 
       entities.each do |entity_data|
         process_entity(entity_data)
       rescue => e
         stats.increment_failed
-        logger.error "Failed to process entity",
+        logger.error({ message: "Failed to process entity",
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           entity_id: entity_data["uid"],
           error: e.message
+        })
 
         Sentry.capture_exception(e, extra: {
           session_id: session_id,
@@ -83,16 +84,16 @@ module SaumonNet
       if record.new_record?
         record.save!
         stats.increment_created
-        logger.debug "Created record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        logger.debug({ message: "Created record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :created)
       elsif record.changed?
         record.save!
         stats.increment_updated
-        logger.debug "Updated record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        logger.debug({ message: "Updated record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :updated)
       else
         stats.increment_skipped
-        logger.debug "Skipped unchanged record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        logger.debug({ message: "Skipped unchanged record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :skipped)
       end
     end
@@ -129,7 +130,7 @@ module SaumonNet
     def log_batch_stats(batch_number)
       return unless batch_number % 10 == 0 # Log every 10 batches
 
-      logger.info "Batch progress",
+      logger.info({ message: "Batch progress",
         component: SaumonNet::COMPONENT,
         session_id: session_id,
         batch: batch_number,
@@ -138,10 +139,11 @@ module SaumonNet
         updated: stats.updated,
         skipped: stats.skipped,
         failed: stats.failed
+      })
     end
 
     def log_final_stats
-      logger.info "Import completed",
+      logger.info({ message: "Import completed",
         component: SaumonNet::COMPONENT,
         session_id: session_id,
         entity_type: entity_type,
@@ -151,6 +153,7 @@ module SaumonNet
         skipped: stats.skipped,
         failed: stats.failed,
         success_rate: stats.success_rate
+      })
     end
 
     def record_successful_import
@@ -159,38 +162,40 @@ module SaumonNet
 
     def parse_file_content(entity_data)
       file_url = entity_data["file_url"]
-      
+
       # Return original data if no file_url
       return entity_data unless file_url.present?
 
       begin
         # Fetch and parse the JSON file using HTTParty
         response = HTTParty.get(file_url)
-        
+
         unless response.success?
-          logger.warn "Failed to fetch file content", 
+          logger.warn({ message: "Failed to fetch file content",
             component: SaumonNet::COMPONENT,
             session_id: session_id,
             file_url: file_url,
             status_code: response.code
+          })
           return entity_data
         end
 
         file_content = response.parsed_response
-        
+
         # Extract the nested entity data (e.g., organe data from the file)
         # The structure is usually {"organe": {...}} for organe entities
         nested_data = file_content[entity_type] || file_content
 
         # Merge original entity data with file details
         entity_data.merge("file_details" => nested_data)
-        
+
       rescue => e
-        logger.error "Error parsing file content",
+        logger.error({ message: "Error parsing file content",
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           file_url: file_url,
           error: e.message
+        })
 
         # Return original data on error
         entity_data
