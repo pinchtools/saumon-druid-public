@@ -58,15 +58,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_082054) do
 
   create_table "an_countries", force: :cascade do |t|
     t.string "uid", null: false
-    t.string "name"
-    t.string "insee_code", null: false
+    t.string "name", null: false
+    t.string "insee_code"
     t.string "insee_name"
-    t.string "iso_code", null: false
+    t.string "iso_code"
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["insee_code"], name: "index_an_countries_on_insee_code", unique: true
-    t.index ["iso_code"], name: "index_an_countries_on_iso_code", unique: true
     t.index ["name"], name: "index_an_countries_on_name"
     t.index ["uid"], name: "index_an_countries_on_uid", unique: true
   end
