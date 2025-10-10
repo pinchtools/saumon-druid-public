@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_10_073208) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_10_082054) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_10_073208) do
     t.index ["an_body_type_id"], name: "index_an_bodies_on_an_body_type_id"
     t.index ["parent_id"], name: "index_an_bodies_on_parent_id"
     t.index ["uid"], name: "index_an_bodies_on_uid", unique: true
+  end
+
+  create_table "an_bodies_countries", id: false, force: :cascade do |t|
+    t.bigint "an_body_id", null: false
+    t.bigint "an_country_id", null: false
+    t.index ["an_body_id", "an_country_id"], name: "index_an_bodies_countries_on_an_body_id_and_an_country_id", unique: true
   end
 
   create_table "an_body_types", force: :cascade do |t|

@@ -4,6 +4,11 @@ class An::Body < ApplicationRecord
   has_many :children, class_name: "An::Body", foreign_key: :parent_id, dependent: :destroy
   has_many :an_terms, class_name: "An::Term", foreign_key: :an_body_id, inverse_of: :an_body, dependent: :destroy
   has_many :constituency_terms, class_name: "An::Term", foreign_key: :constituency_id, dependent: :destroy
+  has_and_belongs_to_many :an_countries,
+                          class_name: "An::Country",
+                          foreign_key: :an_body_id,
+                          association_foreign_key: :an_country_id,
+                          join_table: "an_bodies_countries"
 
   validates :uid, presence: true, uniqueness: true
   validates :an_body_type_id, presence: true
