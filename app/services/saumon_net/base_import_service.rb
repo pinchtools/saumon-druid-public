@@ -84,13 +84,16 @@ module SaumonNet
         record.save!
         stats.increment_created
         logger.debug "Created record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        perform_additional_operations(record, enhanced_entity_data, :created)
       elsif record.changed?
         record.save!
         stats.increment_updated
         logger.debug "Updated record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        perform_additional_operations(record, enhanced_entity_data, :updated)
       else
         stats.increment_skipped
         logger.debug "Skipped unchanged record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"]
+        perform_additional_operations(record, enhanced_entity_data, :skipped)
       end
     end
 
@@ -100,6 +103,16 @@ module SaumonNet
 
     def find_or_initialize_record(attributes)
       raise NotImplementedError, "Subclasses must implement find_or_initialize_record"
+    end
+
+    # Hook method for subclasses to perform additional operations after record save
+    # Override this method in subclasses to add custom logic like creating associations
+    def perform_additional_operations(record, entity_data, operation_type)
+      # Default implementation does nothing
+      # Subclasses can override this to perform additional operations like:
+      # - Creating associations
+      # - Processing nested data
+      # - Triggering events
     end
 
     def configure_saumon_net

@@ -139,5 +139,43 @@ module SaumonNet
     def extract_department_code(file_details)
       file_details.dig("lieu", "departement", "code")
     end
+
+    def perform_additional_operations(record, entity_data, operation_type)
+      super
+
+      create_country_association(record, entity_data)
+    end
+
+    def create_country_association(body, entity_data)
+      file_details = entity_data["file_details"] || entity_data
+      pays_ref = file_details.dig("listePays", "paysRef")
+
+      return unless pays_ref.present?
+
+      # Find country by UID and associate it with the body
+      country = An::Country.find_by(uid: pays_ref)
+
+      if country
+        body.an_countries << country unless body.an_countries.include?(country)
+
+        logger.debug "Associated country with body",
+          component: SaumonNet::COMPONENT,
+          session_id: session_id,
+          body_uid: body.uid,
+          country_uid: country.uid
+      else
+        logger.warn "Country not found for pays_ref",
+          component: SaumonNet::COMPONENT,
+          session_id: session_id,
+          body_uid: body.uid,
+          pays_ref: pays_ref
+      end
+    rescue => e
+      logger.error "Failed to create country association",
+        component: SaumonNet::COMPONENT,
+        session_id: session_id,
+        body_uid: body&.uid,
+        error: e.message
+    end
   end
 end
