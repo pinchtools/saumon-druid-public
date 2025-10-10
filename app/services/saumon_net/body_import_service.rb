@@ -1,8 +1,7 @@
 module SaumonNet
   class BodyImportService < BaseImportService
-
     # example of entity data returned by SaumonNet:
-    #{"uid" => "ANOD-PO52814",
+    # {"uid" => "ANOD-PO52814",
     #          "type" => "organe",
     #          "file_url" =>
     #            "http://localhost:3004/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MjQ0NzIsInB1ciI6ImJsb2JfaWQifX0=--a1676ecacfd3d1eeada3abe9627451d0f9747066/PO52814

@@ -7,7 +7,7 @@ module SaumonNet
       def record_successful_import(entity_type, stats = nil)
         cache_data = {
           timestamp: Time.current.iso8601,
-          stats: stats&.then { |s| 
+          stats: stats&.then { |s|
             {
               processed: s.processed,
               created: s.created,
@@ -29,7 +29,7 @@ module SaumonNet
         if stats && defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccess", Time.current.to_i)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccessRate", stats.success_rate)
-          
+
           NewRelic::Agent.add_custom_attributes({
             "saumon_net.import.entity_type" => entity_type,
             "saumon_net.import.processed" => stats.processed,
@@ -51,10 +51,10 @@ module SaumonNet
 
         entity_types.each do |entity_type|
           last_import = last_import_status(entity_type)
-          
+
           if last_import.nil?
-            results[entity_type] = { status: 'never_imported', healthy: false }
-            
+            results[entity_type] = { status: "never_imported", healthy: false }
+
             # Record metric for never imported entity
             if defined?(NewRelic::Agent)
               NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/NeverImported", 1)
@@ -62,13 +62,13 @@ module SaumonNet
           else
             last_time = Time.parse(last_import[:timestamp])
             age_hours = (Time.current - last_time) / 1.hour
-            
+
             # Consider healthy if imported within last 24 hours
             healthy = age_hours < 24
             healthy_count += 1 if healthy
-            
+
             results[entity_type] = {
-              status: healthy ? 'healthy' : 'stale',
+              status: healthy ? "healthy" : "stale",
               healthy: healthy,
               last_import: last_import[:timestamp],
               age_hours: age_hours.round(2),
@@ -84,7 +84,7 @@ module SaumonNet
         end
 
         overall_healthy = results.values.all? { |r| r[:healthy] }
-        
+
         # Record overall health metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/Healthy", overall_healthy ? 1 : 0)
@@ -101,14 +101,14 @@ module SaumonNet
       # Check API connectivity
       def api_health_check
         start_time = Time.current
-        
+
         result = benchmark "SaumonNet API health check" do
           configure_saumon_net
-          
+
           # Perform a simple API call to check connectivity
           SaumonNet::Entity.list_all(type: "organe", limit: 1) do |entities|
             response_time = ((Time.current - start_time) * 1000).round(2)
-            
+
             # Record API health metrics
             if defined?(NewRelic::Agent)
               NewRelic::Agent.record_metric("Custom/SaumonNet/API/ResponseTime", response_time)
@@ -118,7 +118,7 @@ module SaumonNet
 
             return {
               healthy: true,
-              status: 'connected',
+              status: "connected",
               response_time_ms: response_time,
               entity_count: entities.size
             }
@@ -126,7 +126,7 @@ module SaumonNet
 
           # If we get here without an exception, API is healthy
           response_time = ((Time.current - start_time) * 1000).round(2)
-          
+
           if defined?(NewRelic::Agent)
             NewRelic::Agent.record_metric("Custom/SaumonNet/API/ResponseTime", response_time)
             NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 1)
@@ -134,7 +134,7 @@ module SaumonNet
 
           {
             healthy: true,
-            status: 'connected',
+            status: "connected",
             response_time_ms: response_time
           }
         end
@@ -142,20 +142,20 @@ module SaumonNet
         result
       rescue => e
         Rails.logger.error "SaumonNet API health check failed", component: SaumonNet::COMPONENT, error: e.message
-        
+
         # Record API failure metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/API/Errors", 1)
           NewRelic::Agent.notice_error(e, custom_params: {
-            health_check: 'api_connectivity',
-            component: 'saumon_net_api'
+            health_check: "api_connectivity",
+            component: "saumon_net_api"
           })
         end
-        
+
         {
           healthy: false,
-          status: 'error',
+          status: "error",
           error: e.message,
           error_type: e.class.name
         }
@@ -163,25 +163,25 @@ module SaumonNet
 
       # Check Sidekiq queue health
       def queue_health_check
-        require 'sidekiq/api'
-        
+        require "sidekiq/api"
+
         stats = Sidekiq::Stats.new
         queues = Sidekiq::Queue.all
         failed = Sidekiq::RetrySet.new
-        
+
         # Define thresholds
         max_queue_size = 1000
         max_failed_jobs = 100
         max_retry_jobs = 50
-        
-        queue_sizes = queues.map { |q| [q.name, q.size] }.to_h
+
+        queue_sizes = queues.map { |q| [ q.name, q.size ] }.to_h
         total_enqueued = queue_sizes.values.sum
-        
+
         # Check if any individual queue is too large
         large_queues = queue_sizes.select { |name, size| size > max_queue_size }
-        
-        healthy = total_enqueued < max_queue_size && 
-                 failed.size < max_failed_jobs && 
+
+        healthy = total_enqueued < max_queue_size &&
+                 failed.size < max_failed_jobs &&
                  stats.retry_size < max_retry_jobs &&
                  large_queues.empty?
 
@@ -204,7 +204,7 @@ module SaumonNet
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/RetryCount", stats.retry_size)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/ProcessedToday", stats.processed)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/FailedToday", stats.failed)
-          
+
           # Record individual queue sizes
           queue_sizes.each do |queue_name, size|
             NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Queue/#{queue_name}/Size", size)
@@ -227,16 +227,16 @@ module SaumonNet
         result
       rescue => e
         Rails.logger.error "Sidekiq health check failed", component: SaumonNet::COMPONENT, error: e.message
-        
+
         # Record queue check failure
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", 0)
           NewRelic::Agent.notice_error(e, custom_params: {
-            health_check: 'queue_monitoring',
-            component: 'sidekiq_monitoring'
+            health_check: "queue_monitoring",
+            component: "sidekiq_monitoring"
           })
         end
-        
+
         {
           healthy: false,
           error: e.message,
@@ -261,13 +261,13 @@ module SaumonNet
         results[:imports] = import_status
         overall_healthy &&= import_status[:overall_healthy]
 
-        # Check API connectivity  
+        # Check API connectivity
         api_status = api_health_check
         results[:api] = api_status
         overall_healthy &&= api_status[:healthy]
 
         # Check queue health
-        queue_status = queue_health_check  
+        queue_status = queue_health_check
         results[:queues] = queue_status
         overall_healthy &&= queue_status[:healthy]
 
@@ -277,7 +277,7 @@ module SaumonNet
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/ImportsHealthy", import_status[:overall_healthy] ? 1 : 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/APIHealthy", api_status[:healthy] ? 1 : 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/QueuesHealthy", queue_status[:healthy] ? 1 : 0)
-          
+
           NewRelic::Agent.add_custom_attributes({
             "saumon_net.health.overall" => overall_healthy,
             "saumon_net.health.imports" => import_status[:overall_healthy],
@@ -288,9 +288,9 @@ module SaumonNet
           # Count failed checks
           failed_checks = []
           failed_checks << "imports" unless import_status[:overall_healthy]
-          failed_checks << "api" unless api_status[:healthy] 
+          failed_checks << "api" unless api_status[:healthy]
           failed_checks << "queues" unless queue_status[:healthy]
-          
+
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/FailedCheckCount", failed_checks.size)
         end
 
