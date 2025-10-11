@@ -32,7 +32,7 @@ RSpec.describe SaumonNet::CountryImportService do
 
         expect(result).to eq({
           uid: "PAYS_123",
-          name: "France", 
+          name: "France",
           insee_code: "99100",
           insee_name: "FRANCE",
           iso_code: "FRA",
@@ -102,11 +102,11 @@ RSpec.describe SaumonNet::CountryImportService do
 
     context 'when country does not exist' do
       it 'creates new country with attributes' do
-        expect(An::Country).to receive(:find_or_initialize_by).with(uid: "PAYS_123")
-        
         country = service.send(:find_or_initialize_record, attributes)
-        
+
         expect(country).to be_a(An::Country)
+        expect(country.uid).to eq("PAYS_123")
+        expect(country.name).to eq("France")
       end
     end
 
@@ -115,7 +115,7 @@ RSpec.describe SaumonNet::CountryImportService do
 
       it 'updates existing country with new attributes' do
         country = service.send(:find_or_initialize_record, attributes)
-        
+
         expect(country).to eq(existing_country)
         expect(country.name).to eq("France")
         expect(country.insee_code).to eq("99100")

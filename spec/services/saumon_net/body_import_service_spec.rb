@@ -17,7 +17,7 @@ RSpec.describe SaumonNet::BodyImportService do
   describe '#map_entity_attributes' do
     let(:body_type) { create(:an_body_type, code: "AN") }
     let(:parent_body) { create(:an_body, uid: "PARENT_123") }
-    
+
     let(:entity_data) do
       {
         "uid" => "ORGANE_123",
@@ -291,7 +291,7 @@ RSpec.describe SaumonNet::BodyImportService do
   describe 'integration test' do
     let(:body_type) { create(:an_body_type, code: "AN") }
     let(:country) { create(:an_country, uid: "PAYS_FRA") }
-    
+
     let(:entity_data) do
       {
         "uid" => "ORGANE_AN",

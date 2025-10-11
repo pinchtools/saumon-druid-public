@@ -50,7 +50,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
       it 'calls additional operations with created context' do
         service.send(:process_entity, entity_data)
-        
+
         expect(service).to have_received(:perform_additional_operations)
           .with(record, enhanced_data, :created)
       end
@@ -82,6 +82,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
       before do
         allow(service).to receive(:find_or_initialize_record).and_return(record)
+        allow(record).to receive(:save!)
       end
 
       it 'skips saving and updates stats' do
@@ -111,14 +112,14 @@ RSpec.describe SaumonNet::BaseImportService do
 
       it 'handles error and updates failed stats' do
         expect {
-          service.send(:process_batch, [entity_data], 1)
+          service.send(:process_batch, [ entity_data ], 1)
         }.not_to raise_error
 
         expect(service.stats.failed).to eq(1)
       end
 
       it 'logs error with context' do
-        service.send(:process_batch, [entity_data], 1)
+        service.send(:process_batch, [ entity_data ], 1)
 
         expect(Rails.logger).to have_received(:error).with(
           hash_including(
@@ -130,7 +131,7 @@ RSpec.describe SaumonNet::BaseImportService do
       end
 
       it 'reports to Sentry' do
-        service.send(:process_batch, [entity_data], 1)
+        service.send(:process_batch, [ entity_data ], 1)
 
         expect(Sentry).to have_received(:capture_exception).with(
           error,
@@ -158,7 +159,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
       it 'enhances entity data with file details' do
         result = service.send(:parse_file_content, entity_data)
-        
+
         expect(result).to include(entity_data)
         expect(result["file_details"]).to eq({ "detailed" => "data" })
       end
@@ -174,7 +175,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
       it 'returns original data unchanged' do
         result = service.send(:parse_file_content, entity_data)
-        
+
         expect(result).to eq(entity_data)
         expect(result).not_to have_key("file_details")
       end
@@ -194,9 +195,13 @@ RSpec.describe SaumonNet::BaseImportService do
     context 'when no file_url provided' do
       let(:entity_data) { { "uid" => "123" } }
 
+      before do
+        allow(HTTParty).to receive(:get)
+      end
+
       it 'returns data unchanged without HTTP request' do
         result = service.send(:parse_file_content, entity_data)
-        
+
         expect(result).to eq(entity_data)
         expect(HTTParty).not_to have_received(:get)
       end
@@ -218,7 +223,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
     it 'logs completion with final statistics' do
       allow(Rails.logger).to receive(:info)
-      
+
       service.import_all
 
       expect(Rails.logger).to have_received(:info).with(
@@ -264,7 +269,7 @@ RSpec.describe SaumonNet::BaseImportService do
 
       expect(stats.processed).to eq(1)
       expect(stats.created).to eq(1)
-      expect(stats.updated).to eq(1) 
+      expect(stats.updated).to eq(1)
       expect(stats.skipped).to eq(1)
       expect(stats.failed).to eq(1)
     end
