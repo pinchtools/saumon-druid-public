@@ -1,50 +1,5 @@
 module SaumonNet
   class BodyImportService < BaseImportService
-    # example of entity data returned by SaumonNet:
-    # {"uid" => "ANOD-PO52814",
-    #          "type" => "organe",
-    #          "file_url" =>
-    #            "http://localhost:3004/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MjQ0NzIsInB1ciI6ImJsb2JfaWQifX0=--a1676ecacfd3d1eeada3abe9627451d0f9747066/PO52814
-    # .json",
-    #          "file_type" => "ExtractedFile",
-    #          "metadata" =>
-    #            {"uid" => "PO52814",
-    #             "numero" => "4",
-    #             "regime" => "5ème République",
-    #             "chambre" => nil,
-    #             "libelle" => "4ème circonscription du Var",
-    #             "code_type" => "CIRCONSCRIPTION",
-    #             "legislature" => "10",
-    #             "libelle_abrev" => "CIRCO",
-    #             "organe_parent" => nil,
-    #             "libelle_abrege" => "83 Var (° 4°)",
-    #             "libelle_edition" => "de la circonscription"},
-    #          "updated_at" => "2025-10-05T12:51:50Z"}
-
-    # example of a file content:
-    # {"organe":
-    #    {"@xmlns": "http://schemas.assemblee-nationale.fr/referentiel",
-    #     "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-    #     "@xsi:type": "OrganeParlementaireInternational",
-    #     "uid": "PO733422",
-    #     "codeType": "GA",
-    #     "libelle": "France-Serbie",
-    #     "libelleEdition": "de France-Serbie",
-    #     "libelleAbrege": "Serbie",
-    #     "libelleAbrev": "SER",
-    #     "viMoDe": {"dateDebut": null, "dateAgrement": "2017-07-19", "dateFin": "2022-06-21"},
-    #     "organeParent": null,
-    #     "chambre": null,
-    #     "regime": "5\u00e8me R\u00e9publique",
-    #     "legislature": "15",
-    #     "secretariat": {"secretaire01": null, "secretaire02": null},
-    #     "lieu": {
-    #       "region": {"type": "M\u00e9tropolitain", "libelle": "Nouvelle-Aquitaine"},
-    #       "departement": {"codeNatureDep": "M", "code": "19", "libelle": "Corr\u00e8ze"}
-    #     }
-    #     "listePays": {"paysRef": "GOP756412"}}
-    # }
-
     def initialize
       super("organe")
     end
@@ -156,30 +111,30 @@ module SaumonNet
       # Find country by UID and associate it with the body
       country = An::Country.find_by(uid: pays_ref)
 
+      log_hash = {
+        component: SaumonNet::COMPONENT,
+        session_id: session_id,
+        body_uid: body&.uid
+      }
+
       if country
         body.an_countries << country unless body.an_countries.include?(country)
 
-        logger.debug({ message: "Associated country with body",
-          component: SaumonNet::COMPONENT,
-          session_id: session_id,
-          body_uid: body.uid,
-          country_uid: country.uid
-        })
+        logger.debug(log_hash.merge({
+                                      message: "Associated country with body",
+                                      country_uid: country.uid
+          }))
       else
-        logger.warn({ message: "Country not found for pays_ref",
-          component: SaumonNet::COMPONENT,
-          session_id: session_id,
-          body_uid: body.uid,
-          pays_ref: pays_ref
-        })
+        logger.warn(log_hash.merge({
+                                     message: "Country not found for pays_ref",
+                                     pays_ref: pays_ref
+        }))
       end
     rescue => e
-      logger.error({ message: "Failed to create country association",
-        component: SaumonNet::COMPONENT,
-        session_id: session_id,
-        body_uid: body&.uid,
-        error: e.message
-      })
+      logger.error(log_hash.merge({
+                                    message: "Failed to create country association",
+                                    error: e.message
+      }))
     end
   end
 end
