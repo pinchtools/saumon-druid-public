@@ -45,7 +45,7 @@ module SaumonNet
 
       # Check if imports are healthy (recent successful imports)
       def import_health_status
-        entity_types = %w[organe] # Add more entity types as they're implemented
+        entity_types = %w[organe pays] # Add more entity types as they're implemented
         results = {}
         healthy_count = 0
 
