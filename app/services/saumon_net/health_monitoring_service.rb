@@ -1,6 +1,6 @@
 module SaumonNet
   class HealthMonitoringService
-    include ActiveSupport::Benchmarkable
+    extend ActiveSupport::Benchmarkable
 
     class << self
       # Track last successful import for each entity type
@@ -106,7 +106,7 @@ module SaumonNet
           configure_saumon_net
 
           # Perform a simple API call to check connectivity
-          SaumonNet::Entity.list_all(type: "organe", limit: 1) do |entities|
+          SaumonNet::Entity.list_all(type: "organe") do |entities|
             response_time = ((Time.current - start_time) * 1000).round(2)
 
             # Record API health metrics
