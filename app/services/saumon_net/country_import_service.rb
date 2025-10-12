@@ -7,11 +7,13 @@ module SaumonNet
     private
 
     def map_entity_attributes(entity_data)
-      # Use file_details if available, otherwise fall back to entity_data
       file_details = entity_data["file_details"] || entity_data
 
+
+      file_uid = extract_file_uid(file_details)
+
       {
-        uid: entity_data["uid"],
+        uid: file_uid,
         name: file_details["nomCourant"] || file_details["libelleANLong"],
         insee_code: file_details["code_insee"],
         insee_name: file_details["libelleInsee"],
@@ -25,6 +27,19 @@ module SaumonNet
         country.assign_attributes(attributes)
       end.tap do |country|
         country.assign_attributes(attributes) unless country.new_record?
+      end
+    end
+
+    def extract_file_uid(file_details)
+      uid_data = file_details["uid"]
+
+      case uid_data
+      when Hash
+        uid_data["#text"]
+      when String
+        uid_data
+      else
+        nil
       end
     end
 

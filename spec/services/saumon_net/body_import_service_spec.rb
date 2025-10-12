@@ -20,8 +20,9 @@ RSpec.describe SaumonNet::BodyImportService do
 
     let(:entity_data) do
       {
-        "uid" => "ORGANE_123",
+        "uid" => "ANOD_ORGANE_123",
         "file_details" => {
+          "uid" => "ORGANE_123",
           "libelle" => "Assemblée nationale",
           "libelleAbrev" => "AN",
           "libelleEdition" => "AN-XV",
@@ -294,8 +295,9 @@ RSpec.describe SaumonNet::BodyImportService do
 
     let(:entity_data) do
       {
-        "uid" => "ORGANE_AN",
+        "uid" => "ANOD_ORGANE_AN",
         "file_details" => {
+          "uid" => "ORGANE_AN",
           "libelle" => "Assemblée nationale",
           "codeType" => "AN",
           "viMoDe" => {
@@ -336,6 +338,36 @@ RSpec.describe SaumonNet::BodyImportService do
 
       expect(service.stats.processed).to eq(initial_stats[:processed] + 1)
       expect(service.stats.created).to eq(initial_stats[:created] + 1)
+    end
+  end
+
+  describe '#extract_file_uid' do
+    it 'extracts UID from hash format' do
+      file_details = { "uid" => { "#text" => "PO123456" } }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to eq("PO123456")
+    end
+
+    it 'extracts UID from string format' do
+      file_details = { "uid" => "PO123456" }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to eq("PO123456")
+    end
+
+    it 'returns nil for missing UID' do
+      file_details = {}
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to be_nil
+    end
+
+    it 'returns nil for invalid UID format' do
+      file_details = { "uid" => 123 }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to be_nil
     end
   end
 end

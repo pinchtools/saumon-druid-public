@@ -123,6 +123,36 @@ RSpec.describe SaumonNet::CountryImportService do
     end
   end
 
+  describe '#extract_file_uid' do
+    it 'extracts UID from hash format' do
+      file_details = { "uid" => { "#text" => "PAYS_123" } }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to eq("PAYS_123")
+    end
+
+    it 'extracts UID from string format' do
+      file_details = { "uid" => "PAYS_123" }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to eq("PAYS_123")
+    end
+
+    it 'returns nil for missing UID' do
+      file_details = {}
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to be_nil
+    end
+
+    it 'returns nil for invalid UID format' do
+      file_details = { "uid" => 123 }
+
+      result = service.send(:extract_file_uid, file_details)
+      expect(result).to be_nil
+    end
+  end
+
   describe '#parse_boolean' do
     it 'returns true for blank values' do
       expect(service.send(:parse_boolean, nil)).to be true
@@ -156,8 +186,9 @@ RSpec.describe SaumonNet::CountryImportService do
   describe 'integration test' do
     let(:entity_data) do
       {
-        "uid" => "PAYS_FRA",
+        "uid" => "ANOD_PAYS_FRA",
         "file_details" => {
+          "uid" => "PAYS_FRA",
           "nomCourant" => "France",
           "code_insee" => "99100",
           "libelleInsee" => "FRANCE",

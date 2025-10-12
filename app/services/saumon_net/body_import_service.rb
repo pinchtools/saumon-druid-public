@@ -7,15 +7,16 @@ module SaumonNet
     private
 
     def map_entity_attributes(entity_data)
-      # Use file_details if available, otherwise fall back to entity_data
       file_details = entity_data["file_details"] || entity_data
 
       body_type = find_or_create_body_type(file_details)
       parent_body = find_parent_body(file_details)
       vi_mo_de = file_details["viMoDe"] || {}
 
+      file_uid = extract_file_uid(file_details)
+
       {
-        uid: entity_data["uid"],
+        uid: file_uid,
         an_body_type: body_type,
         parent: parent_body,
         label: file_details["libelle"],
@@ -108,7 +109,6 @@ module SaumonNet
 
       return unless pays_ref.present?
 
-      # Find country by UID and associate it with the body
       country = An::Country.find_by(uid: pays_ref)
 
       log_hash = {
@@ -135,6 +135,19 @@ module SaumonNet
                                     message: "Failed to create country association",
                                     error: e.message
       }))
+    end
+
+    def extract_file_uid(file_details)
+      uid_data = file_details["uid"]
+
+      case uid_data
+      when Hash
+        uid_data["#text"]
+      when String
+        uid_data
+      else
+        nil
+      end
     end
   end
 end
