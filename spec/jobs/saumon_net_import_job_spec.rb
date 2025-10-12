@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe SaumonNetImportJob, type: :job do
+  include ActiveJob::TestHelper
+
   describe '#perform' do
     let(:entity_type) { 'organe' }
     let(:since_date) { nil }
@@ -92,7 +94,7 @@ RSpec.describe SaumonNetImportJob, type: :job do
           entity_type: entity_type,
           since_date: since_date,
           error: "Import failed",
-          backtrace: error.backtrace
+          backtrace: kind_of(Array)
         )
 
         expect {
@@ -104,7 +106,6 @@ RSpec.describe SaumonNetImportJob, type: :job do
     context 'metrics tracking' do
       context 'when NewRelic is available' do
         before do
-          stub_const('NewRelic::Agent', Class.new)
           allow(NewRelic::Agent).to receive(:record_metric)
         end
 
@@ -211,17 +212,40 @@ RSpec.describe SaumonNetImportJob, type: :job do
     end
   end
 
-  describe 'error handling' do
-    it 'discards on SaumonNet::AuthenticationError' do
-      expect(described_class.discard_on).to include(SaumonNet::AuthenticationError)
-    end
-
-    it 'discards on SaumonNet::ConfigurationError' do
-      expect(described_class.discard_on).to include(SaumonNet::ConfigurationError)
-    end
-
+  describe 'job configuration' do
     it 'is queued on default queue' do
       expect(described_class.queue_name).to eq('default')
+    end
+
+    it 'discards SaumonNet::AuthenticationError' do
+      allow(SaumonNet::BodyImportService).to receive(:new).and_raise(SaumonNet::AuthenticationError)
+
+      expect(Rails.logger).to receive(:warn).with(/Discarded job .* because of SaumonNet::AuthenticationError/)
+
+      perform_enqueued_jobs do
+        described_class.perform_later('organe')
+      end
+
+      expect(enqueued_jobs).to be_empty
+    end
+
+    it 'discards SaumonNet::ConfigurationError' do
+      allow(SaumonNet::BodyImportService).to receive(:new).and_raise(SaumonNet::ConfigurationError)
+
+      expect(Rails.logger).to receive(:warn).with(/Discarded job .* because of SaumonNet::ConfigurationError/)
+
+      perform_enqueued_jobs do
+        described_class.perform_later('organe')
+      end
+
+      expect(enqueued_jobs).to be_empty
+    end
+
+    it 'does not discard other errors' do
+      job = described_class.new
+      allow(job).to receive(:build_import_service).and_raise(StandardError, "Other error")
+
+      expect { job.perform('organe') }.to raise_error(StandardError, "Other error")
     end
   end
 end

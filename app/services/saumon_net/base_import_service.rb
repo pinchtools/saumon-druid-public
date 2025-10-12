@@ -118,8 +118,8 @@ module SaumonNet
 
     def configure_saumon_net
       SaumonNet.configure do |config|
-        config.base_url = Rails.application.credentials.saumon_net.base_url
-        config.api_token = Rails.application.credentials.saumon_net.api_token
+        config.base_url = Rails.application.credentials.saumon_net&.base_url
+        config.api_token = Rails.application.credentials.saumon_net&.api_token
       end
     end
 

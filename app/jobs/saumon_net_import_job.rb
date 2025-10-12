@@ -1,8 +1,8 @@
 class SaumonNetImportJob < ApplicationJob
   queue_as :default
 
-  discard_on SaumonNet::AuthenticationError
-  discard_on SaumonNet::ConfigurationError
+  discard_on(SaumonNet::AuthenticationError) { |job, error|  notify_discarded_job(job, error) }
+  discard_on(SaumonNet::ConfigurationError) { |job, error|  notify_discarded_job(job, error) }
 
   def perform(entity_type, since_date = nil)
     import_service = build_import_service(entity_type)
@@ -35,6 +35,13 @@ class SaumonNetImportJob < ApplicationJob
 
   private
 
+  class << self
+    private
+    def notify_discarded_job(job, error)
+      Rails.logger.warn("Discarded job #{job.job_id} because of #{error.class}")
+    end
+  end
+
   def build_import_service(entity_type)
     case entity_type.to_s.downcase
     when "organe"
@@ -55,6 +62,8 @@ class SaumonNetImportJob < ApplicationJob
     else
       raise ArgumentError, "Invalid since_date format: #{since_date}"
     end
+    rescue Date::Error
+      raise ArgumentError, "Invalid since_date format: #{since_date}"
   end
 
   def track_import_metrics(entity_type, stats)
