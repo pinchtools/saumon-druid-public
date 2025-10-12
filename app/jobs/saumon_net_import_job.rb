@@ -48,6 +48,8 @@ class SaumonNetImportJob < ApplicationJob
       SaumonNet::BodyImportService.new
     when "pays"
       SaumonNet::CountryImportService.new
+    when "acteur"
+      SaumonNet::StakeholderImportService.new
     else
       raise ArgumentError, "Unknown entity type: #{entity_type}"
     end

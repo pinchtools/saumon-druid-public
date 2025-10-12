@@ -116,6 +116,7 @@ RSpec.describe SaumonNet::HealthMonitoringService do
     before do
       allow(described_class).to receive(:last_import_status).with("organe").and_return(recent_import)
       allow(described_class).to receive(:last_import_status).with("pays").and_return(recent_import)
+      allow(described_class).to receive(:last_import_status).with("acteur").and_return(recent_import)
     end
 
     it 'reports healthy status for recent imports' do
@@ -131,6 +132,7 @@ RSpec.describe SaumonNet::HealthMonitoringService do
       before do
         allow(described_class).to receive(:last_import_status).with("organe").and_return(stale_import)
         allow(described_class).to receive(:last_import_status).with("pays").and_return(stale_import)
+        allow(described_class).to receive(:last_import_status).with("acteur").and_return(stale_import)
       end
 
       it 'reports unhealthy status for stale imports' do
@@ -147,6 +149,7 @@ RSpec.describe SaumonNet::HealthMonitoringService do
       before do
         allow(described_class).to receive(:last_import_status).with("organe").and_return(nil)
         allow(described_class).to receive(:last_import_status).with("pays").and_return(nil)
+        allow(described_class).to receive(:last_import_status).with("acteur").and_return(nil)
       end
 
       it 'reports never imported status' do

@@ -145,6 +145,11 @@ RSpec.describe SaumonNetImportJob, type: :job do
       expect(service).to be_an_instance_of(SaumonNet::CountryImportService)
     end
 
+    it 'returns StakeholderImportService for acteur entity type' do
+      service = job.send(:build_import_service, 'acteur')
+      expect(service).to be_an_instance_of(SaumonNet::StakeholderImportService)
+    end
+
     it 'raises ArgumentError for unknown entity type' do
       expect {
         job.send(:build_import_service, 'unknown')

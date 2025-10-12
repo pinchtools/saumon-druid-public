@@ -5,7 +5,6 @@ module SaumonNet
     class << self
       def logger = Rails.logger
 
-      # Track last successful import for each entity type
       def record_successful_import(entity_type, stats = nil)
         cache_data = {
           timestamp: Time.current.iso8601,
@@ -27,7 +26,6 @@ module SaumonNet
           expires_in: 30.days
         )
 
-        # Send success metrics to New Relic
         if stats && defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccess", Time.current.to_i)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccessRate", stats.success_rate)
@@ -40,14 +38,12 @@ module SaumonNet
         end
       end
 
-      # Get last successful import status for entity type
       def last_import_status(entity_type)
         Rails.cache.read(import_status_key(entity_type))
       end
 
-      # Check if imports are healthy (recent successful imports)
       def import_health_status
-        entity_types = %w[organe pays] # Add more entity types as they're implemented
+        entity_types = %w[organe pays acteur]
         results = {}
         healthy_count = 0
 
@@ -57,7 +53,6 @@ module SaumonNet
           if last_import.nil?
             results[entity_type] = { status: "never_imported", healthy: false }
 
-            # Record metric for never imported entity
             if defined?(NewRelic::Agent)
               NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/NeverImported", 1)
             end
@@ -77,7 +72,6 @@ module SaumonNet
               stats: last_import[:stats]
             }
 
-            # Record metrics for import staleness
             if defined?(NewRelic::Agent)
               NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/AgeHours", age_hours)
               NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/Healthy", healthy ? 1 : 0)
@@ -87,7 +81,6 @@ module SaumonNet
 
         overall_healthy = results.values.all? { |r| r[:healthy] }
 
-        # Record overall health metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/Healthy", overall_healthy ? 1 : 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/HealthyEntityCount", healthy_count)
@@ -100,18 +93,15 @@ module SaumonNet
         }
       end
 
-      # Check API connectivity
       def api_health_check
         start_time = Time.current
 
         result = benchmark "SaumonNet API health check" do
           configure_saumon_net
 
-          # Perform a simple API call to check connectivity
           SaumonNet::Entity.list_all(type: "organe") do |entities|
             response_time = ((Time.current - start_time) * 1000).round(2)
 
-            # Record API health metrics
             if defined?(NewRelic::Agent)
               NewRelic::Agent.record_metric("Custom/SaumonNet/API/ResponseTime", response_time)
               NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 1)
@@ -148,7 +138,6 @@ module SaumonNet
                            error: e.message,
                            backtrace: e.backtrace
 
-        # Record API failure metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/API/Errors", 1)
@@ -166,7 +155,6 @@ module SaumonNet
         }
       end
 
-      # Check Sidekiq queue health
       def queue_health_check
         require "sidekiq/api"
 
@@ -182,7 +170,6 @@ module SaumonNet
         queue_sizes = queues.map { |q| [ q.name, q.size ] }.to_h
         total_enqueued = queue_sizes.values.sum
 
-        # Check if any individual queue is too large
         large_queues = queue_sizes.select { |name, size| size > max_queue_size }
 
         healthy = total_enqueued < max_queue_size &&
@@ -201,7 +188,6 @@ module SaumonNet
           failed_today: stats.failed
         }
 
-        # Record Sidekiq health metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", healthy ? 1 : 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/TotalEnqueued", total_enqueued)
@@ -236,7 +222,6 @@ module SaumonNet
                            error: e.message,
                            backtrace: e.backtrace
 
-        # Record queue check failure
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", 0)
           NewRelic::Agent.notice_error(e, custom_params: {
@@ -252,34 +237,28 @@ module SaumonNet
         }
       end
 
-      # Comprehensive health check
       def full_health_check
         results = {}
         overall_healthy = true
 
-        # Start New Relic transaction
         if defined?(NewRelic::Agent)
           NewRelic::Agent.add_custom_attributes({
             "saumon_net.health_check.timestamp" => Time.current.iso8601
           })
         end
 
-        # Check import status
         import_status = import_health_status
         results[:imports] = import_status
         overall_healthy &&= import_status[:overall_healthy]
 
-        # Check API connectivity
         api_status = api_health_check
         results[:api] = api_status
         overall_healthy &&= api_status[:healthy]
 
-        # Check queue health
         queue_status = queue_health_check
         results[:queues] = queue_status
         overall_healthy &&= queue_status[:healthy]
 
-        # Record comprehensive health metrics
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/Overall", overall_healthy ? 1 : 0)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/ImportsHealthy", import_status[:overall_healthy] ? 1 : 0)
@@ -293,7 +272,6 @@ module SaumonNet
             "saumon_net.health.queues" => queue_status[:healthy]
           })
 
-          # Count failed checks
           failed_checks = []
           failed_checks << "imports" unless import_status[:overall_healthy]
           failed_checks << "api" unless api_status[:healthy]
