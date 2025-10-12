@@ -3,6 +3,8 @@ module SaumonNet
     extend ActiveSupport::Benchmarkable
 
     class << self
+      def logger = Rails.logger
+
       # Track last successful import for each entity type
       def record_successful_import(entity_type, stats = nil)
         cache_data = {
@@ -141,7 +143,10 @@ module SaumonNet
 
         result
       rescue => e
-        Rails.logger.error "SaumonNet API health check failed", component: SaumonNet::COMPONENT, error: e.message
+        Rails.logger.error message: "SaumonNet API health check failed",
+                           component: SaumonNet::COMPONENT,
+                           error: e.message,
+                           backtrace: e.backtrace
 
         # Record API failure metrics
         if defined?(NewRelic::Agent)
@@ -226,7 +231,10 @@ module SaumonNet
 
         result
       rescue => e
-        Rails.logger.error "Sidekiq health check failed", component: SaumonNet::COMPONENT, error: e.message
+        Rails.logger.error message: "Sidekiq health check failed",
+                           component: SaumonNet::COMPONENT,
+                           error: e.message,
+                           backtrace: e.backtrace
 
         # Record queue check failure
         if defined?(NewRelic::Agent)
