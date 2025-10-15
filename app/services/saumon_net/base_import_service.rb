@@ -59,7 +59,8 @@ module SaumonNet
           component: SaumonNet::COMPONENT,
           session_id: session_id,
           entity_id: entity_data["uid"],
-          error: e.message
+          error: e.message,
+          backtrace: e.backtrace
         })
 
         Sentry.capture_exception(e, extra: {
