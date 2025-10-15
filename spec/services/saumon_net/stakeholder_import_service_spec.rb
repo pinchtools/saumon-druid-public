@@ -402,11 +402,11 @@ RSpec.describe SaumonNet::StakeholderImportService do
       it 'returns original valElec for non-Facebook types' do
         address_data = {
           "typeLibelle" => "Twitter",
-          "valElec" => "https://twitter.com/test"
+          "valElec" => "@test"
         }
 
         result = service.send(:build_website_url, address_data)
-        expect(result).to eq("https://twitter.com/test")
+        expect(result).to eq("https://twitter.com/@test")
       end
 
       it 'returns original valElec when typeLibelle is missing' do

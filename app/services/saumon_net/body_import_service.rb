@@ -72,7 +72,7 @@ module SaumonNet
     end
 
     def parse_date(date_string)
-      return nil if date_string.blank?
+      return nil if date_string.blank? || !date_string.is_a?(String)
 
       Date.parse(date_string)
     rescue ArgumentError => e

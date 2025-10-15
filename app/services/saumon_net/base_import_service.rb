@@ -33,6 +33,12 @@ module SaumonNet
 
     private
 
+    def sanitize_entity_value(entity_value)
+      return nil if entity_value.blank? || !entity_value.is_a?(String)
+
+      entity_value
+    end
+
     def import_entities(since: nil)
       batch_count = 0
 

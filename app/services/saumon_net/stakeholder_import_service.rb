@@ -26,13 +26,13 @@ module SaumonNet
         first_name: identity["prenom"],
         last_name: identity["nom"],
         birth_date: parse_date(birth_info["dateNais"]),
-        birth_city: birth_info["villeNais"],
-        birth_province: birth_info["depNais"],
-        birth_country: birth_info["paysNais"],
+        birth_city: sanitize_entity_value(birth_info["villeNais"]),
+        birth_province: sanitize_entity_value(birth_info["depNais"]),
+        birth_country: sanitize_entity_value(birth_info["paysNais"]),
         death_date: parse_date(death_date),
-        occupation: profession_data["libelleCourant"],
-        occupation_category: profession_data.dig("socProcINSEE", "catSocPro"),
-        occupation_family: profession_data.dig("socProcINSEE", "famSocPro"),
+        occupation: sanitize_entity_value(profession_data["libelleCourant"]),
+        occupation_category: sanitize_entity_value(profession_data.dig("socProcINSEE", "catSocPro")),
+        occupation_family: sanitize_entity_value(profession_data.dig("socProcINSEE", "famSocPro")),
         emails: [],
         urls: [],
         phone_numbers: []
@@ -70,7 +70,7 @@ module SaumonNet
     end
 
     def parse_date(date_string)
-      return nil if date_string.blank?
+      return nil if date_string.blank? || !date_string.is_a?(String)
 
       Date.parse(date_string)
     rescue ArgumentError => e
@@ -304,7 +304,7 @@ module SaumonNet
     end
 
     def parse_datetime(date_string)
-      return nil if date_string.blank?
+      return nil if date_string.blank? || !date_string.is_a?(String)
 
       DateTime.parse(date_string)
     rescue ArgumentError => e
@@ -377,6 +377,12 @@ module SaumonNet
       # Handle Facebook edge case
       if type_libelle&.downcase == "facebook"
         "https://facebook.com/#{val_elec}"
+      elsif type_libelle&.downcase == "twitter"
+        "https://twitter.com/#{val_elec}"
+      elsif type_libelle&.downcase == "instagram"
+        "https://instagram.com/#{val_elec}"
+      elsif type_libelle&.downcase == "linkedin"
+        "https://linkedin.com/#{val_elec}"
       else
         val_elec
       end
