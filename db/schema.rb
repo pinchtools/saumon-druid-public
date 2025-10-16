@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_12_133659) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_16_125841) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -53,6 +53,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_133659) do
     t.boolean "has_substitute", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "institution"
+    t.string "group"
+    t.string "selection"
     t.index ["code"], name: "index_an_body_types_on_code", unique: true
   end
 

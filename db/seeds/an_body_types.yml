@@ -6,6 +6,9 @@
   trans_legislature: false
   local: false
   has_substitute: true
+  institution: legislative_branch
+  group: parliament
+  selection: election
 -
   code: "MISINFO"
   unique_per_date: false
@@ -14,6 +17,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: parliamentary_mission
+  selection: appointment
 -
   code: "API"
   unique_per_date: false
@@ -22,6 +28,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: international
+  group: interparliamentary_organization
+  selection: appointment
 -
   code: "OFFPAR"
   unique_per_date: false
@@ -30,6 +39,9 @@
   trans_legislature: true
   local: true
   has_substitute: false
+  institution: parliament
+  group: parliamentary_delegation
+  selection: appointment
 -
   code: "COMNL"
   unique_per_date: false
@@ -38,6 +50,9 @@
   trans_legislature: true
   local: true
   has_substitute: false
+  institution: parliament
+  group: legislative_committee
+  selection: appointment
 -
   code: "ORGEXTPARL"
   unique_per_date: false
@@ -46,6 +61,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: other
+  group: external_body
+  selection: appointment
 -
   code: "CNPE"
   unique_per_date: false
@@ -54,6 +72,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: investigative_body
+  selection: appointment
 -
   code: "ORGAINT"
   unique_per_date: false
@@ -62,6 +83,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: international
+  group: external_organization
+  selection: appointment
 -
   code: "CMP"
   unique_per_date: false
@@ -70,6 +94,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: legislative_coordination
+  selection: appointment
 -
   code: "ASSEXT"
   unique_per_date: false
@@ -78,6 +105,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: public_institution
+  group: consultative_body
+  selection: appointment
 -
   code: "COMPER"
   unique_per_date: false
@@ -86,6 +116,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: parliament
+  group: legislative_committee
+  selection: appointment
 -
   code: "CONSTITU"
   unique_per_date: true
@@ -94,6 +127,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: judicial_branch
+  group: constitutional_body
+  selection: appointment
 -
   code: "CNPS"
   unique_per_date: false
@@ -102,6 +138,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: temporary_legislative_committee
+  selection: appointment
 -
   code: "CES"
   unique_per_date: true
@@ -110,6 +149,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: public_institution
+  group: consultative_body
+  selection: appointment
 -
   code: "CJR"
   unique_per_date: true
@@ -118,6 +160,9 @@
   trans_legislature: true
   local: false
   has_substitute: true
+  institution: judicial_branch
+  group: judicial_body
+  selection: appointment
 -
   code: "SENAT"
   unique_per_date: false
@@ -126,6 +171,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: legislative_branch
+  group: parliament
+  selection: election
 -
   code: "DELEGBUREAU"
   unique_per_date: false
@@ -134,6 +182,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: national_assembly
+  group: internal_body
+  selection: appointment
 -
   code: "EUROPE"
   unique_per_date: true
@@ -142,6 +193,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: european_union
+  group: elected_position
+  selection: election
 -
   code: "DELEG"
   unique_per_date: false
@@ -150,6 +204,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: parliament
+  group: delegation
+  selection: appointment
 -
   code: "MINISTERE"
   unique_per_date: false
@@ -158,6 +215,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: government
+  group: executive_branch
+  selection: appointment
 -
   code: "GA"
   unique_per_date: false
@@ -166,6 +226,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: interparliamentary_group
+  selection: appointment
 -
   code: "PRESREP"
   unique_per_date: true
@@ -174,6 +237,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: executive_branch
+  group: head_of_state
+  selection: appointment
 -
   code: "GE"
   unique_per_date: false
@@ -182,6 +248,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: parliamentary_study_group
+  selection: appointment
 -
   code: "ASSTOM"
   unique_per_date: false
@@ -190,6 +259,9 @@
   trans_legislature: false
   local: true
   has_substitute: false
+  institution: local_authority
+  group: regional_assembly
+  selection: election
 -
   code: "GEVI"
   unique_per_date: false
@@ -198,6 +270,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: interparliamentary_group
+  selection: appointment
 -
   code: "DEPARTEMENT"
   unique_per_date: false
@@ -206,6 +281,9 @@
   trans_legislature: false
   local: true
   has_substitute: false
+  institution: local_authority
+  group: local_assembly
+  selection: election
 -
   code: "GP"
   unique_per_date: false
@@ -214,6 +292,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: political_group
+  selection: membership
 -
   code: "REGION"
   unique_per_date: false
@@ -222,6 +303,9 @@
   trans_legislature: false
   local: true
   has_substitute: false
+  institution: local_authority
+  group: local_assembly
+  selection: election
 -
   code: "HCJ"
   unique_per_date: true
@@ -230,6 +314,9 @@
   trans_legislature: true
   local: false
   has_substitute: false
+  institution: judicial_branch
+  group: judicial_body
+  selection: appointment
 -
   code: "INTCO"
   unique_per_date: false
@@ -238,6 +325,9 @@
   trans_legislature: false
   local: true
   has_substitute: false
+  institution: local_authority
+  group: local_cooperation_structure
+  selection: election
 -
   code: "MISINFOCOM"
   unique_per_date: false
@@ -246,6 +336,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: joint_mission
+  selection: appointment
 -
   code: "COMMUNE"
   unique_per_date: false
@@ -254,6 +347,9 @@
   trans_legislature: false
   local: true
   has_substitute: false
+  institution: local_authority
+  group: local_assembly
+  selection: election
 -
   code: "MISINFOPRE"
   unique_per_date: false
@@ -262,6 +358,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: parliament
+  group: coordinating_mission
+  selection: appointment
 -
   code: "PARPOL"
   unique_per_date: false
@@ -270,6 +369,9 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: other
+  group: political_organization
+  selection: membership
 -
   code: "CIRCONSCRIPTION"
   unique_per_date: false
@@ -278,3 +380,76 @@
   trans_legislature: false
   local: false
   has_substitute: false
+  institution: electoral_system
+  group: electoral_district
+  selection: election
+- code: "BUREAU"
+  unique_per_date: false
+  single_assignment_per_actor: false
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: parliament
+  group: internal_leadership_body
+  selection: appointment
+- code: "GOUVERNEMENT"
+  unique_per_date: true
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: executive_branch
+  group: government_body
+  selection: appointment
+- code: "GROUPESENAT"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: senate
+  group: political_group
+  selection: membership
+- code: "COMSPSENAT"
+  unique_per_date: false
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: senate
+  group: legislative_committee
+  selection: appointment
+- code: "CONFPT"
+  unique_per_date: true
+  single_assignment_per_actor: true
+  external: false
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: parliament
+  group: coordination_body
+  selection: appointment
+- code: "DELEGSENAT"
+  unique_per_date: true
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: senate
+  group: delegation
+  selection: appointment
+- code: "COMSENAT"
+  unique_per_date: true
+  single_assignment_per_actor: true
+  external: true
+  trans_legislature: false
+  local: false
+  has_substitute: false
+  institution: senate
+  group: legislative_committee
+  selection: appointment

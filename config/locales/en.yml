@@ -1,31 +1,46 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  attributes:
+    an_body_type:
+      code:
+        ASSEMBLEE: "National Assembly"
+        MISINFO: "Information Missions"
+        API: "International Parliamentary Assembly"
+        OFFPAR: "Parliamentary Office or Joint Delegation"
+        COMNL: "Other Standing Committees"
+        ORGEXTPARL: "Extra-Parliamentary Organization"
+        CNPE: "Inquiry Commissions"
+        ORGAINT: "International Organization"
+        CMP: "Joint Mixed Committees"
+        ASSEXT: "Other Councils"
+        COMPER: "Legislative Standing Committees"
+        CONSTITU: "Constitutional Council"
+        CNPS: "Special Commissions"
+        CES: "Economic, Social and Environmental Council"
+        CJR: "Court of Justice of the Republic"
+        SENAT: "Senate Mandate"
+        DELEGBUREAU: "Bureau Delegation (National Assembly)"
+        EUROPE: "European Mandate"
+        DELEG: "Parliamentary Delegation"
+        MINISTERE: "Ministry"
+        GA: "Friendship Group"
+        PRESREP: "Presidency of the Republic"
+        GE: "Study Group"
+        ASSTOM: "Overseas Territorial Assembly"
+        GEVI: "International Study Group"
+        DEPARTEMENT: "Departmental or General Council"
+        GP: "Political Group"
+        REGION: "Regional Council"
+        HCJ: "High Court of Justice"
+        INTCO: "Intercommunality"
+        MISINFOCOM: "Joint Information Missions"
+        COMMUNE: "Municipal Council"
+        MISINFOPRE: "Information Missions of the Conference of Presidents"
+        PARPOL: "Political Party"
+        CIRCONSCRIPTION: "Constituency"
+        BUREAU: "Bureau (Assembly or Senator)"
+        GOUVERNEMENT: "Government"
+        GROUPESENAT: "Political Group (Senate)"
+        COMSPSENAT: "Special Committee (Senate)"
+        CONFPT: "Conference of Presidents"
+        DELEGSENAT: "Senate Delegation"
+        COMSENAT: "Legislative Committee (Senate)"
