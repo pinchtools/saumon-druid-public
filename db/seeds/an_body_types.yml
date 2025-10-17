@@ -9,6 +9,7 @@
   institution: legislative_branch
   group: parliament
   selection: election
+  hierarchy_level: 2
 -
   code: "MISINFO"
   unique_per_date: false
@@ -20,6 +21,7 @@
   institution: parliament
   group: parliamentary_mission
   selection: appointment
+  hierarchy_level: 6
 -
   code: "API"
   unique_per_date: false
@@ -31,6 +33,7 @@
   institution: international
   group: interparliamentary_organization
   selection: appointment
+  hierarchy_level: 6
 -
   code: "OFFPAR"
   unique_per_date: false
@@ -42,6 +45,7 @@
   institution: parliament
   group: parliamentary_delegation
   selection: appointment
+  hierarchy_level: 4
 -
   code: "COMNL"
   unique_per_date: false
@@ -53,6 +57,7 @@
   institution: parliament
   group: legislative_committee
   selection: appointment
+  hierarchy_level: 4
 -
   code: "ORGEXTPARL"
   unique_per_date: false
@@ -64,6 +69,7 @@
   institution: other
   group: external_body
   selection: appointment
+  hierarchy_level: 6
 -
   code: "CNPE"
   unique_per_date: false
@@ -75,6 +81,7 @@
   institution: parliament
   group: investigative_body
   selection: appointment
+  hierarchy_level: 4
 -
   code: "ORGAINT"
   unique_per_date: false
@@ -86,6 +93,7 @@
   institution: international
   group: external_organization
   selection: appointment
+  hierarchy_level: 6
 -
   code: "CMP"
   unique_per_date: false
@@ -97,6 +105,7 @@
   institution: parliament
   group: legislative_coordination
   selection: appointment
+  hierarchy_level: 4
 -
   code: "ASSEXT"
   unique_per_date: false
@@ -108,6 +117,7 @@
   institution: public_institution
   group: consultative_body
   selection: appointment
+  hierarchy_level: 5
 -
   code: "COMPER"
   unique_per_date: false
@@ -119,6 +129,7 @@
   institution: parliament
   group: legislative_committee
   selection: appointment
+  hierarchy_level: 4
 -
   code: "CONSTITU"
   unique_per_date: true
@@ -130,6 +141,7 @@
   institution: judicial_branch
   group: constitutional_body
   selection: appointment
+  hierarchy_level: 1
 -
   code: "CNPS"
   unique_per_date: false
@@ -141,6 +153,7 @@
   institution: parliament
   group: temporary_legislative_committee
   selection: appointment
+  hierarchy_level: 4
 -
   code: "CES"
   unique_per_date: true
@@ -152,6 +165,7 @@
   institution: public_institution
   group: consultative_body
   selection: appointment
+  hierarchy_level: 5
 -
   code: "CJR"
   unique_per_date: true
@@ -163,6 +177,7 @@
   institution: judicial_branch
   group: judicial_body
   selection: appointment
+  hierarchy_level: 1
 -
   code: "SENAT"
   unique_per_date: false
@@ -174,6 +189,7 @@
   institution: legislative_branch
   group: parliament
   selection: election
+  hierarchy_level: 2
 -
   code: "DELEGBUREAU"
   unique_per_date: false
@@ -185,6 +201,7 @@
   institution: national_assembly
   group: internal_body
   selection: appointment
+  hierarchy_level: 3
 -
   code: "EUROPE"
   unique_per_date: true
@@ -196,6 +213,7 @@
   institution: european_union
   group: elected_position
   selection: election
+  hierarchy_level: 5
 -
   code: "DELEG"
   unique_per_date: false
@@ -207,6 +225,7 @@
   institution: parliament
   group: delegation
   selection: appointment
+  hierarchy_level: 5
 -
   code: "MINISTERE"
   unique_per_date: false
@@ -218,6 +237,7 @@
   institution: government
   group: executive_branch
   selection: appointment
+  hierarchy_level: 1
 -
   code: "GA"
   unique_per_date: false
@@ -229,6 +249,7 @@
   institution: parliament
   group: interparliamentary_group
   selection: appointment
+  hierarchy_level: 6
 -
   code: "PRESREP"
   unique_per_date: true
@@ -240,6 +261,7 @@
   institution: executive_branch
   group: head_of_state
   selection: appointment
+  hierarchy_level: 1
 -
   code: "GE"
   unique_per_date: false
@@ -251,6 +273,7 @@
   institution: parliament
   group: parliamentary_study_group
   selection: appointment
+  hierarchy_level: 6
 -
   code: "ASSTOM"
   unique_per_date: false
@@ -262,6 +285,7 @@
   institution: local_authority
   group: regional_assembly
   selection: election
+  hierarchy_level: 5
 -
   code: "GEVI"
   unique_per_date: false
@@ -273,6 +297,7 @@
   institution: parliament
   group: interparliamentary_group
   selection: appointment
+  hierarchy_level: 6
 -
   code: "DEPARTEMENT"
   unique_per_date: false
@@ -284,6 +309,7 @@
   institution: local_authority
   group: local_assembly
   selection: election
+  hierarchy_level: 5
 -
   code: "GP"
   unique_per_date: false
@@ -295,6 +321,7 @@
   institution: parliament
   group: political_group
   selection: membership
+  hierarchy_level: 5
 -
   code: "REGION"
   unique_per_date: false
@@ -306,6 +333,7 @@
   institution: local_authority
   group: local_assembly
   selection: election
+  hierarchy_level: 5
 -
   code: "HCJ"
   unique_per_date: true
@@ -317,6 +345,7 @@
   institution: judicial_branch
   group: judicial_body
   selection: appointment
+  hierarchy_level: 1
 -
   code: "INTCO"
   unique_per_date: false
@@ -328,6 +357,7 @@
   institution: local_authority
   group: local_cooperation_structure
   selection: election
+  hierarchy_level: 7
 -
   code: "MISINFOCOM"
   unique_per_date: false
@@ -339,6 +369,7 @@
   institution: parliament
   group: joint_mission
   selection: appointment
+  hierarchy_level: 6
 -
   code: "COMMUNE"
   unique_per_date: false
@@ -350,6 +381,7 @@
   institution: local_authority
   group: local_assembly
   selection: election
+  hierarchy_level: 7
 -
   code: "MISINFOPRE"
   unique_per_date: false
@@ -361,6 +393,7 @@
   institution: parliament
   group: coordinating_mission
   selection: appointment
+  hierarchy_level: 6
 -
   code: "PARPOL"
   unique_per_date: false
@@ -372,6 +405,7 @@
   institution: other
   group: political_organization
   selection: membership
+  hierarchy_level: 7
 -
   code: "CIRCONSCRIPTION"
   unique_per_date: false
@@ -383,7 +417,9 @@
   institution: electoral_system
   group: electoral_district
   selection: election
-- code: "BUREAU"
+  hierarchy_level: 7
+-
+  code: "BUREAU"
   unique_per_date: false
   single_assignment_per_actor: false
   external: false
@@ -393,7 +429,9 @@
   institution: parliament
   group: internal_leadership_body
   selection: appointment
-- code: "GOUVERNEMENT"
+  hierarchy_level: 3
+-
+  code: "GOUVERNEMENT"
   unique_per_date: true
   single_assignment_per_actor: true
   external: true
@@ -403,7 +441,9 @@
   institution: executive_branch
   group: government_body
   selection: appointment
-- code: "GROUPESENAT"
+  hierarchy_level: 1
+-
+  code: "GROUPESENAT"
   unique_per_date: false
   single_assignment_per_actor: true
   external: true
@@ -413,7 +453,9 @@
   institution: senate
   group: political_group
   selection: membership
-- code: "COMSPSENAT"
+  hierarchy_level: 5
+-
+  code: "COMSPSENAT"
   unique_per_date: false
   single_assignment_per_actor: true
   external: true
@@ -423,7 +465,9 @@
   institution: senate
   group: legislative_committee
   selection: appointment
-- code: "CONFPT"
+  hierarchy_level: 4
+-
+  code: "CONFPT"
   unique_per_date: true
   single_assignment_per_actor: true
   external: false
@@ -433,7 +477,9 @@
   institution: parliament
   group: coordination_body
   selection: appointment
-- code: "DELEGSENAT"
+  hierarchy_level: 3
+-
+  code: "DELEGSENAT"
   unique_per_date: true
   single_assignment_per_actor: true
   external: true
@@ -443,7 +489,9 @@
   institution: senate
   group: delegation
   selection: appointment
-- code: "COMSENAT"
+  hierarchy_level: 3
+-
+  code: "COMSENAT"
   unique_per_date: true
   single_assignment_per_actor: true
   external: true
@@ -453,3 +501,4 @@
   institution: senate
   group: legislative_committee
   selection: appointment
+  hierarchy_level: 4
