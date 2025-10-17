@@ -174,7 +174,8 @@ module SaumonNet
         street_name: address_data["nomRue"],
         post_code: address_data["codePostal"],
         city: address_data["ville"],
-        weight: address_data["poids"]&.to_i
+        weight: address_data["poids"]&.to_i,
+        type: address_data["type"]&.to_i
       }
     end
 
