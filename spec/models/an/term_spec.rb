@@ -47,7 +47,6 @@ RSpec.describe An::Term, type: :model do
       let!(:term_mid) { create(:an_term, an_body: body_mid) }
 
       it 'orders terms by hierarchy_level ascending' do
-
         ordered_terms = An::Term.by_hierarchy
         expect(ordered_terms.first).to eq(term_low)
         expect(ordered_terms.second).to eq(term_mid)
