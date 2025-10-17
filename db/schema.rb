@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_17_091957) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_17_143720) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -85,6 +85,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_091957) do
     t.integer "weight"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "type"
     t.index ["an_stakeholder_id"], name: "index_an_stakeholder_addresses_on_an_stakeholder_id"
     t.index ["uid"], name: "index_an_stakeholder_addresses_on_uid", unique: true
   end
