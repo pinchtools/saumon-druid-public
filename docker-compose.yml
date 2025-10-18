@@ -28,7 +28,8 @@ services:
     ports:
       - "3005:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:foo@postgresql:5432/saumon_druid_development
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PASSWORD=foo
     networks:
       - saumon_network
       - default
