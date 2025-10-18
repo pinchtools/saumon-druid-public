@@ -7,6 +7,7 @@ RSpec.describe An::Term, type: :model do
     it { should belong_to(:constituency).class_name('An::Body').optional }
     it { should belong_to(:deputy_term).class_name('An::Term').optional }
     it { should have_many(:subordinate_terms).class_name('An::Term').with_foreign_key(:deputy_term_id).dependent(:destroy) }
+    it { should have_many(:an_substitutes).class_name('An::Substitute').with_foreign_key(:an_term_id).inverse_of(:an_term).dependent(:destroy) }
     it { should have_one(:an_body_type).through(:an_body) }
   end
 

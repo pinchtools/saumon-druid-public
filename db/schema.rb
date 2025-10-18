@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_17_143720) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_18_115915) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,6 +117,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_143720) do
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
 
+  create_table "an_substitutes", force: :cascade do |t|
+    t.bigint "an_term_id", null: false
+    t.bigint "an_stakeholder_id", null: false
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["an_stakeholder_id"], name: "index_an_substitutes_on_an_stakeholder_id"
+    t.index ["an_term_id"], name: "index_an_substitutes_on_an_term_id"
+  end
+
   create_table "an_terms", force: :cascade do |t|
     t.bigint "an_stakeholder_id", null: false
     t.bigint "an_body_id", null: false
@@ -147,6 +158,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_143720) do
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
   add_foreign_key "an_bodies", "an_body_types"
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
+  add_foreign_key "an_substitutes", "an_stakeholders"
+  add_foreign_key "an_substitutes", "an_terms"
   add_foreign_key "an_terms", "an_bodies"
   add_foreign_key "an_terms", "an_bodies", column: "constituency_id"
   add_foreign_key "an_terms", "an_stakeholders"

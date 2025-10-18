@@ -4,6 +4,7 @@ class An::Term < ApplicationRecord
   belongs_to :constituency, class_name: "An::Body", optional: true
   belongs_to :deputy_term, class_name: "An::Term", optional: true
   has_many :subordinate_terms, class_name: "An::Term", foreign_key: :deputy_term_id, dependent: :destroy
+  has_many :an_substitutes, class_name: "An::Substitute", foreign_key: :an_term_id, inverse_of: :an_term, dependent: :destroy
   has_one :an_body_type, through: :an_body
 
   scope :main, -> { where(main: true) }
