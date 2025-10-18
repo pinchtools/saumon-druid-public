@@ -67,3 +67,8 @@ fr:
           7:
             label: "Affiliations locales et politiques"
             description: "Conseils municipaux, intercommunalité, partis politiques, circonscriptions."
+      an/stakeholder_address:
+        types:
+          0: "Adresse officielle"
+          1: "Adresse publiée pour Paris ou sa région"
+          2: "Adresse publiée de circonscription"

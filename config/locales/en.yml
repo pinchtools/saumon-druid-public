@@ -67,5 +67,8 @@ en:
           7:
             label: "Local and political affiliations"
             description: "Municipal councils, intercommunality, political party memberships, constituencies."
-
-
+      an/stakeholder_address:
+        types:
+          0: "Official address"
+          1: "Published address for Paris or its region"
+          2: "Published address of constituency"
