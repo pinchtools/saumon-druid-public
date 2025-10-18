@@ -53,8 +53,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
       expect(result).to include(
         uid: "PA721860",
         civility: "M.",
-        first_name: "Jean-François",
-        last_name: "Cesarini",
+        first_name: "jean-françois",
+        last_name: "cesarini",
         birth_date: Date.parse("1970-09-30"),
         birth_city: "Avignon",
         birth_province: "Vaucluse",
@@ -92,8 +92,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
         expect(result).to include(
           uid: "PA123456",
-          first_name: "John",
-          last_name: "Doe",
+          first_name: "john",
+          last_name: "doe",
           civility: nil,
           birth_date: nil,
           death_date: nil
@@ -103,7 +103,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
   end
 
   describe '#find_or_initialize_record' do
-    let(:attributes) { { uid: "PA123456", first_name: "John", last_name: "Doe" } }
+    let(:attributes) { { uid: "PA123456", first_name: "john", last_name: "doe" } }
 
     context 'when stakeholder does not exist' do
       it 'creates a new stakeholder' do
@@ -111,8 +111,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
         expect(stakeholder).to be_new_record
         expect(stakeholder.uid).to eq("PA123456")
-        expect(stakeholder.first_name).to eq("John")
-        expect(stakeholder.last_name).to eq("Doe")
+        expect(stakeholder.first_name).to eq("john")
+        expect(stakeholder.last_name).to eq("doe")
       end
     end
 
@@ -123,8 +123,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
         stakeholder = service.send(:find_or_initialize_record, attributes)
 
         expect(stakeholder).to eq(existing_stakeholder)
-        expect(stakeholder.first_name).to eq("John")  # Updated
-        expect(stakeholder.last_name).to eq("Doe")
+        expect(stakeholder.first_name).to eq("john")  # Updated
+        expect(stakeholder.last_name).to eq("doe")
       end
     end
   end
@@ -436,6 +436,89 @@ RSpec.describe SaumonNet::StakeholderImportService do
         result = service.send(:parse_date, "invalid-date")
         expect(result).to be_nil
       end
+    end
+  end
+
+  describe '#upsert_substitutes' do
+    let(:stakeholder) { create(:an_stakeholder) }
+    let(:term) { create(:an_term, an_stakeholder: stakeholder) }
+    let(:substitute_stakeholder) { create(:an_stakeholder) }
+    let(:mandate_data) do
+      {
+        "suppleants" => {
+          "suppleant" => {
+            "dateDebut" => "2022-06-19",
+            "dateFin" => "2027-06-19",
+            "suppleantRef" => substitute_stakeholder.uid
+          }
+        }
+      }
+    end
+
+    it 'creates a substitute when valid data is provided' do
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.to change(An::Substitute, :count).by(1)
+
+      substitute = An::Substitute.last
+      expect(substitute.an_term).to eq(term)
+      expect(substitute.an_stakeholder).to eq(substitute_stakeholder)
+      expect(substitute.start_date).to eq(DateTime.parse("2022-06-19"))
+      expect(substitute.end_date).to eq(DateTime.parse("2027-06-19"))
+    end
+
+    it 'handles multiple substitutes' do
+      substitute_stakeholder_2 = create(:an_stakeholder)
+      mandate_data["suppleants"]["suppleant"] = [
+        {
+          "dateDebut" => "2022-06-19",
+          "dateFin" => "2024-06-19",
+          "suppleantRef" => substitute_stakeholder.uid
+        },
+        {
+          "dateDebut" => "2024-06-20",
+          "dateFin" => "2027-06-19",
+          "suppleantRef" => substitute_stakeholder_2.uid
+        }
+      ]
+
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.to change(An::Substitute, :count).by(2)
+    end
+
+    it 'does not create duplicate substitutes for same term, stakeholder, and start_date' do
+      service.send(:upsert_substitutes, term, mandate_data)
+
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.not_to change(An::Substitute, :count)
+    end
+
+    it 'creates different substitutes for same term and stakeholder with different start_dates' do
+      service.send(:upsert_substitutes, term, mandate_data)
+
+      mandate_data["suppleants"]["suppleant"]["dateDebut"] = "2025-01-01"
+
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.to change(An::Substitute, :count).by(1)
+    end
+
+    it 'skips when stakeholder is not found' do
+      mandate_data["suppleants"]["suppleant"]["suppleantRef"] = "INVALID_UID"
+
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.not_to change(An::Substitute, :count)
+    end
+
+    it 'returns early when no suppleants data' do
+      mandate_data.delete("suppleants")
+
+      expect {
+        service.send(:upsert_substitutes, term, mandate_data)
+      }.not_to change(An::Substitute, :count)
     end
   end
 end

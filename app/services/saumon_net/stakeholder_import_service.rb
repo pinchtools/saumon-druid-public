@@ -23,8 +23,8 @@ module SaumonNet
       {
         uid: file_uid,
         civility: identity["civ"],
-        first_name: identity["prenom"],
-        last_name: identity["nom"],
+        first_name: identity["prenom"].downcase,
+        last_name: identity["nom"].downcase,
         birth_date: parse_date(birth_info["dateNais"]),
         birth_city: sanitize_entity_value(birth_info["villeNais"]),
         birth_province: sanitize_entity_value(birth_info["depNais"]),
@@ -226,6 +226,8 @@ module SaumonNet
           term_uid: term_uid
         })
       end
+
+      upsert_substitutes(term, mandate_data)
     rescue => e
       logger.error({
         message: "Failed to upsert single term",
@@ -387,6 +389,88 @@ module SaumonNet
       else
         val_elec
       end
+    end
+
+    def upsert_substitutes(term, mandate_data)
+      suppleants_data = mandate_data["suppleants"]
+      return unless suppleants_data.present?
+
+      suppleant_entries = suppleants_data["suppleant"]
+      return unless suppleant_entries.present?
+
+      suppleant_entries = [ suppleant_entries ] unless suppleant_entries.is_a?(Array)
+
+      suppleant_entries.each do |suppleant_data|
+        next unless suppleant_data.is_a?(Hash)
+
+        upsert_single_substitute(term, suppleant_data)
+      end
+    rescue => e
+      logger.error({
+        message: "Failed to upsert substitutes",
+        component: SaumonNet::COMPONENT,
+        session_id: session_id,
+        term_uid: term.uid,
+        error: e.message
+      })
+    end
+
+    def upsert_single_substitute(term, suppleant_data)
+      stakeholder_uid = suppleant_data["suppleantRef"]
+      return unless stakeholder_uid.present?
+
+      # Find the stakeholder by uid
+      stakeholder = An::Stakeholder.find_by(uid: stakeholder_uid)
+      unless stakeholder
+        logger.warn({
+          message: "Stakeholder not found for substitute",
+          component: SaumonNet::COMPONENT,
+          session_id: session_id,
+          stakeholder_uid: stakeholder_uid,
+          term_uid: term.uid
+        })
+        return
+      end
+
+      start_date = parse_datetime(suppleant_data["dateDebut"])
+      end_date = parse_datetime(suppleant_data["dateFin"])
+
+      substitute_attributes = {
+        an_term: term,
+        an_stakeholder: stakeholder,
+        start_date: start_date,
+        end_date: end_date
+      }
+
+      substitute = An::Substitute.find_or_initialize_by(
+        an_term: term,
+        an_stakeholder: stakeholder,
+        start_date: start_date
+      )
+
+      substitute.assign_attributes(substitute_attributes)
+
+      if substitute.new_record? || substitute.changed?
+        substitute.save!
+        operation = substitute.previously_new_record? ? "created" : "updated"
+
+        logger.debug({
+          message: "Substitute #{operation}",
+          component: SaumonNet::COMPONENT,
+          session_id: session_id,
+          term_uid: term.uid,
+          stakeholder_uid: stakeholder_uid
+        })
+      end
+    rescue => e
+      logger.error({
+        message: "Failed to upsert single substitute",
+        component: SaumonNet::COMPONENT,
+        session_id: session_id,
+        term_uid: term&.uid,
+        stakeholder_uid: stakeholder_uid,
+        error: e.message
+      })
     end
   end
 end
