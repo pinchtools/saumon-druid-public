@@ -82,7 +82,7 @@ group :development do
   gem "web-console"
   gem "guard-rspec", require: false
   gem "better_errors"
-  gem "bullet"
+  gem "bullet", require: false
 end
 
 group :test do
