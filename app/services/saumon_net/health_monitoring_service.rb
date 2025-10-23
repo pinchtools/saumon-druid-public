@@ -133,10 +133,10 @@ module SaumonNet
 
         result
       rescue => e
-        Rails.logger.error message: "SaumonNet API health check failed",
-                           component: SaumonNet::COMPONENT,
+        Rails.event.notify_with_tags("saumon_net.api_health_check_failed", {
                            error: e.message,
                            backtrace: e.backtrace
+                         }, tags: { severity: :error })
 
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 0)
@@ -217,10 +217,10 @@ module SaumonNet
 
         result
       rescue => e
-        Rails.logger.error message: "Sidekiq health check failed",
-                           component: SaumonNet::COMPONENT,
+        Rails.event.notify_with_tags("saumon_net.sidekiq_health_check_failed", {
                            error: e.message,
                            backtrace: e.backtrace
+                         }, tags: { severity: :error })
 
         if defined?(NewRelic::Agent)
           NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", 0)

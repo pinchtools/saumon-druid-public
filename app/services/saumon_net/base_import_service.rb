@@ -12,7 +12,7 @@ module SaumonNet
     end
 
     def import_all
-      logger.info({ message: "Starting import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type })
+      Rails.event.notify_with_tags("saumon_net.import_started", { session_id: session_id, entity_type: entity_type }, tags: { severity: :info })
 
       import_entities
 
@@ -22,7 +22,7 @@ module SaumonNet
     end
 
     def import_since(date)
-      logger.info({ message: "Starting incremental import", component: SaumonNet::COMPONENT, session_id: session_id, entity_type: entity_type, since: date })
+      Rails.event.notify_with_tags("saumon_net.incremental_import_started", { session_id: session_id, entity_type: entity_type, since: date }, tags: { severity: :info })
 
       import_entities(since: date)
 
@@ -49,25 +49,24 @@ module SaumonNet
         end
       end
     rescue => e
-      logger.error({ message: "Import failed", component: SaumonNet::COMPONENT, session_id: session_id, error: e.message, backtrace: e.backtrace })
+      Rails.event.notify_with_tags("saumon_net.import_failed", { session_id: session_id, error: e.message, backtrace: e.backtrace }, tags: { severity: :error })
       Sentry.capture_exception(e, extra: { session_id: session_id, entity_type: entity_type })
       raise
     end
 
     def process_batch(entities, batch_number)
-      logger.info({ message: "Processing batch", component: SaumonNet::COMPONENT, session_id: session_id, batch: batch_number, count: entities.size })
+      Rails.event.notify_with_tags("saumon_net.batch_processing", { session_id: session_id, batch: batch_number, count: entities.size }, tags: { severity: :info })
 
       entities.each do |entity_data|
         process_entity(entity_data)
       rescue => e
         stats.increment_failed
-        logger.error({ message: "Failed to process entity",
-          component: SaumonNet::COMPONENT,
+        Rails.event.notify_with_tags("saumon_net.entity_processing_failed", {
           session_id: session_id,
           entity_id: entity_data["uid"],
           error: e.message,
           backtrace: e.backtrace
-        })
+        }, tags: { severity: :error })
 
         Sentry.capture_exception(e, extra: {
           session_id: session_id,
@@ -91,16 +90,16 @@ module SaumonNet
       if record.new_record?
         record.save!
         stats.increment_created
-        logger.debug({ message: "Created record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
+        Rails.event.notify_with_tags("saumon_net.record_created", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
         perform_additional_operations(record, enhanced_entity_data, :created)
       elsif record.changed?
         record.save!
         stats.increment_updated
-        logger.debug({ message: "Updated record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
+        Rails.event.notify_with_tags("saumon_net.record_updated", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
         perform_additional_operations(record, enhanced_entity_data, :updated)
       else
         stats.increment_skipped
-        logger.debug({ message: "Skipped unchanged record", component: SaumonNet::COMPONENT, session_id: session_id, uid: entity_data["uid"] })
+        Rails.event.notify_with_tags("saumon_net.record_skipped", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
         perform_additional_operations(record, enhanced_entity_data, :skipped)
       end
     end
@@ -137,8 +136,7 @@ module SaumonNet
     def log_batch_stats(batch_number)
       return unless batch_number % 10 == 0 # Log every 10 batches
 
-      logger.info({ message: "Batch progress",
-        component: SaumonNet::COMPONENT,
+      Rails.event.notify_with_tags("saumon_net.batch_progress", {
         session_id: session_id,
         batch: batch_number,
         processed: stats.processed,
@@ -146,12 +144,11 @@ module SaumonNet
         updated: stats.updated,
         skipped: stats.skipped,
         failed: stats.failed
-      })
+      }, tags: { severity: :info })
     end
 
     def log_final_stats
-      logger.info({ message: "Import completed",
-        component: SaumonNet::COMPONENT,
+      Rails.event.notify_with_tags("saumon_net.import_completed", {
         session_id: session_id,
         entity_type: entity_type,
         total_processed: stats.processed,
@@ -160,7 +157,7 @@ module SaumonNet
         skipped: stats.skipped,
         failed: stats.failed,
         success_rate: stats.success_rate
-      })
+      }, tags: { severity: :info })
     end
 
     def record_successful_import
@@ -178,12 +175,11 @@ module SaumonNet
         response = HTTParty.get(file_url)
 
         unless response.success?
-          logger.warn({ message: "Failed to fetch file content",
-            component: SaumonNet::COMPONENT,
+          Rails.event.notify_with_tags("saumon_net.file_fetch_failed", {
             session_id: session_id,
             file_url: file_url,
             status_code: response.code
-          })
+          }, tags: { severity: :warn })
           return entity_data
         end
 
@@ -197,12 +193,11 @@ module SaumonNet
         entity_data.merge("file_details" => nested_data)
 
       rescue => e
-        logger.error({ message: "Error parsing file content",
-          component: SaumonNet::COMPONENT,
+        Rails.event.notify_with_tags("saumon_net.file_parsing_error", {
           session_id: session_id,
           file_url: file_url,
           error: e.message
-        })
+        }, tags: { severity: :error })
 
         # Return original data on error
         entity_data

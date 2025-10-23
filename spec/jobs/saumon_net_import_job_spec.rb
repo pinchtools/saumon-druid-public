@@ -73,12 +73,14 @@ RSpec.describe SaumonNetImportJob, type: :job do
           success_rate: 0.9
         }
 
-        expect(Rails.logger).to receive(:info).with(
-          message: "Import job completed",
-          component: SaumonNet::COMPONENT,
-          entity_type: entity_type,
-          since_date: since_date,
-          stats: expected_stats
+        expect(Rails.event).to receive(:notify_with_tags).with(
+          "saumon_net.import_job_completed",
+          {
+            entity_type: entity_type,
+            since_date: since_date,
+            stats: expected_stats
+          },
+          tags: { severity: :info }
         )
 
         described_class.new.perform(entity_type, since_date)
@@ -88,13 +90,15 @@ RSpec.describe SaumonNetImportJob, type: :job do
         error = StandardError.new("Import failed")
         allow(import_service).to receive(:import_all).and_raise(error)
 
-        expect(Rails.logger).to receive(:error).with(
-          message: "Import job failed",
-          component: SaumonNet::COMPONENT,
-          entity_type: entity_type,
-          since_date: since_date,
-          error: "Import failed",
-          backtrace: kind_of(Array)
+        expect(Rails.event).to receive(:notify_with_tags).with(
+          "saumon_net.import_job_failed",
+          {
+            entity_type: entity_type,
+            since_date: since_date,
+            error: "Import failed",
+            backtrace: kind_of(Array)
+          },
+          tags: { severity: :error }
         )
 
         expect {

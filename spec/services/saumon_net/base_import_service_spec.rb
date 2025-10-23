@@ -106,7 +106,7 @@ RSpec.describe SaumonNet::BaseImportService do
       before do
         allow(service).to receive(:find_or_initialize_record).and_return(record)
         allow(record).to receive(:save!).and_raise(error)
-        allow(Rails.logger).to receive(:error)
+        allow(Rails.event).to receive(:notify_with_tags)
         allow(Sentry).to receive(:capture_exception)
       end
 
@@ -121,12 +121,13 @@ RSpec.describe SaumonNet::BaseImportService do
       it 'logs error with context' do
         service.send(:process_batch, [ entity_data ], 1)
 
-        expect(Rails.logger).to have_received(:error).with(
+        expect(Rails.event).to have_received(:notify_with_tags).with(
+          "saumon_net.entity_processing_failed",
           hash_including(
-            message: "Failed to process entity",
             entity_id: "123",
             error: error.message
-          )
+          ),
+          tags: { severity: :error }
         )
       end
 
@@ -170,7 +171,7 @@ RSpec.describe SaumonNet::BaseImportService do
         allow(HTTParty).to receive(:get).with(file_url).and_return(response)
         allow(response).to receive(:success?).and_return(false)
         allow(response).to receive(:code).and_return(404)
-        allow(Rails.logger).to receive(:warn)
+        allow(Rails.event).to receive(:notify_with_tags)
       end
 
       it 'returns original data unchanged' do
@@ -183,11 +184,12 @@ RSpec.describe SaumonNet::BaseImportService do
       it 'logs warning with status code' do
         service.send(:parse_file_content, entity_data)
 
-        expect(Rails.logger).to have_received(:warn).with(
+        expect(Rails.event).to have_received(:notify_with_tags).with(
+          "saumon_net.file_fetch_failed",
           hash_including(
-            message: "Failed to fetch file content",
             status_code: 404
-          )
+          ),
+          tags: { severity: :warn }
         )
       end
     end
@@ -222,17 +224,18 @@ RSpec.describe SaumonNet::BaseImportService do
     end
 
     it 'logs completion with final statistics' do
-      allow(Rails.logger).to receive(:info)
+      allow(Rails.event).to receive(:notify_with_tags)
 
       service.import_all
 
-      expect(Rails.logger).to have_received(:info).with(
+      expect(Rails.event).to have_received(:notify_with_tags).with(
+        "saumon_net.import_completed",
         hash_including(
-          message: "Import completed",
           entity_type: entity_type,
           total_processed: service.stats.processed,
           success_rate: service.stats.success_rate
-        )
+        ),
+        tags: { severity: :info }
       )
     end
   end

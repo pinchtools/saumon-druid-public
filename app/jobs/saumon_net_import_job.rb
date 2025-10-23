@@ -16,19 +16,19 @@ class SaumonNetImportJob < ApplicationJob
 
     track_import_metrics(entity_type, stats)
 
-    Rails.logger.info message: "Import job completed",
-                      component: SaumonNet::COMPONENT,
+    Rails.event.notify_with_tags("saumon_net.import_job_completed", {
                       entity_type: entity_type,
                       since_date: since_date,
                       stats: stats_summary(stats)
+                    }, tags: { severity: :info })
 
   rescue => e
-    Rails.logger.error message: "Import job failed",
-                       component: SaumonNet::COMPONENT,
+    Rails.event.notify_with_tags("saumon_net.import_job_failed", {
                        entity_type: entity_type,
                        since_date: since_date,
                        error: e.message,
                        backtrace: e.backtrace
+                     }, tags: { severity: :error })
 
     raise
   end
