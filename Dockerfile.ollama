@@ -1,0 +1,12 @@
+# Dockerfile.ollama
+FROM ollama/ollama:latest
+
+# Start ollama server in background and pull the model
+RUN ollama serve & \
+    sleep 5 && \
+    ollama pull nomic-embed-text && \
+    pkill ollama
+
+EXPOSE 11434
+
+CMD ["serve"]

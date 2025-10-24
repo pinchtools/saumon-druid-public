@@ -30,9 +30,24 @@ services:
     environment:
       - POSTGRES_HOST=postgresql
       - POSTGRES_PASSWORD=foo
+      - OLLAMA_HOST=http://ollama:11434
     networks:
       - saumon_network
       - default
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - default
+volumes:
+  ollama_data:
 
 networks:
   saumon_network:
