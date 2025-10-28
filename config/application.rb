@@ -28,6 +28,8 @@ module SaumonDruid
 
     config.log_formatter = ComponentLoggerFormatter.new
 
+    config.log_file_size = 250.megabytes
+
     # Register the Rails event logger subscriber
     config.after_initialize do
       Rails.event.subscribe(RailsEventLoggerSubscriber.new)
