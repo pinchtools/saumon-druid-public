@@ -411,6 +411,7 @@ GEM
       faraday-retry (>= 1)
       marcel (~> 1.0)
       zeitwerk (~> 2)
+    ruby_llm-schema (0.2.1)
     rubyzip (3.2.1)
     securerandom (0.4.1)
     selenium-webdriver (4.38.0)
@@ -545,6 +546,7 @@ DEPENDENCIES
   rspec-rails
   rubocop-rails-omakase
   ruby_llm
+  ruby_llm-schema
   selenium-webdriver
   sentry-rails
   sentry-ruby

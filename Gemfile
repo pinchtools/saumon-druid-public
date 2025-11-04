@@ -64,6 +64,7 @@ gem "newrelic_rpm"
 
 # LLM
 gem "ruby_llm"
+gem "ruby_llm-schema"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
