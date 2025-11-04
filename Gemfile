@@ -63,7 +63,6 @@ gem "newrelic_rpm"
 
 
 # LLM
-gem "dspy"
 gem "ruby_llm"
 
 group :development, :test do
