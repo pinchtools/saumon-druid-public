@@ -10,28 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_22_122154) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_11_134753) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
 
   create_table "an_bodies", force: :cascade do |t|
     t.bigint "an_body_type_id", null: false
-    t.string "uid", null: false
+    t.string "chamber"
+    t.datetime "created_at", null: false
+    t.datetime "deliver_date"
+    t.string "department_code"
+    t.datetime "end_date"
     t.string "label"
     t.string "label_abbr"
     t.string "label_code"
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.datetime "deliver_date"
-    t.string "chamber"
-    t.string "regime"
     t.string "legislature"
     t.string "number"
-    t.string "province"
-    t.string "department_code"
     t.bigint "parent_id"
-    t.datetime "created_at", null: false
+    t.string "province"
+    t.string "regime"
+    t.datetime "start_date"
+    t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["an_body_type_id"], name: "index_an_bodies_on_an_body_type_id"
     t.index ["parent_id"], name: "index_an_bodies_on_parent_id"
@@ -46,69 +46,69 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_22_122154) do
 
   create_table "an_body_types", force: :cascade do |t|
     t.string "code"
-    t.boolean "unique_per_date", default: false, null: false
-    t.boolean "single_assignment_per_actor", default: false, null: false
-    t.boolean "external", default: false, null: false
-    t.boolean "trans_legislature", default: false, null: false
-    t.boolean "local", default: false, null: false
-    t.boolean "has_substitute", default: false, null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "institution"
+    t.boolean "external", default: false, null: false
     t.string "group"
-    t.string "selection"
+    t.boolean "has_substitute", default: false, null: false
     t.integer "hierarchy_level"
+    t.string "institution"
+    t.boolean "local", default: false, null: false
+    t.string "selection"
+    t.boolean "single_assignment_per_actor", default: false, null: false
+    t.boolean "trans_legislature", default: false, null: false
+    t.boolean "unique_per_date", default: false, null: false
+    t.datetime "updated_at", null: false
     t.index ["code"], name: "index_an_body_types_on_code", unique: true
   end
 
   create_table "an_countries", force: :cascade do |t|
-    t.string "uid", null: false
-    t.string "name", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
     t.string "insee_code"
     t.string "insee_name"
     t.string "iso_code"
-    t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_an_countries_on_name"
     t.index ["uid"], name: "index_an_countries_on_uid", unique: true
   end
 
   create_table "an_stakeholder_addresses", force: :cascade do |t|
-    t.bigint "an_stakeholder_id", null: false
-    t.string "uid", null: false
     t.string "address_1"
     t.string "address_2"
+    t.bigint "an_stakeholder_id", null: false
+    t.string "city"
+    t.datetime "created_at", null: false
+    t.string "post_code"
     t.string "street_name"
     t.string "street_number"
-    t.string "post_code"
-    t.string "city"
-    t.integer "weight"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.integer "type"
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.integer "weight"
     t.index ["an_stakeholder_id"], name: "index_an_stakeholder_addresses_on_an_stakeholder_id"
     t.index ["uid"], name: "index_an_stakeholder_addresses_on_uid", unique: true
   end
 
   create_table "an_stakeholders", force: :cascade do |t|
-    t.string "uid"
+    t.string "birth_city"
+    t.string "birth_country"
+    t.date "birth_date"
+    t.string "birth_province"
     t.string "civility"
+    t.datetime "created_at", null: false
+    t.date "death_date"
+    t.string "emails", default: [], array: true
     t.string "first_name"
     t.string "last_name"
-    t.date "birth_date"
-    t.string "birth_city"
-    t.string "birth_province"
-    t.date "death_date"
     t.string "occupation"
     t.string "occupation_category"
     t.string "occupation_family"
-    t.string "emails", default: [], array: true
-    t.string "urls", default: [], array: true
     t.string "phone_numbers", default: [], array: true
-    t.datetime "created_at", null: false
+    t.string "uid"
     t.datetime "updated_at", null: false
-    t.string "birth_country"
+    t.string "urls", default: [], array: true
     t.index ["birth_date"], name: "index_an_stakeholders_on_birth_date"
     t.index ["first_name"], name: "index_an_stakeholders_on_first_name"
     t.index ["last_name"], name: "index_an_stakeholders_on_last_name"
@@ -119,41 +119,62 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_22_122154) do
   end
 
   create_table "an_substitutes", force: :cascade do |t|
-    t.bigint "an_term_id", null: false
     t.bigint "an_stakeholder_id", null: false
-    t.datetime "start_date"
-    t.datetime "end_date"
+    t.bigint "an_term_id", null: false
     t.datetime "created_at", null: false
+    t.datetime "end_date"
+    t.datetime "start_date"
     t.datetime "updated_at", null: false
     t.index ["an_stakeholder_id"], name: "index_an_substitutes_on_an_stakeholder_id"
     t.index ["an_term_id"], name: "index_an_substitutes_on_an_term_id"
   end
 
   create_table "an_terms", force: :cascade do |t|
-    t.bigint "an_stakeholder_id", null: false
     t.bigint "an_body_id", null: false
-    t.bigint "constituency_id"
-    t.bigint "deputy_term_id"
-    t.string "uid", null: false
-    t.string "legislature"
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.datetime "publish_date"
+    t.bigint "an_stakeholder_id", null: false
     t.datetime "assumption_date"
-    t.integer "role_rank"
-    t.string "role_code"
+    t.string "collaborators", default: [], array: true
+    t.bigint "constituency_id"
+    t.datetime "created_at", null: false
+    t.bigint "deputy_term_id"
+    t.datetime "end_date"
+    t.string "end_reason"
+    t.string "legislature"
     t.boolean "main", default: false, null: false
     t.string "origin"
-    t.string "end_reason"
+    t.datetime "publish_date"
+    t.string "role_code"
+    t.integer "role_rank"
     t.string "seat"
-    t.string "collaborators", default: [], array: true
-    t.datetime "created_at", null: false
+    t.datetime "start_date"
+    t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["an_body_id"], name: "index_an_terms_on_an_body_id"
     t.index ["an_stakeholder_id"], name: "index_an_terms_on_an_stakeholder_id"
     t.index ["constituency_id"], name: "index_an_terms_on_constituency_id"
     t.index ["deputy_term_id"], name: "index_an_terms_on_deputy_term_id"
     t.index ["uid"], name: "index_an_terms_on_uid", unique: true
+  end
+
+  create_table "llm_models", force: :cascade do |t|
+    t.boolean "available", default: true
+    t.jsonb "capabilities", default: []
+    t.jsonb "categories", default: []
+    t.integer "context_window"
+    t.datetime "created_at", null: false
+    t.string "external_id", null: false
+    t.string "family", null: false
+    t.decimal "input_cost", precision: 10, scale: 6
+    t.date "knowledge_cutoff"
+    t.string "name", null: false
+    t.decimal "output_cost", precision: 10, scale: 6
+    t.integer "output_size"
+    t.string "provider", null: false
+    t.string "tier"
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_llm_models_on_external_id", unique: true
+    t.index ["family"], name: "index_llm_models_on_family"
+    t.index ["tier"], name: "index_llm_models_on_tier"
   end
 
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
