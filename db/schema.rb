@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_11_134753) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_12_101635) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -164,12 +164,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_134753) do
     t.datetime "created_at", null: false
     t.string "external_id", null: false
     t.string "family", null: false
+    t.boolean "free", default: false
     t.decimal "input_cost", precision: 10, scale: 6
     t.date "knowledge_cutoff"
     t.string "name", null: false
     t.decimal "output_cost", precision: 10, scale: 6
     t.integer "output_size"
     t.string "provider", null: false
+    t.jsonb "supported_params", default: []
     t.string "tier"
     t.datetime "updated_at", null: false
     t.index ["external_id"], name: "index_llm_models_on_external_id", unique: true
