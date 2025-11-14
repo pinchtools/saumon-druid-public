@@ -8,8 +8,8 @@ RSpec.describe Llm::ImporterService do
   describe '#call' do
     let(:yaml_content) do
       {
-        'openai' => [ { 'id' => 'gpt-4', 'tier' => 'premium' } ],
-        'anthropic' => [ { 'id' => 'claude-3', 'tier' => 'standard' } ]
+        'openai' => [ { 'id' => 'gpt-4', 'tier' => 'strong' } ],
+        'anthropic' => [ { 'id' => 'claude-3', 'tier' => 'top' } ]
       }
     end
 
@@ -32,8 +32,8 @@ RSpec.describe Llm::ImporterService do
 
       it 'processes all models from configuration' do
         allow(Llm::ModelImporter).to receive_message_chain(:new, :call)
-        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'gpt-4', 'tier' => 'premium' })
-        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'claude-3', 'tier' => 'standard' })
+        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'gpt-4', 'tier' => 'strong' })
+        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'claude-3', 'tier' => 'top' })
 
         subject.call
       end
@@ -55,7 +55,7 @@ RSpec.describe Llm::ModelImporter do
   subject { described_class.new(model_config) }
 
   describe '#call' do
-    let(:model_config) { { 'id' => 'gpt-4', 'tier' => 'premium' } }
+    let(:model_config) { { 'id' => 'gpt-4', 'tier' => 'strong' } }
     let(:standard_price) { double('input_per_million' => 10.0, 'output_per_million' => 30.0) }
     let(:pricing) { double(text_tokens: double(standard: standard_price)) }
     let(:ruby_llm_model) do
