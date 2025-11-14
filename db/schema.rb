@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_12_101635) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_14_133302) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -177,6 +177,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_12_101635) do
     t.index ["external_id"], name: "index_llm_models_on_external_id", unique: true
     t.index ["family"], name: "index_llm_models_on_family"
     t.index ["tier"], name: "index_llm_models_on_tier"
+    t.check_constraint "tier::text = ANY (ARRAY['tiny'::character varying, 'small'::character varying, 'medium'::character varying, 'strong'::character varying, 'top'::character varying]::text[])", name: "valid_tier"
   end
 
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"

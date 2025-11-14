@@ -18,5 +18,6 @@ RSpec.describe LlmModel, type: :model do
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:family) }
     it { should validate_presence_of(:provider) }
+    it { should validate_inclusion_of(:tier).in_array(described_class::TIERS).allow_nil }
   end
 end
