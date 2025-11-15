@@ -58,7 +58,6 @@ RSpec.describe Agent, type: :model do
 
   describe 'scopes' do
     describe '.active' do
-
       context 'when agent is active' do
         subject { create(:agent, active: true) }
         it { expect(described_class.active).to include(subject) }
