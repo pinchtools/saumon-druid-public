@@ -1,6 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe Agent, type: :model do
+  describe 'associations' do
+    it { should have_many(:agent_versions) }
+    it { should belong_to(:current_agent_version).class_name("AgentVersion").optional }
+  end
+
   describe 'validations' do
     subject do
       described_class.new(
