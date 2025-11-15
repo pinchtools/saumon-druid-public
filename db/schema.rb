@@ -10,10 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_15_133903) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_15_154818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
+
+  create_table "agent_version_llm_models", force: :cascade do |t|
+    t.bigint "agent_version_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: true, null: false
+    t.bigint "llm_model_id", null: false
+    t.integer "priority", default: 1, null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_version_id", "llm_model_id"], name: "idx_on_agent_version_id_llm_model_id_6916d77c45", unique: true
+    t.index ["agent_version_id", "priority"], name: "idx_on_agent_version_id_priority_43756bb370", unique: true
+    t.index ["agent_version_id"], name: "index_agent_version_llm_models_on_agent_version_id"
+    t.index ["llm_model_id"], name: "index_agent_version_llm_models_on_llm_model_id"
+  end
 
   create_table "agent_versions", force: :cascade do |t|
     t.bigint "agent_id", null: false
@@ -202,6 +215,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_15_133903) do
     t.check_constraint "tier::text = ANY (ARRAY['tiny'::character varying, 'small'::character varying, 'medium'::character varying, 'strong'::character varying, 'top'::character varying]::text[])", name: "valid_tier"
   end
 
+  add_foreign_key "agent_version_llm_models", "agent_versions"
+  add_foreign_key "agent_version_llm_models", "llm_models"
   add_foreign_key "agent_versions", "agents"
   add_foreign_key "agents", "agent_versions", column: "current_agent_version_id"
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
