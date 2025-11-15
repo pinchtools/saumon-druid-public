@@ -55,4 +55,19 @@ RSpec.describe Agent, type: :model do
       expect(agent.errors[:normalized_name]).to include("can't be blank")
     end
   end
+
+  describe 'scopes' do
+    describe '.active' do
+
+      context 'when agent is active' do
+        subject { create(:agent, active: true) }
+        it { expect(described_class.active).to include(subject) }
+      end
+
+      context 'when agent is not active' do
+        subject { create(:agent, active: false) }
+        it { expect(described_class.active).not_to include(subject) }
+      end
+    end
+  end
 end

@@ -6,8 +6,9 @@ class Agent < ApplicationRecord
 
   validates :name, presence: true
   validates :normalized_name, presence: true, uniqueness: true
-
   validate :current_version_owned_by_agent
+
+  scope :active, -> { where(active: true) }
 
   private
 
