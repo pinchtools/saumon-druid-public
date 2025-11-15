@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_14_133302) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_15_104054) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
+
+  create_table "agents", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.string "normalized_name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["normalized_name"], name: "index_agents_on_normalized_name", unique: true
+  end
 
   create_table "an_bodies", force: :cascade do |t|
     t.bigint "an_body_type_id", null: false
