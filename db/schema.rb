@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_15_132412) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_15_133903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -28,10 +28,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_15_132412) do
   create_table "agents", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
+    t.bigint "current_agent_version_id"
     t.text "description"
     t.string "name", null: false
     t.string "normalized_name", null: false
     t.datetime "updated_at", null: false
+    t.index ["current_agent_version_id"], name: "index_agents_on_current_agent_version_id"
     t.index ["normalized_name"], name: "index_agents_on_normalized_name", unique: true
   end
 
@@ -201,6 +203,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_15_132412) do
   end
 
   add_foreign_key "agent_versions", "agents"
+  add_foreign_key "agents", "agent_versions", column: "current_agent_version_id"
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
   add_foreign_key "an_bodies", "an_body_types"
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
