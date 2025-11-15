@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_15_104054) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_15_132412) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
+
+  create_table "agent_versions", force: :cascade do |t|
+    t.bigint "agent_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "hyperparams"
+    t.jsonb "instructions"
+    t.datetime "updated_at", null: false
+    t.integer "version", null: false
+    t.index ["agent_id"], name: "index_agent_versions_on_agent_id"
+  end
 
   create_table "agents", force: :cascade do |t|
     t.boolean "active", default: true, null: false
@@ -190,6 +200,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_15_104054) do
     t.check_constraint "tier::text = ANY (ARRAY['tiny'::character varying, 'small'::character varying, 'medium'::character varying, 'strong'::character varying, 'top'::character varying]::text[])", name: "valid_tier"
   end
 
+  add_foreign_key "agent_versions", "agents"
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
   add_foreign_key "an_bodies", "an_body_types"
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
