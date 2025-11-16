@@ -8,6 +8,5 @@ class LlmModel < ApplicationRecord
 
   validates :tier,
             inclusion: { in: TIERS },
-            allow_nil: true,
-            allow_blank: false
+            allow_nil: true
 end
