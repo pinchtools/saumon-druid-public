@@ -36,7 +36,7 @@ RSpec.describe Agent, type: :model do
         it { should_not be_valid }
         it "should add an error on current_agent_version" do
           subject.valid?
-          expect(subject.errors[:current_agent_version]).to include("does not belong to agent")
+          expect(subject.errors[:current_agent_version]).to include("must belong to this agent")
           end
       end
     end
