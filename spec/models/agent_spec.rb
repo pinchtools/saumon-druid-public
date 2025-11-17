@@ -68,5 +68,20 @@ RSpec.describe Agent, type: :model do
         it { expect(described_class.active).not_to include(subject) }
       end
     end
+
+    describe '.with_name' do
+      let!(:agent) { create(:agent, name: 'Test Agent') }
+
+      it 'finds agent by normalized name' do
+        expect(described_class.with_name('Test Agent')).to include(agent)
+        expect(described_class.with_name('test_agent')).to include(agent)
+        expect(described_class.with_name('TEST AGENT')).to include(agent)
+      end
+
+      it 'handles special characters' do
+        special_agent = create(:agent, name: 'Test-Special_Agent!')
+        expect(described_class.with_name('Test-Special_Agent!')).to include(special_agent)
+      end
+    end
   end
 end

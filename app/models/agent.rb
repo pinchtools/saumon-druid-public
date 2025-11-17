@@ -9,11 +9,16 @@ class Agent < ApplicationRecord
   validate :current_version_owned_by_agent
 
   scope :active, -> { where(active: true) }
+  scope :with_name, ->(str) { where(normalized_name: normalize(str)) }
 
   private
 
+  def self.normalize(str)
+    str.downcase.gsub(/[^a-z0-9_]/, "_")
+  end
+
   def normalize_name
-    self.normalized_name = name.downcase.gsub(/[^a-z0-9_]/, "_") if name
+    self.normalized_name = Agent.normalize(name) if name
   end
 
   def current_version_owned_by_agent
