@@ -8,4 +8,11 @@ class AgentVersion < ApplicationRecord
 
   validates :agent_id, presence: true
   validates :version, presence: true, uniqueness: { scope: :agent_id }
+  before_validation :set_version, on: :create
+
+  def set_version
+    return if agent.nil?
+
+    self.version = (agent.agent_versions.maximum(:version) || 0) + 1
+  end
 end

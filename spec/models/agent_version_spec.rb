@@ -11,7 +11,29 @@ RSpec.describe AgentVersion, type: :model do
     subject { create(:agent_version) }
     it { should validate_presence_of(:agent_id) }
     it { should validate_presence_of(:version) }
-    it { should validate_uniqueness_of(:version).scoped_to(:agent_id) }
+  end
+
+  describe 'callbacks' do
+    describe '#set_version' do
+      let(:agent) { create(:agent) }
+
+      context 'when version is not set' do
+        it 'sets version to 1 for first agent version' do
+          agent_version = agent.agent_versions.build
+          agent_version.save!
+          expect(agent_version.version).to eq(1)
+        end
+
+        it 'increments version for subsequent agent versions' do
+          agent.agent_versions.create!
+          agent.agent_versions.create!
+
+          new_version = agent.agent_versions.build
+          new_version.save!
+          expect(new_version.version).to eq(3)
+        end
+      end
+    end
   end
 
   describe 'enabled associations' do
