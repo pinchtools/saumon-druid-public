@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_15_154818) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_17_073420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -34,7 +34,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_15_154818) do
     t.jsonb "hyperparams"
     t.jsonb "instructions"
     t.datetime "updated_at", null: false
-    t.integer "version", null: false
+    t.integer "version", default: 1, null: false
     t.index ["agent_id"], name: "index_agent_versions_on_agent_id"
   end
 
