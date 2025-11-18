@@ -1,9 +1,9 @@
 class AgentVersion < ApplicationRecord
   belongs_to :agent
-  has_many :agent_version_llm_models, dependent: :destroy
+  has_many :agent_version_llm_models, -> { order(:priority) }, dependent: :destroy
   has_many :llm_models, through: :agent_version_llm_models
 
-  has_many :enabled_agent_version_llm_models, -> { enabled }, class_name: "AgentVersionLlmModel"
+  has_many :enabled_agent_version_llm_models, -> { enabled.order(:priority) }, class_name: "AgentVersionLlmModel"
   has_many :enabled_llm_models, through: :enabled_agent_version_llm_models, source: :llm_model
 
   validates :agent_id, presence: true
