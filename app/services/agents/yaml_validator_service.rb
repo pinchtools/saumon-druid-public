@@ -84,15 +84,17 @@ module Agents
     end
 
     def permitted_params
-      ActionController::Parameters.new(raw_yaml).require(:agent).permit(
-        :name,
-        :description,
-        :role,
-        :directives,
-        :context_format,
-        hyperparams: {},
-        models: []
-      )
+      agent_data = raw_yaml["agent"]
+
+      {
+        "name" => agent_data["name"],
+        "description" => agent_data["description"],
+        "role" => agent_data["role"],
+        "directives" => agent_data["directives"],
+        "context_format" => agent_data["context_format"],
+        "hyperparams" => agent_data["hyperparams"],
+        "models" => agent_data["models"]
+      }.compact
     end
 
     def add_error(message)
