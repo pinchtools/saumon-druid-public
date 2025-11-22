@@ -165,7 +165,7 @@ RSpec.describe Agents::InstructionBuilder do
 
       expect(result).to include("Test role")
       expect(result).to include("Test directives")
-      expect(result).to include("CONTEXT FORMAT")
+      expect(result).to include("CONTEXT_FORMAT")
     end
 
     it 'handles missing context_format' do

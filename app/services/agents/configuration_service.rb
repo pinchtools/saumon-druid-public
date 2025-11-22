@@ -131,7 +131,8 @@ module Agents
       return nil unless yaml["context_format"]
 
       <<~TEXT
-        CONTEXT FORMAT
+        CONTEXT_FORMAT
+        ----------
         #{JSON.parse(yaml["context_format"])}
       TEXT
     end
