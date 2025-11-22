@@ -117,4 +117,88 @@ RSpec.describe Agents::BaseAgent do
       end
     end
   end
+
+  describe '#extract_json_from_response' do
+    let(:base_agent) { described_class.new }
+
+    it 'extracts JSON from ```json markdown blocks' do
+      content = "```json\n{\"test\": true}\n```"
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq('{"test": true}')
+    end
+
+    it 'extracts JSON from ``` markdown blocks' do
+      content = "```\n{\"test\": true}\n```"
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq('{"test": true}')
+    end
+
+    it 'returns content as-is if no markdown blocks' do
+      content = '{"test": true}'
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq('{"test": true}')
+    end
+
+    it 'handles content with extra whitespace' do
+      content = "  ```json\n  {\"test\": true}  \n```  "
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq('{"test": true}')
+    end
+
+    it 'does not modify content with partial markdown syntax' do
+      content = "```json\n{\"test\": true}"
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq("```json\n{\"test\": true}")
+    end
+
+    it 'handles nested code blocks correctly' do
+      content = "```json\n{\"code\": \"```inner```\"}\n```"
+      result = base_agent.send(:extract_json_from_response, content)
+      expect(result).to eq('{"code": "```inner```"}')
+    end
+  end
+
+  describe '#parse_and_validate_json_response' do
+    let(:base_agent) { described_class.new }
+    let(:response) { double('response', content: content) }
+
+    context 'with valid JSON' do
+      let(:content) { '{"test": true}' }
+
+      it 'parses and validates JSON response' do
+        allow(base_agent).to receive(:validate_output).and_return(true)
+        result = base_agent.send(:parse_and_validate_json_response, response)
+        expect(result).to eq({ "test" => true })
+      end
+    end
+
+    context 'with JSON in markdown blocks' do
+      let(:content) { "```json\n{\"test\": true}\n```" }
+
+      it 'extracts and parses JSON from markdown blocks' do
+        allow(base_agent).to receive(:validate_output).and_return(true)
+        result = base_agent.send(:parse_and_validate_json_response, response)
+        expect(result).to eq({ "test" => true })
+      end
+    end
+
+    context 'with invalid JSON' do
+      let(:content) { 'invalid json' }
+
+      it 'raises ArgumentError for invalid JSON' do
+        expect { base_agent.send(:parse_and_validate_json_response, response) }
+          .to raise_error(ArgumentError, /Invalid JSON response from LLM/)
+      end
+    end
+
+    context 'with validation failure' do
+      let(:content) { '{"test": true}' }
+
+      it 'raises ArgumentError when validation fails' do
+        allow(base_agent).to receive(:validate_output).and_raise(ArgumentError, "Validation failed")
+        expect { base_agent.send(:parse_and_validate_json_response, response) }
+          .to raise_error(ArgumentError, "Validation failed")
+      end
+    end
+  end
 end
