@@ -9,7 +9,6 @@ FactoryBot.define do
     publish_date { 1.year.ago }
     assumption_date { 1.year.ago }
     role_rank { 1 }
-    role_code { "DEPUTY" }
     main { false }
     origin { "Election" }
     end_reason { nil }

@@ -258,7 +258,6 @@ RSpec.describe SaumonNet::StakeholderImportService do
       expect(term.uid).to eq("PM123456")
       expect(term.an_stakeholder).to eq(stakeholder)
       expect(term.an_body).to eq(body)
-      expect(term.role_code).to eq("GP")
       expect(term.legislature).to eq("15")
       expect(term.main).to be(true)
       expect(term.start_date).to eq(DateTime.parse("2017-06-27"))

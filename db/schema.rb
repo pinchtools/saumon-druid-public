@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_17_092625) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_23_105631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -179,7 +179,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_17_092625) do
     t.boolean "main", default: false, null: false
     t.string "origin"
     t.datetime "publish_date"
-    t.string "role_code"
     t.integer "role_rank"
     t.string "seat"
     t.datetime "start_date"

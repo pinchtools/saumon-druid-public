@@ -1,7 +1,9 @@
 module SaumonNet
   class StakeholderImportService < BaseImportService
+    attr_reader :term_qualities
     def initialize
       super("acteur")
+      @term_qualities = []
     end
 
     private
@@ -244,13 +246,11 @@ module SaumonNet
 
 
       constituency = nil
+      deputy_term = nil
+
       if mandate_data["@xsi:type"] == "MandatParlementaire_type"
         constituency_ref = mandate_data.dig("election", "refCirconscription")
         constituency = find_body_by_uid(constituency_ref) if constituency_ref.present?
-      end
-
-      deputy_term = nil
-      if mandate_data["@xsi:type"] == "MandatParlementaire_type"
         mandat_remplace_ref = mandate_data.dig("mandature", "mandatRemplaceRef")
         deputy_term = find_deputy_term_by_uid(mandat_remplace_ref) if mandat_remplace_ref.present?
       end
@@ -267,7 +267,6 @@ module SaumonNet
         publish_date: parse_datetime(mandate_data["datePublication"]),
         assumption_date: parse_assumption_date(mandate_data),
         role_rank: mandate_data["preseance"]&.to_i,
-        role_code: mandate_data["typeOrgane"],
         main: mandate_data["nominPrincipale"] == "1",
         origin: extract_origin(mandate_data),
         end_reason: extract_end_reason(mandate_data),
