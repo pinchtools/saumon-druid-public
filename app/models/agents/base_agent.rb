@@ -27,7 +27,6 @@ class Agents::BaseAgent
   end
 
   def primary_model
-    # @enabled_models.find_by_external_id!("microsoft/phi-3.5-mini-128k-instruct")
     @enabled_models.first
   end
 

@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Agents::BaseAgent do
+  subject(:base_agent) { described_class.new }
+  
   let(:agent) { create(:agent, name: "Test Agent", active: true) }
   let(:agent_version) { create(:agent_version, agent: agent) }
   let(:llm_model) { create(:llm_model) }
@@ -18,7 +20,6 @@ RSpec.describe Agents::BaseAgent do
   describe '#initialize' do
     context 'with valid agent' do
       it 'loads agent data successfully' do
-        base_agent = described_class.new
         expect(base_agent.agent).to eq(agent)
         expect(base_agent.current_version).to eq(agent_version)
         expect(base_agent.enabled_models).to include(llm_model)
@@ -68,28 +69,24 @@ RSpec.describe Agents::BaseAgent do
 
   describe '#name' do
     it 'returns agent name' do
-      base_agent = described_class.new
       expect(base_agent.name).to eq(agent.name)
     end
   end
 
   describe '#normalized_name' do
     it 'returns agent normalized name' do
-      base_agent = described_class.new
       expect(base_agent.normalized_name).to eq(agent.normalized_name)
     end
   end
 
   describe '#version' do
     it 'returns current version number' do
-      base_agent = described_class.new
       expect(base_agent.version).to eq(agent_version.version)
     end
   end
 
   describe '#primary_model' do
     it 'returns first enabled model' do
-      base_agent = described_class.new
       expect(base_agent.primary_model).to eq(llm_model)
     end
   end
@@ -119,7 +116,6 @@ RSpec.describe Agents::BaseAgent do
   end
 
   describe '#extract_json_from_response' do
-    let(:base_agent) { described_class.new }
 
     it 'extracts JSON from ```json markdown blocks' do
       content = "```json\n{\"test\": true}\n```"
@@ -159,7 +155,6 @@ RSpec.describe Agents::BaseAgent do
   end
 
   describe '#parse_and_validate_json_response' do
-    let(:base_agent) { described_class.new }
     let(:response) { double('response', content: content) }
 
     context 'with valid JSON' do
