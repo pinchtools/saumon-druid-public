@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Agents::BaseAgent do
   subject(:base_agent) { described_class.new }
-  
+
   let(:agent) { create(:agent, name: "Test Agent", active: true) }
   let(:agent_version) { create(:agent_version, agent: agent) }
   let(:llm_model) { create(:llm_model) }
@@ -116,7 +116,6 @@ RSpec.describe Agents::BaseAgent do
   end
 
   describe '#extract_json_from_response' do
-
     it 'extracts JSON from ```json markdown blocks' do
       content = "```json\n{\"test\": true}\n```"
       result = base_agent.send(:extract_json_from_response, content)
