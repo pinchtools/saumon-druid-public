@@ -255,6 +255,9 @@ module SaumonNet
         deputy_term = find_deputy_term_by_uid(mandat_remplace_ref) if mandat_remplace_ref.present?
       end
 
+      capacity = mandate_data.dig("infosQualite", "codeQualite")
+      capacity = capacity.parameterize(separator: "_").underscore if capacity.present?
+
       {
         uid: mandate_data["uid"],
         an_stakeholder: stakeholder,
@@ -267,6 +270,7 @@ module SaumonNet
         publish_date: parse_datetime(mandate_data["datePublication"]),
         assumption_date: parse_assumption_date(mandate_data),
         role_rank: mandate_data["preseance"]&.to_i,
+        capacity: capacity,
         main: mandate_data["nominPrincipale"] == "1",
         origin: extract_origin(mandate_data),
         end_reason: extract_end_reason(mandate_data),

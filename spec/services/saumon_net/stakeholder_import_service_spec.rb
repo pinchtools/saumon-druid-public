@@ -263,6 +263,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
       expect(term.start_date).to eq(DateTime.parse("2017-06-27"))
       expect(term.end_date).to eq(DateTime.parse("2020-03-29"))
       expect(term.collaborators).to eq([ "M. Alexis David", "M. Baptiste Al Sabty" ])
+      expect(term.role_rank).to eq(20)
+      expect(term.capacity).to eq("membre")
     end
 
     context 'with parliamentary mandate' do
