@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_23_140318) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_24_095002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_trgm"
   enable_extension "vector"
 
   create_table "agent_version_llm_models", force: :cascade do |t|
@@ -142,6 +143,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_23_140318) do
     t.string "occupation_category"
     t.string "occupation_family"
     t.string "phone_numbers", default: [], array: true
+    t.tsvector "search_identity_fts"
+    t.text "search_identity_trgm"
     t.string "uid"
     t.datetime "updated_at", null: false
     t.string "urls", default: [], array: true
@@ -151,6 +154,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_23_140318) do
     t.index ["occupation"], name: "index_an_stakeholders_on_occupation"
     t.index ["occupation_category"], name: "index_an_stakeholders_on_occupation_category"
     t.index ["occupation_family"], name: "index_an_stakeholders_on_occupation_family"
+    t.index ["search_identity_fts"], name: "idx_an_stakeholders_fts", using: :gin
+    t.index ["search_identity_trgm"], name: "idx_an_stakeholders_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
 
