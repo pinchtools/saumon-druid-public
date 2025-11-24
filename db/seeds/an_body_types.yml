@@ -477,7 +477,7 @@
   institution: parliament
   group: coordination_body
   selection: appointment
-  hierarchy_level: 3
+  hierarchy_level: 1
 -
   code: "DELEGSENAT"
   unique_per_date: true
