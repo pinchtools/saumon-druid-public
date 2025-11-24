@@ -547,7 +547,6 @@ DEPENDENCIES
   rspec-rails
   rubocop-rails-omakase
   ruby_llm
-  ruby_llm-schema
   selenium-webdriver
   sentry-rails
   sentry-ruby
