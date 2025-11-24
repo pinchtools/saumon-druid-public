@@ -25,8 +25,8 @@ module SaumonNet
       {
         uid: file_uid,
         civility: identity["civ"],
-        first_name: identity["prenom"].downcase,
-        last_name: identity["nom"].downcase,
+        first_name: identity["prenom"],
+        last_name: identity["nom"],
         birth_date: parse_date(birth_info["dateNais"]),
         birth_city: sanitize_entity_value(birth_info["villeNais"]),
         birth_province: sanitize_entity_value(birth_info["depNais"]),

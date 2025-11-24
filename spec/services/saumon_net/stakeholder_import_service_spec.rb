@@ -53,8 +53,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
       expect(result).to include(
         uid: "PA721860",
         civility: "M.",
-        first_name: "jean-françois",
-        last_name: "cesarini",
+        first_name: "Jean-François",
+        last_name: "Cesarini",
         birth_date: Date.parse("1970-09-30"),
         birth_city: "Avignon",
         birth_province: "Vaucluse",
@@ -92,8 +92,8 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
         expect(result).to include(
           uid: "PA123456",
-          first_name: "john",
-          last_name: "doe",
+          first_name: "John",
+          last_name: "Doe",
           civility: nil,
           birth_date: nil,
           death_date: nil
