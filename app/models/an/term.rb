@@ -9,8 +9,17 @@ class An::Term < ApplicationRecord
 
   scope :main, -> { where(main: true) }
   scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
+  scope :past, -> { where.not(start_date: nil, end_date: nil) }
   scope :by_hierarchy, -> { joins(an_body: :an_body_type).order("an_body_types.hierarchy_level ASC") }
 
   validates :uid, presence: true, uniqueness: true
   validates :an_stakeholder_id, :an_body_id, presence: true
+
+  def full_label
+    [
+      self.class.humanize("capacities.#{capacity}.label"),
+      an_body.label_code,
+      constituency&.label
+    ].compact.join(" ")
+  end
 end

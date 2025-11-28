@@ -12,4 +12,6 @@ class An::Body < ApplicationRecord
 
   validates :uid, presence: true, uniqueness: true
   validates :an_body_type_id, presence: true
+
+  scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
 end
