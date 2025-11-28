@@ -72,3 +72,153 @@ en:
           0: "Official address"
           1: "Published address for Paris or its region"
           2: "Published address of constituency"
+      an/term:
+        capacities:
+          membre:
+            label: "Member"
+          en_mission:
+            label: "on mission"
+          titulaire:
+            label: "Incumbent"
+          secretaire:
+            label: "Secretary"
+          depute_non_inscrit:
+            label: "Non-attached Member"
+          senateur:
+            label: "Senator"
+          co_president:
+            label: "Co-President"
+          autre_membre_du_bureau:
+            label: "Other Bureau member"
+          rapporteur:
+            label: "Rapporteur"
+          suppleant:
+            label: "Substitute"
+          haut_commissaire:
+            label: "High Commissioner"
+          co_rapporteur:
+            label: "Co-rapporteur"
+          vice_president:
+            label: "Vice-President"
+          president:
+            label: "President"
+          membre_apparente:
+            label: "Associated member"
+          secretaire_d_etat:
+            label: "Secretary of State"
+          rapporteur_special:
+            label: "Special Rapporteur"
+          membre_de_droit_du_bureau:
+            label: "Ex officio Bureau member"
+          secretaire_du_bureau:
+            label: "Bureau Secretary"
+          membre_nomme_par_le_president_de_l_assemblee_nationale:
+            label: "Member appointed by the President of the National Assembly"
+          ministre:
+            label: "Minister"
+          membre_de_droit:
+            label: "Ex officio member"
+          membre_de_droit_president_de_la_commission_de_la_defense:
+            label: "Ex officio member (President of the Defense Committee)"
+          president_rapporteur:
+            label: "President-Rapporteur"
+          president_de_l_assemblee_nationale:
+            label: "President of the National Assembly"
+          president_de_droit:
+            label: "Ex officio President"
+          juge_suppleant:
+            label: "Substitute Judge"
+          membre_rattache:
+            label: "Attached member"
+          premier_vice_president:
+            label: "First Vice-President"
+          ministre_delegue:
+            label: "Minister Delegate"
+          juge_titulaire:
+            label: "Titular Judge"
+          membre_de_droit_president_de_la_commission_des_lois:
+            label: "Ex officio member (President of the Law Committee)"
+          rapporteur_general:
+            label: "General Rapporteur"
+          secretaire_d_age:
+            label: "Secretary by age"
+          ministre_d_etat:
+            label: "Minister of State"
+          president_executif:
+            label: "Executive President"
+          tresorier:
+            label: "Treasurer"
+          rapporteur_thematique:
+            label: "Thematic Rapporteur"
+          vice_presidents_de_l_assemblee_nationale:
+            label: "Vice-Presidents of the National Assembly"
+          vice_president_delegue:
+            label: "Delegated Vice-President"
+          secretaire_general_adjoint:
+            label: "Deputy Secretary General"
+          membre_de_droit_representant_de_la_commission_des_lois:
+            label: "Ex officio member (Representative of the Law Committee)"
+          premier_ministre:
+            label: "Prime Minister"
+          presidents_des_commissions_permanentes:
+            label: "Presidents of Permanent Committees"
+          president_d_age:
+            label: "President by age"
+          garde_des_sceaux:
+            label: "Keeper of the Seals"
+          membre_designe_par_les_groupes:
+            label: "Member designated by groups"
+          questeur:
+            label: "Quaestor"
+          membre_de_droit_representant_de_la_commission_de_la_defense:
+            label: "Ex officio member (Representative of the Defense Committee)"
+          vice_president_co_rapporteur:
+            label: "Vice-President, Co-Rapporteur"
+          membre_de_droit_representant_de_la_commission_des_finances:
+            label: "Ex officio member (Representative of the Finance Committee)"
+          tresorier_adjoint:
+            label: "Assistant Treasurer"
+          representant_du_president_de_groupe:
+            label: "Representative of the Group President"
+          president_delegue:
+            label: "Delegated President"
+          deuxieme_vice_president:
+            label: "Second Vice-President"
+          membre_nomme_par_le_president_du_senat:
+            label: "Member appointed by the President of the Senate"
+          membre_de_droit_president_de_la_commission_des_affaires_sociales:
+            label: "Ex officio member (President of the Social Affairs Committee)"
+          rapporteur_general_de_la_commission_des_affaires_sociales:
+            label: "General Rapporteur of the Social Affairs Committee"
+          membre_de_droit_representant_de_la_commission_des_affaires_etrangeres:
+            label: "Ex officio member (Representative of the Foreign Affairs Committee)"
+          secretaire_general:
+            label: "Secretary General"
+          membre_de_droit_rapporteur_du_projet_de_loi_de_financement_de_la_sec_sociale:
+            label: "Ex officio member (Rapporteur of the Social Security Financing Bill)"
+          membre_de_droit_representante_de_la_commission_des_affaires_culturelles:
+            label: "Ex officio member (Representative of the Cultural Affairs Committee)"
+          chef_de_la_delegation_de_l_assemblee_nationale:
+            label: "Head of the National Assembly Delegation"
+          membre_de_droit_president_de_la_commission_des_affaires_culturelles:
+            label: "Ex officio member (President of the Cultural Affairs Committee)"
+          president_de_groupe:
+            label: "Group President"
+          membre_de_droit_president_de_la_commission_des_affaires_etrangeres:
+            label: "Ex officio member (President of the Foreign Affairs Committee)"
+          president_de_la_republique:
+            label: "President of the Republic"
+          membre_de_droit_representant_de_la_commission_des_affaires_economiques:
+            label: "Ex officio member (Representative of the Economic Affairs Committee)"
+          rapporteur_generale_de_la_commission_des_finances:
+            label: "General Rapporteur of the Finance Committee"
+          rapporteur_suppleant:
+            label: "Substitute Rapporteur"
+          president_de_la_commission_des_affaires_europeennes:
+            label: "President of the European Affairs Committee"
+          membre_de_droit_representant_de_la_commission_des_affaires_sociales:
+            label: "Ex officio member (Representative of the Social Affairs Committee)"
+          membre_associe:
+            label: "Associate member"
+          president_delegue_pour_l_ueo:
+            label: "Delegated President for the WEU"

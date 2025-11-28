@@ -74,151 +74,151 @@ fr:
           2: "Adresse publiée de circonscription"
       an/term:
         capacities:
-          - code: "membre"
+          membre:
             label: "Membre"
-          - code: "en_mission"
+          en_mission:
             label: "en mission"
-          - code: "titulaire"
+          titulaire:
             label: "Titulaire"
-          - code: "secretaire"
+          secretaire:
             label: "Secrétaire"
-          - code: "depute_non_inscrit"
+          depute_non_inscrit:
             label: "Député non-inscrit"
-          - code: "senateur"
+          senateur:
             label: "Sénateur"
-          - code: "co_president"
+          co_president:
             label: "Co-Président"
-          - code: "autre_membre_du_bureau"
+          autre_membre_du_bureau:
             label: "Autre membre du Bureau"
-          - code: "rapporteur"
+          rapporteur:
             label: "Rapporteur"
-          - code: "suppleant"
+          suppleant:
             label: "Suppléant"
-          - code: "haut_commissaire"
+          haut_commissaire:
             label: "Haut-commissaire"
-          - code: "co_rapporteur"
+          co_rapporteur:
             label: "Co-rapporteur"
-          - code: "vice_president"
+          vice_president:
             label: "Vice-Président"
-          - code: "president"
+          president:
             label: "Président"
-          - code: "membre_apparente"
+          membre_apparente:
             label: "Membre apparenté"
-          - code: "secretaire_d_etat"
+          secretaire_d_etat:
             label: "Secrétaire d'État"
-          - code: "rapporteur_special"
+          rapporteur_special:
             label: "Rapporteur spécial"
-          - code: "membre_de_droit_du_bureau"
+          membre_de_droit_du_bureau:
             label: "Membre de droit du Bureau"
-          - code: "secretaire_du_bureau"
+          secretaire_du_bureau:
             label: "Secrétaire du Bureau"
-          - code: "membre_nomme_par_le_president_de_l_assemblee_nationale"
+          membre_nomme_par_le_president_de_l_assemblee_nationale:
             label: "Membre nommé par le Président de l'Assemblée nationale"
-          - code: "ministre"
+          ministre:
             label: "Ministre"
-          - code: "membre_de_droit"
+          membre_de_droit:
             label: "Membre de droit"
-          - code: "membre_de_droit_president_de_la_commission_de_la_defense"
+          membre_de_droit_president_de_la_commission_de_la_defense:
             label: "Membre de droit (Président de la commission de la défense)"
-          - code: "president_rapporteur"
+          president_rapporteur:
             label: "Président-rapporteur"
-          - code: "president_de_l_assemblee_nationale"
+          president_de_l_assemblee_nationale:
             label: "Président de l'Assemblée nationale"
-          - code: "president_de_droit"
+          president_de_droit:
             label: "Président de droit"
-          - code: "juge_suppleant"
+          juge_suppleant:
             label: "Juge suppléant"
-          - code: "membre_rattache"
+          membre_rattache:
             label: "Membre rattaché"
-          - code: "premier_vice_president"
+          premier_vice_president:
             label: "Premier Vice-Président"
-          - code: "ministre_delegue"
+          ministre_delegue:
             label: "Ministre délégué"
-          - code: "juge_titulaire"
+          juge_titulaire:
             label: "Juge titulaire"
-          - code: "membre_de_droit_president_de_la_commission_des_lois"
+          membre_de_droit_president_de_la_commission_des_lois:
             label: "Membre de droit (Président de la commission des lois)"
-          - code: "rapporteur_general"
+          rapporteur_general:
             label: "Rapporteur général"
-          - code: "secretaire_d_age"
+          secretaire_d_age:
             label: "Secrétaire d'âge"
-          - code: "ministre_d_etat"
+          ministre_d_etat:
             label: "Ministre d'État"
-          - code: "president_executif"
+          president_executif:
             label: "Président exécutif"
-          - code: "tresorier"
+          tresorier:
             label: "Trésorier"
-          - code: "rapporteur_thematique"
+          rapporteur_thematique:
             label: "Rapporteur thématique"
-          - code: "vice_presidents_de_l_assemblee_nationale"
+          vice_presidents_de_l_assemblee_nationale:
             label: "Vice-Présidents de l'Assemblée nationale"
-          - code: "vice_president_delegue"
+          vice_president_delegue:
             label: "Vice-Président délégué"
-          - code: "secretaire_general_adjoint"
+          secretaire_general_adjoint:
             label: "Secrétaire général-adjoint"
-          - code: "membre_de_droit_representant_de_la_commission_des_lois"
+          membre_de_droit_representant_de_la_commission_des_lois:
             label: "Membre de droit (Représentant de la commission des lois)"
-          - code: "premier_ministre"
+          premier_ministre:
             label: "Premier ministre"
-          - code: "presidents_des_commissions_permanentes"
+          presidents_des_commissions_permanentes:
             label: "Présidents des commissions permanentes"
-          - code: "president_d_age"
+          president_d_age:
             label: "Président d'âge"
-          - code: "garde_des_sceaux"
+          garde_des_sceaux:
             label: "Garde des sceaux"
-          - code: "membre_designe_par_les_groupes"
+          membre_designe_par_les_groupes:
             label: "Membre désigné par les groupes"
-          - code: "questeur"
+          questeur:
             label: "Questeur"
-          - code: "membre_de_droit_representant_de_la_commission_de_la_defense"
+          membre_de_droit_representant_de_la_commission_de_la_defense:
             label: "Membre de droit (Représentant de la commission de la défense)"
-          - code: "vice_president_co_rapporteur"
+          vice_president_co_rapporteur:
             label: "Vice-président, co-rapporteur"
-          - code: "membre_de_droit_representant_de_la_commission_des_finances"
+          membre_de_droit_representant_de_la_commission_des_finances:
             label: "Membre de droit (Représentant de la commission des finances)"
-          - code: "tresorier_adjoint"
+          tresorier_adjoint:
             label: "Trésorier adjoint"
-          - code: "representant_du_president_de_groupe"
+          representant_du_president_de_groupe:
             label: "Représentant du président de groupe"
-          - code: "president_delegue"
+          president_delegue:
             label: "Président délégué"
-          - code: "deuxieme_vice_president"
+          deuxieme_vice_president:
             label: "Deuxième Vice-Président"
-          - code: "membre_nomme_par_le_president_du_senat"
+          membre_nomme_par_le_president_du_senat:
             label: "Membre nommé par le Président du Sénat"
-          - code: "membre_de_droit_president_de_la_commission_des_affaires_sociales"
+          membre_de_droit_president_de_la_commission_des_affaires_sociales:
             label: "Membre de droit (Président de la commission des affaires sociales)"
-          - code: "rapporteur_general_de_la_commission_des_affaires_sociales"
+          rapporteur_general_de_la_commission_des_affaires_sociales:
             label: "Rapporteur général de la commission des affaires sociales"
-          - code: "membre_de_droit_representant_de_la_commission_des_affaires_etrangeres"
+          membre_de_droit_representant_de_la_commission_des_affaires_etrangeres:
             label: "Membre de droit (Représentant de la commission des affaires étrangères)"
-          - code: "secretaire_general"
+          secretaire_general:
             label: "Secrétaire général"
-          - code: "membre_de_droit_rapporteur_du_projet_de_loi_de_financement_de_la_sec_sociale"
+          membre_de_droit_rapporteur_du_projet_de_loi_de_financement_de_la_sec_sociale:
             label: "Membre de droit (Rapporteur du projet de loi de financement de la séc. sociale)"
-          - code: "membre_de_droit_representante_de_la_commission_des_affaires_culturelles"
+          membre_de_droit_representante_de_la_commission_des_affaires_culturelles:
             label: "Membre de droit (Représentante de la commission des affaires culturelles)"
-          - code: "chef_de_la_delegation_de_l_assemblee_nationale"
+          chef_de_la_delegation_de_l_assemblee_nationale:
             label: "Chef de la délégation de l'Assemblée nationale"
-          - code: "membre_de_droit_president_de_la_commission_des_affaires_culturelles"
+          membre_de_droit_president_de_la_commission_des_affaires_culturelles:
             label: "Membre de droit (Président de la commission des affaires culturelles)"
-          - code: "president_de_groupe"
+          president_de_groupe:
             label: "Président de groupe"
-          - code: "membre_de_droit_president_de_la_commission_des_affaires_etrangeres"
+          membre_de_droit_president_de_la_commission_des_affaires_etrangeres:
             label: "Membre de droit (Président de la commission des affaires étrangères)"
-          - code: "president_de_la_republique"
+          president_de_la_republique:
             label: "Président de la République"
-          - code: "membre_de_droit_representant_de_la_commission_des_affaires_economiques"
+          membre_de_droit_representant_de_la_commission_des_affaires_economiques:
             label: "Membre de droit (Représentant de la commission des affaires économiques)"
-          - code: "rapporteur_generale_de_la_commission_des_finances"
+          rapporteur_generale_de_la_commission_des_finances:
             label: "Rapporteur générale de la commission des finances"
-          - code: "rapporteur_suppleant"
+          rapporteur_suppleant:
             label: "Rapporteur suppléant"
-          - code: "president_de_la_commission_des_affaires_europeennes"
+          president_de_la_commission_des_affaires_europeennes:
             label: "Président de la commission des affaires européennes"
-          - code: "membre_de_droit_representant_de_la_commission_des_affaires_sociales"
+          membre_de_droit_representant_de_la_commission_des_affaires_sociales:
             label: "Membre de droit (Représentant de la commission des affaires sociales)"
-          - code: "membre_associe"
+          membre_associe:
             label: "Membre associé"
-          - code: "president_delegue_pour_l_ueo"
+          president_delegue_pour_l_ueo:
             label: "Président délégué pour l'UEO"
