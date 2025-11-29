@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_24_095002) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_27_112234) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -96,6 +96,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_24_095002) do
     t.boolean "unique_per_date", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_an_body_types_on_code", unique: true
+  end
+
+  create_table "an_corrections", id: :uuid, default: -> { "uuidv7()" }, force: :cascade do |t|
+    t.bigint "correctable_id", null: false
+    t.string "correctable_type", null: false
+    t.jsonb "correction_changes", default: {}, null: false
+    t.string "correction_type", default: "automatic", null: false
+    t.datetime "created_at", null: false
+    t.string "reason", null: false
+    t.string "session_id"
+    t.datetime "updated_at", null: false
+    t.index ["correctable_type", "correctable_id", "created_at"], name: "idx_corrections_on_correctable_and_time"
+    t.index ["correctable_type", "correctable_id"], name: "index_an_corrections_on_correctable"
+    t.index ["correction_changes"], name: "index_an_corrections_on_correction_changes", using: :gin
+    t.index ["created_at"], name: "index_an_corrections_on_created_at"
+    t.index ["session_id"], name: "index_an_corrections_on_session_id"
+    t.check_constraint "correctable_type::text = ANY (ARRAY['An::Stakeholder'::character varying, 'An::Term'::character varying, 'An::Body'::character varying]::text[])", name: "check_correctable_type"
   end
 
   create_table "an_countries", force: :cascade do |t|

@@ -9,6 +9,7 @@ RSpec.describe An::Term, type: :model do
     it { should have_many(:subordinate_terms).class_name('An::Term').with_foreign_key(:deputy_term_id).dependent(:destroy) }
     it { should have_many(:an_substitutes).class_name('An::Substitute').with_foreign_key(:an_term_id).inverse_of(:an_term).dependent(:destroy) }
     it { should have_one(:an_body_type).through(:an_body) }
+    it { should have_many(:corrections).class_name('An::Correction').dependent(:destroy) }
   end
 
   describe 'scopes' do

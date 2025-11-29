@@ -6,6 +6,7 @@ class An::Term < ApplicationRecord
   has_many :subordinate_terms, class_name: "An::Term", foreign_key: :deputy_term_id, dependent: :destroy
   has_many :an_substitutes, class_name: "An::Substitute", foreign_key: :an_term_id, inverse_of: :an_term, dependent: :destroy
   has_one :an_body_type, through: :an_body
+  has_many :corrections, as: :correctable, class_name: "An::Correction", dependent: :destroy
 
   scope :main, -> { where(main: true) }
   scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }

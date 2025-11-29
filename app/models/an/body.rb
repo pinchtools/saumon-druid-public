@@ -9,6 +9,7 @@ class An::Body < ApplicationRecord
                           foreign_key: :an_body_id,
                           association_foreign_key: :an_country_id,
                           join_table: "an_bodies_countries"
+  has_many :corrections, as: :correctable, class_name: "An::Correction", dependent: :destroy
 
   validates :uid, presence: true, uniqueness: true
   validates :an_body_type_id, presence: true

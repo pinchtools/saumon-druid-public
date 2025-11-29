@@ -5,6 +5,7 @@ RSpec.describe An::Stakeholder, type: :model do
     it { should have_many(:an_stakeholder_addresses).class_name('An::StakeholderAddress').with_foreign_key(:an_stakeholder_id).dependent(:destroy) }
     it { should have_many(:an_terms).class_name('An::Term').with_foreign_key(:an_stakeholder_id).dependent(:destroy) }
     it { should have_many(:an_substitutes).class_name('An::Substitute').with_foreign_key(:an_stakeholder_id).inverse_of(:an_stakeholder).dependent(:destroy) }
+    it { should have_many(:corrections).class_name('An::Correction').dependent(:destroy) }
   end
 
   describe 'validations' do

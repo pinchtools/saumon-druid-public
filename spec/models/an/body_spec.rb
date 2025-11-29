@@ -8,6 +8,7 @@ RSpec.describe An::Body, type: :model do
     it { should have_many(:an_terms).class_name('An::Term').with_foreign_key(:an_body_id).dependent(:destroy) }
     it { should have_many(:constituency_terms).class_name('An::Term').with_foreign_key(:constituency_id).dependent(:destroy) }
     it { should have_and_belong_to_many(:an_countries).class_name('An::Country') }
+    it { should have_many(:corrections).class_name('An::Correction').dependent(:destroy) }
   end
 
   describe 'validations' do

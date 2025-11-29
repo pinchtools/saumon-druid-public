@@ -2,6 +2,7 @@ class An::Stakeholder < ApplicationRecord
   has_many :an_stakeholder_addresses, class_name: "An::StakeholderAddress", foreign_key: :an_stakeholder_id, inverse_of: :an_stakeholder, dependent: :destroy
   has_many :an_terms, class_name: "An::Term", foreign_key: :an_stakeholder_id, inverse_of: :an_stakeholder, dependent: :destroy
   has_many :an_substitutes, class_name: "An::Substitute", foreign_key: :an_stakeholder_id, inverse_of: :an_stakeholder, dependent: :destroy
+  has_many :corrections, as: :correctable, class_name: "An::Correction", dependent: :destroy
 
   validates :uid, presence: true, uniqueness: true
   validates :first_name, :last_name, presence: true
@@ -40,7 +41,7 @@ class An::Stakeholder < ApplicationRecord
     Arel.sql(template % sanitized_values)
   end
   def build_search_text
-    name = [first_name, last_name].join(" ")
+    name = [ first_name, last_name ].join(" ")
     current_main_position = an_terms.main.active.by_hierarchy.first&.full_label
     other_active_positions = an_terms.main.active.by_hierarchy.offset(1).limit(3).map(&:full_label).join(" ")
     past_positions = an_terms.main.past.by_hierarchy.limit(2).map(&:full_label).join(" ")
@@ -57,7 +58,7 @@ class An::Stakeholder < ApplicationRecord
   def update_fts_search
     self.search_identity_fts = ActiveRecord::Base.connection.execute(
       "SELECT to_tsvector('french', #{ActiveRecord::Base.connection.quote(build_search_text)})"
-    ).first['to_tsvector']
+    ).first["to_tsvector"]
   end
 
   def update_trigram_search
