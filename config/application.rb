@@ -39,7 +39,7 @@ module SaumonDruid
       g.test_framework :rspec
     end
 
-    config.i18n.available_locales = [:en, :fr]
+    config.i18n.available_locales = [ :en, :fr ]
     config.i18n.default_locale = :fr
   end
 end
