@@ -82,4 +82,8 @@ RSpec.configure do |config|
       with.library :rails
     end
   end
+
+  config.before :all do
+    I18n.locale = :en
+  end
 end
