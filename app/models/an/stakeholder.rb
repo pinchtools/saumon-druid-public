@@ -7,9 +7,6 @@ class An::Stakeholder < ApplicationRecord
   validates :uid, presence: true, uniqueness: true
   validates :first_name, :last_name, presence: true
 
-  before_save :update_fts_search
-  before_save :update_trigram_search
-
   scope :fts_search, ->(query) {
     where("search_identity_fts @@ plainto_tsquery('french', ?)", query)
       .order(safe_sql_order("ts_rank(search_identity_fts, plainto_tsquery('french', %s)) DESC", query))
@@ -53,6 +50,11 @@ class An::Stakeholder < ApplicationRecord
       past_positions,
       occupation
     ].flatten.compact.join(" ")
+  end
+
+  def sync_search_fields
+    update_fts_search
+    update_trigram_search
   end
 
   def update_fts_search
