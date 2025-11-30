@@ -429,7 +429,7 @@
   institution: parliament
   group: internal_leadership_body
   selection: appointment
-  hierarchy_level: 3
+  hierarchy_level: 1
 -
   code: "GOUVERNEMENT"
   unique_per_date: true
@@ -477,7 +477,7 @@
   institution: parliament
   group: coordination_body
   selection: appointment
-  hierarchy_level: 1
+  hierarchy_level: 2
 -
   code: "DELEGSENAT"
   unique_per_date: true
