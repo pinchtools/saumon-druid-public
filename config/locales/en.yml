@@ -222,3 +222,5 @@ en:
             label: "Associate member"
           president_delegue_pour_l_ueo:
             label: "Delegated President for the WEU"
+          president-du-senat:
+            label: "President of the Senate"

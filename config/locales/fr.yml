@@ -83,25 +83,41 @@ fr:
           secretaire:
             label: "Secrétaire"
           depute_non_inscrit:
-            label: "Député non-inscrit"
+            label:
+              male: "Député non-inscrit"
+              female: "Députée non-inscrite"
           senateur:
-            label: "Sénateur"
+            label:
+              male: "Sénateur"
+              female: "Sénatrice"
           co_president:
-            label: "Co-Président"
+            label:
+              male: "Co-Président"
+              female: "Co-Présidente"
           autre_membre_du_bureau:
             label: "Autre membre du Bureau"
           rapporteur:
-            label: "Rapporteur"
+            label:
+              male: "Rapporteur"
+              female: "Rapporteure"
           suppleant:
-            label: "Suppléant"
+            label:
+              male: "Suppléant"
+              female: "Suppléante"
           haut_commissaire:
             label: "Haut-commissaire"
           co_rapporteur:
-            label: "Co-rapporteur"
+            label:
+              male: "Co-rapporteur"
+              female: "Co-rapporteure"
           vice_president:
-            label: "Vice-Président"
+            label:
+              male: "Vice-Président"
+              female: "Vice-Présidente"
           president:
-            label: "Président"
+            label:
+              male: "Président"
+              female: "Présidente"
           membre_apparente:
             label: "Membre apparenté"
           secretaire_d_etat:
@@ -121,104 +137,184 @@ fr:
           membre_de_droit_president_de_la_commission_de_la_defense:
             label: "Membre de droit (Président de la commission de la défense)"
           president_rapporteur:
-            label: "Président-rapporteur"
+            label:
+              male: "Président-rapporteur"
+              female: "Présidente-rapporteure"
           president_de_l_assemblee_nationale:
-            label: "Président de l'Assemblée nationale"
+            label:
+              male: "Président de l'Assemblée nationale"
+              female: "Présidente de l'Assemblée nationale"
           president_de_droit:
-            label: "Président de droit"
+            label:
+              male: "Président de droit"
+              female: "Présidente de droit"
           juge_suppleant:
-            label: "Juge suppléant"
+            label:
+              male: "Juge suppléant"
+              female: "Juge suppléante"
           membre_rattache:
             label: "Membre rattaché"
           premier_vice_president:
-            label: "Premier Vice-Président"
+            label:
+              male: "Premier Vice-Président"
+              female: "Première Vice-Présidente"
           ministre_delegue:
-            label: "Ministre délégué"
+            label:
+              male: "Ministre délégué"
+              female: "Ministre déléguée"
           juge_titulaire:
             label: "Juge titulaire"
           membre_de_droit_president_de_la_commission_des_lois:
             label: "Membre de droit (Président de la commission des lois)"
           rapporteur_general:
-            label: "Rapporteur général"
+            label:
+              male: "Rapporteur général"
+              female: "Rapporteure générale"
           secretaire_d_age:
             label: "Secrétaire d'âge"
           ministre_d_etat:
             label: "Ministre d'État"
           president_executif:
-            label: "Président exécutif"
+            label:
+              male: "Président exécutif"
+              female: "Présidente exécutive"
           tresorier:
-            label: "Trésorier"
+            label:
+              male: "Trésorier"
+              female: "Trésorière"
           rapporteur_thematique:
-            label: "Rapporteur thématique"
+            label:
+              male: "Rapporteur thématique"
+              female: "Rapporteure thématique"
           vice_presidents_de_l_assemblee_nationale:
-            label: "Vice-Présidents de l'Assemblée nationale"
+            label:
+              male: "Vice-Présidents de l'Assemblée nationale"
+              female: "Vice-Présidentes de l'Assemblée nationale"
           vice_president_delegue:
-            label: "Vice-Président délégué"
+            label:
+              male: "Vice-Président délégué"
+              female: "Vice-Présidente déléguée"
           secretaire_general_adjoint:
             label: "Secrétaire général-adjoint"
           membre_de_droit_representant_de_la_commission_des_lois:
             label: "Membre de droit (Représentant de la commission des lois)"
           premier_ministre:
-            label: "Premier ministre"
+            label:
+              male: "Premier ministre"
+              female: "Première ministre"
           presidents_des_commissions_permanentes:
-            label: "Présidents des commissions permanentes"
+            label:
+              male: "Présidents des commissions permanentes"
+              female: "Présidentes des commissions permanentes"
           president_d_age:
-            label: "Président d'âge"
+            label:
+              male: "Président d'âge"
+              female: "Présidente d'âge"
           garde_des_sceaux:
             label: "Garde des sceaux"
           membre_designe_par_les_groupes:
             label: "Membre désigné par les groupes"
           questeur:
-            label: "Questeur"
+            label:
+              male: "Questeur"
+              female: "Questeuse"
           membre_de_droit_representant_de_la_commission_de_la_defense:
-            label: "Membre de droit (Représentant de la commission de la défense)"
+            label:
+              male: "Membre de droit (Représentant de la commission de la défense)"
+              female: "Membre de droit (Représentante de la commission de la défense)"
           vice_president_co_rapporteur:
-            label: "Vice-président, co-rapporteur"
+            label:
+              male: "Vice-président, co-rapporteur"
+              female: "Vice-présidente, co-rapporteure"
           membre_de_droit_representant_de_la_commission_des_finances:
-            label: "Membre de droit (Représentant de la commission des finances)"
+            label:
+              male: "Membre de droit (Représentant de la commission des finances)"
+              female: "Membre de droit (Représentante de la commission des finances)"
           tresorier_adjoint:
-            label: "Trésorier adjoint"
+            label:
+              male: "Trésorier adjoint"
+              female: "Trésorière adjointe"
           representant_du_president_de_groupe:
-            label: "Représentant du président de groupe"
+            label:
+              male: "Représentant du président de groupe"
+              female: "Représentante du président de groupe"
           president_delegue:
-            label: "Président délégué"
+            label:
+              male: "Président délégué"
+              female: "Présidente déléguée"
           deuxieme_vice_president:
-            label: "Deuxième Vice-Président"
+            label:
+              male: "Deuxième Vice-Président"
+              female: "Deuxième Vice-Présidente"
           membre_nomme_par_le_president_du_senat:
             label: "Membre nommé par le Président du Sénat"
           membre_de_droit_president_de_la_commission_des_affaires_sociales:
-            label: "Membre de droit (Président de la commission des affaires sociales)"
+            label:
+              male: "Membre de droit (Président de la commission des affaires sociales)"
+              female: "Membre de droit (Présidente de la commission des affaires sociales)"
           rapporteur_general_de_la_commission_des_affaires_sociales:
-            label: "Rapporteur général de la commission des affaires sociales"
+            label:
+              male: "Rapporteur général de la commission des affaires sociales"
+              female: "Rapporteure générale de la commission des affaires sociales"
           membre_de_droit_representant_de_la_commission_des_affaires_etrangeres:
-            label: "Membre de droit (Représentant de la commission des affaires étrangères)"
+            label:
+              male: "Membre de droit (Représentant de la commission des affaires étrangères)"
+              female: "Membre de droit (Représentante de la commission des affaires étrangères)"
           secretaire_general:
-            label: "Secrétaire général"
+            label:
+              male: "Secrétaire général"
+              female: "Secrétaire générale"
           membre_de_droit_rapporteur_du_projet_de_loi_de_financement_de_la_sec_sociale:
-            label: "Membre de droit (Rapporteur du projet de loi de financement de la séc. sociale)"
+            label:
+              male: "Membre de droit (Rapporteur du projet de loi de financement de la séc. sociale)"
+              female: "Membre de droit (Rapporteure du projet de loi de financement de la séc. sociale)"
           membre_de_droit_representante_de_la_commission_des_affaires_culturelles:
             label: "Membre de droit (Représentante de la commission des affaires culturelles)"
           chef_de_la_delegation_de_l_assemblee_nationale:
             label: "Chef de la délégation de l'Assemblée nationale"
           membre_de_droit_president_de_la_commission_des_affaires_culturelles:
-            label: "Membre de droit (Président de la commission des affaires culturelles)"
+            label:
+              male: "Membre de droit (Président de la commission des affaires culturelles)"
+              female: "Membre de droit (Présidente de la commission des affaires culturelles)"
           president_de_groupe:
-            label: "Président de groupe"
+            label:
+              male: "Président de groupe"
+              female: "Présidente de groupe"
           membre_de_droit_president_de_la_commission_des_affaires_etrangeres:
-            label: "Membre de droit (Président de la commission des affaires étrangères)"
+            label:
+              male: "Membre de droit (Président de la commission des affaires étrangères)"
+              female: "Membre de droit (Présidente de la commission des affaires étrangères)"
           president_de_la_republique:
-            label: "Président de la République"
+            label:
+              male: "Président de la République"
+              female: "Présidente de la République"
           membre_de_droit_representant_de_la_commission_des_affaires_economiques:
-            label: "Membre de droit (Représentant de la commission des affaires économiques)"
+            label:
+              male: "Membre de droit (Représentant de la commission des affaires économiques)"
+              female: "Membre de droit (Représentante de la commission des affaires économiques)"
           rapporteur_generale_de_la_commission_des_finances:
-            label: "Rapporteur générale de la commission des finances"
+            label:
+              male: "Rapporteur générale de la commission des finances"
+              female: "Rapporteure générale de la commission des finances"
           rapporteur_suppleant:
-            label: "Rapporteur suppléant"
+            label:
+              male: "Rapporteur suppléant"
+              female: "Rapporteure suppléante"
           president_de_la_commission_des_affaires_europeennes:
-            label: "Président de la commission des affaires européennes"
+            label:
+              male: "Président de la commission des affaires européennes"
+              female: "Présidente de la commission des affaires européennes"
           membre_de_droit_representant_de_la_commission_des_affaires_sociales:
-            label: "Membre de droit (Représentant de la commission des affaires sociales)"
+            label:
+              male: "Membre de droit (Représentant de la commission des affaires sociales)"
+              female: "Membre de droit (Représentante de la commission des affaires sociales)"
           membre_associe:
             label: "Membre associé"
           president_delegue_pour_l_ueo:
-            label: "Président délégué pour l'UEO"
+            label:
+              male: "Président délégué pour l'UEO"
+              female: "Présidente déléguée pour l'UEO"
+          president-du-senat:
+            label:
+              male: "Président du Sénat"
+              female: "Présidente du Sénat"
