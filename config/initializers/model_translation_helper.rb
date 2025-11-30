@@ -6,7 +6,7 @@ module ModelTranslationHelper
     #   humanize("capacities.depute_non_inscrit.label")
     #   humanize(:capacities, :depute_non_inscrit, :label)
     #
-    def humanize(*keys)
+    def humanize(*keys, default: :__not_provided__, gender: nil)
       flat_key =
         if keys.length == 1 && keys.first.is_a?(String)
           keys.first
@@ -20,7 +20,11 @@ module ModelTranslationHelper
         flat_key
       ].join(".")
 
-      I18n.t(i18n_key, default: i18n_fallback(flat_key))
+      if gender && I18n.exists?("#{i18n_key}.#{gender}")
+        i18n_key += ".#{gender}"
+      end
+
+      I18n.t(i18n_key, default: default != :__not_provided__ ? default : i18n_fallback(flat_key))
     end
 
     private
