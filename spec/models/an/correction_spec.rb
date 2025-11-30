@@ -80,9 +80,9 @@ RSpec.describe An::Correction, type: :model do
         }.to change { stakeholder.reload.last_name }.from('OLD').to('NEW')
       end
 
-      it 'triggers callbacks' do
-        expect(stakeholder).to receive(:update_fts_search)
-        expect(stakeholder).to receive(:update_trigram_search)
+      it 'does not trigger callbacks' do
+        expect(stakeholder).not_to receive(:update_fts_search)
+        expect(stakeholder).not_to receive(:update_trigram_search)
 
         create(:an_correction, correctable: stakeholder, correction_changes: correction_changes)
       end
