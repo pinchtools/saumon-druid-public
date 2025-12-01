@@ -346,6 +346,14 @@ RSpec.describe SaumonNet::StakeholderImportService do
         end
       end
     end
+
+    context 'correction detection' do
+      it 'calls detect_and_apply_corrections for each term' do
+        expect(service).to receive(:detect_and_apply_corrections).once
+
+        service.send(:upsert_terms, stakeholder, entity_data)
+      end
+    end
   end
 
   describe 'helper methods' do
@@ -436,6 +444,117 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
         result = service.send(:parse_date, "invalid-date")
         expect(result).to be_nil
+      end
+    end
+  end
+
+  describe '#perform_additional_operations' do
+    let(:stakeholder) { create(:an_stakeholder) }
+    let(:entity_data) do
+      {
+        "file_details" => {
+          "acteur" => {
+            "adresses" => {},
+            "mandats" => {}
+          }
+        }
+      }
+    end
+
+    before do
+      allow(service).to receive(:upsert_stakeholder_addresses)
+      allow(service).to receive(:upsert_terms)
+    end
+
+    context 'when record has sync_search_fields method' do
+      it 'calls sync_search_fields on the record' do
+        expect(stakeholder).to receive(:sync_search_fields)
+
+        service.send(:perform_additional_operations, stakeholder, entity_data, :create)
+      end
+    end
+
+    context 'when record does not have sync_search_fields method' do
+      let(:record_without_sync) { double('Record', persisted?: true) }
+
+      it 'does not raise an error' do
+        expect {
+          service.send(:perform_additional_operations, record_without_sync, entity_data, :create)
+        }.not_to raise_error
+      end
+    end
+
+    context 'when record is not persisted' do
+      let(:unpersisted_stakeholder) { build(:an_stakeholder) }
+
+      it 'does not call sync_search_fields' do
+        expect(unpersisted_stakeholder).not_to receive(:sync_search_fields)
+
+        service.send(:perform_additional_operations, unpersisted_stakeholder, entity_data, :create)
+      end
+    end
+  end
+
+  describe '#detect_and_apply_corrections' do
+    let(:stakeholder) { create(:an_stakeholder) }
+    let(:term) { create(:an_term, an_stakeholder: stakeholder) }
+    let(:mandate_data) { { "typeOrgane" => "SENAT" } }
+
+    context 'when corrections are detected' do
+      let(:mock_detector) { instance_double(An::CorrectionDetector) }
+      let(:corrections_data) do
+        [
+          {
+            correction_changes: {
+              "capacity" => {
+                "before" => "president",
+                "after" => "president-du-senat"
+              }
+            },
+            reason: "Test correction reason",
+            correction_type: "automatic",
+            session_id: service.session_id
+          }
+        ]
+      end
+
+      before do
+        allow(An::CorrectionDetector).to receive(:new).
+          with(term, mandate_data, session_id: service.session_id).
+          and_return(mock_detector)
+        allow(mock_detector).to receive(:detect).and_return(corrections_data)
+      end
+
+      it 'creates correction records' do
+        expect {
+          service.send(:detect_and_apply_corrections, term, mandate_data)
+        }.to change(An::Correction, :count).by(1)
+
+        correction = An::Correction.last
+        expect(correction.correctable).to eq(term)
+        expect(correction.correction_changes).to eq({
+          "capacity" => {
+            "before" => "president",
+            "after" => "president-du-senat"
+          }
+        })
+        expect(correction.reason).to eq("Test correction reason")
+        expect(correction.correction_type).to eq("automatic")
+      end
+    end
+
+    context 'when no corrections are detected' do
+      let(:mock_detector) { instance_double(An::CorrectionDetector) }
+
+      before do
+        allow(An::CorrectionDetector).to receive(:new).with(term, mandate_data, session_id: service.session_id).and_return(mock_detector)
+        allow(mock_detector).to receive(:detect).and_return([])
+      end
+
+      it 'does not create any correction records' do
+        expect {
+          service.send(:detect_and_apply_corrections, term, mandate_data)
+        }.not_to change(An::Correction, :count)
       end
     end
   end

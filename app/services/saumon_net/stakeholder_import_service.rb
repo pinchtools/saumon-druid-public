@@ -56,6 +56,28 @@ module SaumonNet
 
       upsert_stakeholder_addresses(record, entity_data)
       upsert_terms(record, entity_data)
+
+      record.sync_search_fields if record.respond_to?(:sync_search_fields)
+    end
+
+    def detect_and_apply_corrections(record, entity_data)
+      detector = An::CorrectionDetector.new(record, entity_data, session_id: @session_id)
+      corrections_data = detector.detect
+
+      corrections_data.each do |attrs|
+        correction = An::Correction.create(correctable: record, **attrs)
+
+        unless correction.persisted?
+          logger.warn(
+            "Failed to create correction for #{record.class.name}##{record.id}: " \
+            "#{correction.errors.full_messages.join(', ')}",
+            component: SaumonNet::COMPONENT,
+            session_id: @session_id,
+            record_id: record.id,
+            correction_errors: correction.errors.full_messages
+          )
+        end
+      end
     end
 
     def extract_file_uid(acteur_data)
@@ -229,6 +251,7 @@ module SaumonNet
         })
       end
 
+      detect_and_apply_corrections(term, mandate_data)
       upsert_substitutes(term, mandate_data)
     rescue => e
       logger.error({
