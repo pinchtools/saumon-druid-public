@@ -1,0 +1,50 @@
+# Term Correction Rules
+# =====================
+# Automatically detected corrections for An::Term records
+#
+# Each correction rule has:
+#   - name: Unique identifier for the correction
+#   - conditions: Criteria that must match for correction to apply
+#     - api_data: Conditions on API response data (hash access)
+#     - record: Conditions on the ActiveRecord model (method calls)
+#   - correction: The correction to apply
+#     - field: The field to correct
+#     - before: Expected current value (use null for nil, blank for blank?)
+#     - after: New value to set
+#     - reason: Human-readable explanation
+
+term_corrections:
+  - name: senate_president_mislabeling
+    conditions:
+      api_data:
+        typeOrgane: "SENAT"
+      record:
+        capacity: "president"
+    correction:
+      field: capacity
+      before: "president"
+      after: "president-du-senat"
+      reason: "President is too generic for Senate president role"
+
+  - name: missing_capacity
+    conditions:
+      record:
+        capacity: blank
+    correction:
+      field: capacity
+      before: null
+      after: "membre"
+      reason: "Missing capacity defaults to member"
+
+  - name: missing_presidency_end_date_hollande
+    conditions:
+      api_data:
+        typeOrgane: "PRESREP"
+      record:
+        end_date: null
+        an_stakeholder.last_name: "Hollande"
+    correction:
+      field: end_date
+      before: null
+      after: "2017-05-14"
+      reason: "Missing end date for François Hollande presidency (2012-2017)"
