@@ -15,12 +15,5 @@ class An::Term < ApplicationRecord
 
   validates :uid, presence: true, uniqueness: true
   validates :an_stakeholder_id, :an_body_id, presence: true
-
-  def full_label
-    [
-      self.class.humanize("capacities.#{capacity}.label"),
-      an_body.label_code,
-      constituency&.label
-    ].compact.join(" ")
-  end
+  validates :label, length: { maximum: 800 }
 end

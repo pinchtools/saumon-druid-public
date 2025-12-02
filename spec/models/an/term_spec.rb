@@ -68,5 +68,6 @@ RSpec.describe An::Term, type: :model do
     it { should validate_uniqueness_of(:uid) }
     it { should validate_presence_of(:an_stakeholder_id) }
     it { should validate_presence_of(:an_body_id) }
+    it { should validate_length_of(:label).is_at_most(800) }
   end
 end

@@ -25,6 +25,7 @@ module SaumonNet
       {
         uid: file_uid,
         civility: identity["civ"],
+        gender: (identity["civ"] == "M.") ? "male" : "female",
         first_name: identity["prenom"],
         last_name: identity["nom"],
         birth_date: parse_date(birth_info["dateNais"]),
@@ -211,7 +212,6 @@ module SaumonNet
       mandate_entries = mandates_data["mandat"]
       return unless mandate_entries.present?
 
-      # Handle both single mandate and array of mandates
       mandate_entries = [ mandate_entries ] unless mandate_entries.is_a?(Array)
 
       mandate_entries.each do |mandate_data|
@@ -281,8 +281,15 @@ module SaumonNet
       capacity = mandate_data.dig("infosQualite", "codeQualite")
       capacity = capacity.parameterize(separator: "_").underscore if capacity.present?
 
+      label = [
+        An::Term.humanize("capacities.#{capacity}.label", default: nil, gender: stakeholder.gender),
+        body&.label_code || body&.label,
+        constituency&.label
+      ].compact.join(" ").presence
+
       {
         uid: mandate_data["uid"],
+        label: label,
         an_stakeholder: stakeholder,
         an_body: body,
         constituency: constituency,

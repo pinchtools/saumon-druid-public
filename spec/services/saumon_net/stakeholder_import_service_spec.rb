@@ -53,6 +53,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
       expect(result).to include(
         uid: "PA721860",
         civility: "M.",
+        gender: "male",
         first_name: "Jean-François",
         last_name: "Cesarini",
         birth_date: Date.parse("1970-09-30"),
@@ -256,6 +257,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
       term = An::Term.last
       expect(term.uid).to eq("PM123456")
+      expect(term.label).to eq("Member CIRCO")
       expect(term.an_stakeholder).to eq(stakeholder)
       expect(term.an_body).to eq(body)
       expect(term.legislature).to eq("15")
