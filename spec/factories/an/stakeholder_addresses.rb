@@ -9,5 +9,6 @@ FactoryBot.define do
     post_code { Faker::Address.postcode }
     city { Faker::Address.city }
     weight { 1 }
+    address_type { "other" }
   end
 end

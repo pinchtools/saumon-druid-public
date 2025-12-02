@@ -190,6 +190,8 @@ module SaumonNet
     end
 
     def map_address_attributes(address_data, stakeholder)
+      type = (address_data["type"].present?) ?
+               An::StakeholderAddress::ADDRESS_TYPES.at(address_data["type"].to_i) : "other"
       {
         uid: address_data["uid"],
         an_stakeholder: stakeholder,
@@ -200,7 +202,7 @@ module SaumonNet
         post_code: address_data["codePostal"],
         city: address_data["ville"],
         weight: address_data["poids"]&.to_i,
-        type: address_data["type"]&.to_i
+        address_type: type
       }
     end
 
