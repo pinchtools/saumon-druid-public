@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_27_112234) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_02_074817) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -155,6 +155,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_112234) do
     t.date "death_date"
     t.string "emails", default: [], array: true
     t.string "first_name"
+    t.string "gender"
     t.string "last_name"
     t.string "occupation"
     t.string "occupation_category"
@@ -198,6 +199,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_112234) do
     t.bigint "deputy_term_id"
     t.datetime "end_date"
     t.string "end_reason"
+    t.string "label", limit: 800
     t.string "legislature"
     t.boolean "main", default: false, null: false
     t.string "origin"
