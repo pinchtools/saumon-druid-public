@@ -39,9 +39,9 @@ class An::Stakeholder < ApplicationRecord
   end
   def build_search_text
     name = [ first_name, last_name ].join(" ")
-    current_main_position = an_terms.main.active.by_hierarchy.first&.full_label
-    other_active_positions = an_terms.main.active.by_hierarchy.offset(1).limit(3).map(&:full_label).join(" ")
-    past_positions = an_terms.main.past.by_hierarchy.limit(2).map(&:full_label).join(" ")
+    current_main_position = an_terms.main.active.by_hierarchy.first&.label
+    other_active_positions = an_terms.main.active.by_hierarchy.offset(1).limit(3).map(&:label).join(" ")
+    past_positions = an_terms.main.past.by_hierarchy.limit(2).map(&:label).join(" ")
 
     [
       3.times.map { name },
