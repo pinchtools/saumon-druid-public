@@ -62,8 +62,11 @@ module SaumonNet
     end
 
     def detect_and_apply_corrections(record, entity_data)
+      # apply corrections at import only if the record is new
+      return unless record.previously_new_record?
+
       detector = An::CorrectionDetector.new(record, entity_data, session_id: @session_id)
-      corrections_data = detector.detect
+      corrections_data = detector.detect_all
 
       corrections_data.each do |attrs|
         correction = An::Correction.create(correctable: record, **attrs)

@@ -1,5 +1,5 @@
 class An::CorrectionDetector
-  delegate :detect, to: :@delegator
+  delegate :detect_all, :detect_one, to: :@delegator
 
   def initialize(record, api_data, session_id:)
     @record = record

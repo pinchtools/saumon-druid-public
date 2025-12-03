@@ -33,15 +33,25 @@ RSpec.describe An::CorrectionDetector do
     end
   end
 
-  describe '#detect' do
+  describe '#detect_all' do
     context 'expect to delegate to a specific detector' do
       it 'delegates to TermCorrectionDetector' do
-        expect(subject.instance_variable_get(:@delegator)).to receive(:detect)
-        subject.detect
+        expect(subject.instance_variable_get(:@delegator)).to receive(:detect_all)
+        subject.detect_all
       end
 
-      it 'returns the result of TermCorrectionDetector#detect' do
-        expect(subject.detect).to be_an(Array)
+      it 'returns the result of TermCorrectionDetector#detect_all' do
+        expect(subject.detect_all).to be_an(Array)
+      end
+    end
+  end
+
+  describe '#detect_one' do
+    context 'expect to delegate to a specific detector' do
+      let(:correction_name) { 'first_correction' }
+      it 'delegates to TermCorrectionDetector' do
+        expect(subject.instance_variable_get(:@delegator)).to receive(:detect_one).with(correction_name)
+        subject.detect_one(correction_name)
       end
     end
   end

@@ -7,7 +7,7 @@ RSpec.describe An::TermCorrectionDetector do
 
   subject { described_class.new(record, api_data, session_id: session_id) }
 
-  describe '#detect' do
+  describe '#detect_all' do
     let(:corrections_config) do
       [
         {
@@ -35,7 +35,7 @@ RSpec.describe An::TermCorrectionDetector do
       let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'applies the correction' do
-        corrections = subject.detect
+        corrections = subject.detect_all
         fix = corrections.first
 
         expect(corrections.size).to eq(1)
@@ -52,7 +52,7 @@ RSpec.describe An::TermCorrectionDetector do
       let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'does not apply the correction' do
-        expect(subject.detect).to be_empty
+        expect(subject.detect_all).to be_empty
       end
     end
 
@@ -61,7 +61,7 @@ RSpec.describe An::TermCorrectionDetector do
       let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
 
       it 'does not apply the correction' do
-        expect(subject.detect).to be_empty
+        expect(subject.detect_all).to be_empty
       end
     end
 
@@ -70,7 +70,7 @@ RSpec.describe An::TermCorrectionDetector do
       let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
 
       it 'does not apply the correction' do
-        corrections = subject.detect
+        corrections = subject.detect_all
 
         expect(corrections).to be_empty
       end
@@ -105,10 +105,84 @@ RSpec.describe An::TermCorrectionDetector do
       let(:api_data) { {} }
 
       it 'applies all matching corrections' do
-        corrections = subject.detect
+        corrections = subject.detect_all
 
         expect(corrections.size).to eq(2)
         expect(corrections.map { |c| c[:correction_changes].keys }.flatten).to contain_exactly('capacity', 'end_date')
+      end
+    end
+  end
+
+  describe '#detect_one' do
+    let(:corrections_config) do
+      [
+        {
+          "name" => "test_correction",
+          "conditions" => {
+            "api_data" => { "typeOrgane" => "SENAT" },
+            "record" => { "capacity" => "president" }
+          },
+          "correction" => {
+            "field" => "capacity",
+            "before" => "president",
+            "after" => "president-du-senat",
+            "reason" => "Test correction reason"
+          }
+        },
+        {
+          "name" => "another_correction",
+          "conditions" => {
+            "record" => { "capacity" => "membre" }
+          },
+          "correction" => {
+            "field" => "capacity",
+            "before" => "membre",
+            "after" => "membre-corrected",
+            "reason" => "Another correction reason"
+          }
+        }
+      ]
+    end
+
+    before do
+      stub_const('An::TermCorrectionDetector::CORRECTIONS_CONFIG', corrections_config)
+    end
+
+    context 'when correction is found by name and conditions match' do
+      let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
+      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
+
+      it 'applies the correction' do
+        fix = subject.detect_one('test_correction')
+
+        expect(fix).not_to be_nil
+        expect(fix[:correction_changes]['capacity']['before']).to eq('president')
+        expect(fix[:correction_changes]['capacity']['after']).to eq('president-du-senat')
+        expect(fix[:reason]).to eq('Test correction reason')
+        expect(fix[:correction_type]).to eq('automatic')
+        expect(fix[:session_id]).to eq(session_id)
+      end
+    end
+
+    context 'when correction is found by name but conditions do not match' do
+      let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'autre') }
+      let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
+
+      it 'returns nil' do
+        result = subject.detect_one('test_correction')
+
+        expect(result).to be_nil
+      end
+    end
+
+    context 'when correction is not found by name' do
+      let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
+      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
+
+      it 'returns nil' do
+        result = subject.detect_one('nonexistent_correction')
+
+        expect(result).to be_nil
       end
     end
   end

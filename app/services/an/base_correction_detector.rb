@@ -7,6 +7,20 @@ class An::BaseCorrectionDetector
     @session_id = session_id
   end
 
+  def detect_all
+    self.class::CORRECTIONS_CONFIG.filter_map do |correction_config|
+      apply_correction(correction_config) if matches_conditions?(correction_config["conditions"])
+    end
+  end
+
+  def detect_one(name)
+    correction_config = self.class::CORRECTIONS_CONFIG.find { |correction_config| correction_config["name"] == name }
+
+    return apply_correction(correction_config) if correction_config && matches_conditions?(correction_config["conditions"])
+
+    nil
+  end
+
   def correction(field, before:, after:, reason:)
     {
       correction_changes: {

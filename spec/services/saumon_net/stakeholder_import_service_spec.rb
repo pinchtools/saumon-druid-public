@@ -499,10 +499,17 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
   describe '#detect_and_apply_corrections' do
     let(:stakeholder) { create(:an_stakeholder) }
-    let(:term) { create(:an_term, an_stakeholder: stakeholder) }
+    let(:body) { create(:an_body) }
     let(:mandate_data) { { "typeOrgane" => "SENAT" } }
+    let!(:new_term) do
+      create(:an_term,
+             uid: "PM_NEW_123",
+             an_stakeholder: stakeholder,
+             an_body: body,
+             capacity: "president")
+    end
 
-    context 'when corrections are detected' do
+    context 'when record is newly created' do
       let(:mock_detector) { instance_double(An::CorrectionDetector) }
       let(:corrections_data) do
         [
@@ -521,19 +528,17 @@ RSpec.describe SaumonNet::StakeholderImportService do
       end
 
       before do
-        allow(An::CorrectionDetector).to receive(:new).
-          with(term, mandate_data, session_id: service.session_id).
-          and_return(mock_detector)
-        allow(mock_detector).to receive(:detect).and_return(corrections_data)
+        allow(An::CorrectionDetector).to receive(:new).and_return(mock_detector)
+        allow(mock_detector).to receive(:detect_all).and_return(corrections_data)
       end
 
-      it 'creates correction records' do
+      it 'applies corrections to newly created records' do
         expect {
-          service.send(:detect_and_apply_corrections, term, mandate_data)
+          service.send(:detect_and_apply_corrections, new_term, mandate_data)
         }.to change(An::Correction, :count).by(1)
 
         correction = An::Correction.last
-        expect(correction.correctable).to eq(term)
+        expect(correction.correctable).to eq(new_term)
         expect(correction.correction_changes).to eq({
           "capacity" => {
             "before" => "president",
@@ -543,19 +548,89 @@ RSpec.describe SaumonNet::StakeholderImportService do
         expect(correction.reason).to eq("Test correction reason")
         expect(correction.correction_type).to eq("automatic")
       end
+
+      it 'calls the detector for newly created records' do
+        expect(An::CorrectionDetector).to receive(:new).
+          with(new_term, mandate_data, session_id: service.session_id).
+          and_return(mock_detector)
+
+        service.send(:detect_and_apply_corrections, new_term, mandate_data)
+      end
     end
 
-    context 'when no corrections are detected' do
+    context 'when record already existed (not newly created)' do
+      let(:existing_term) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: "president") }
+
+      before do
+        # Update an existing term to ensure previously_new_record? == false
+        existing_term.update!(capacity: "membre")
+      end
+
+      it 'does not apply corrections to existing records' do
+        expect(An::CorrectionDetector).not_to receive(:new)
+
+        expect {
+          service.send(:detect_and_apply_corrections, existing_term, mandate_data)
+        }.not_to change(An::Correction, :count)
+      end
+    end
+
+    context 'when multiple corrections are detected for new record' do
+      let(:mock_detector) { instance_double(An::CorrectionDetector) }
+      let(:corrections_data) do
+        [
+          {
+            correction_changes: {
+              "capacity" => {
+                "before" => "president",
+                "after" => "president-du-senat"
+              }
+            },
+            reason: "First correction",
+            correction_type: "automatic",
+            session_id: service.session_id
+          },
+          {
+            correction_changes: {
+              "end_date" => {
+                "before" => nil,
+                "after" => "2024-01-01"
+              }
+            },
+            reason: "Second correction",
+            correction_type: "automatic",
+            session_id: service.session_id
+          }
+        ]
+      end
+
+      before do
+        allow(An::CorrectionDetector).to receive(:new).and_return(mock_detector)
+        allow(mock_detector).to receive(:detect_all).and_return(corrections_data)
+      end
+
+      it 'creates all correction records' do
+        expect {
+          service.send(:detect_and_apply_corrections, new_term, mandate_data)
+        }.to change(An::Correction, :count).by(2)
+
+        corrections = An::Correction.where(correctable: new_term)
+        expect(corrections.count).to eq(2)
+        expect(corrections.pluck(:reason)).to contain_exactly("First correction", "Second correction")
+      end
+    end
+
+    context 'when no corrections are detected for new record' do
       let(:mock_detector) { instance_double(An::CorrectionDetector) }
 
       before do
-        allow(An::CorrectionDetector).to receive(:new).with(term, mandate_data, session_id: service.session_id).and_return(mock_detector)
-        allow(mock_detector).to receive(:detect).and_return([])
+        allow(An::CorrectionDetector).to receive(:new).and_return(mock_detector)
+        allow(mock_detector).to receive(:detect_all).and_return([])
       end
 
       it 'does not create any correction records' do
         expect {
-          service.send(:detect_and_apply_corrections, term, mandate_data)
+          service.send(:detect_and_apply_corrections, new_term, mandate_data)
         }.not_to change(An::Correction, :count)
       end
     end
