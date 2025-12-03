@@ -1,9 +1,9 @@
 class An::CorrectionDetector
   delegate :detect_all, :detect_one, to: :@delegator
 
-  def initialize(record, api_data, session_id:)
+  def initialize(record, session_id:)
     @record = record
-    @delegator = delegator_class_name.new(record, api_data, session_id: session_id)
+    @delegator = delegator_class_name.new(record, session_id: session_id)
   end
 
   private

@@ -1,13 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe An::BaseCorrectionDetector do
-  let(:record) { double('record', id: 1, name: 'Test') }
-  let(:input_api_data) { { 'uid' => 'PA123', 'status' => 'active' } }
+  let(:email) { 'test@example.com' }
+  let(:record) { double('record', id: 1, name: 'Test', email: email) }
   let(:session_id) { 'test_session_123' }
 
-  subject { described_class.new(record, input_api_data, session_id: session_id) }
+  subject { described_class.new(record, session_id: session_id) }
 
-  describe '#correction' do
+  describe '#correction ' do
     let(:field) { 'email' }
     let(:before_value) { 'old@example.com' }
     let(:after_value) { 'new@example.com' }
@@ -38,19 +38,7 @@ RSpec.describe An::BaseCorrectionDetector do
   describe '#matches_conditions?' do
     let(:stakeholder) { double('stakeholder', last_name: 'Hollande', first_name: 'François') }
     let(:nested_record) { double('term', capacity: 'president', end_date: nil, an_stakeholder: stakeholder) }
-    let(:detector_with_nested) { described_class.new(nested_record, input_api_data, session_id: session_id) }
-
-    context 'with api_data conditions' do
-      it 'matches when values are equal' do
-        conditions = { 'api_data' => { 'uid' => input_api_data["uid"], 'status' => input_api_data["status"] } }
-        expect(subject.send(:matches_conditions?, conditions)).to be true
-      end
-
-      it 'does not match when values differ' do
-        conditions = { 'api_data' => { 'uid' => 'PA999' } }
-        expect(subject.send(:matches_conditions?, conditions)).to be false
-      end
-    end
+    let(:detector_with_nested) { described_class.new(nested_record, session_id: session_id) }
 
     context 'with record conditions' do
       it 'matches when values are equal' do
@@ -66,7 +54,7 @@ RSpec.describe An::BaseCorrectionDetector do
 
     context 'with special value matchers' do
       let(:blank_record) { double('record', capacity: '', end_date: nil) }
-      subject(:blank_detector) { described_class.new(blank_record, input_api_data, session_id: session_id) }
+      subject(:blank_detector) { described_class.new(blank_record, session_id: session_id) }
 
       it 'matches blank values with "blank" keyword' do
         conditions = { 'record' => { 'capacity' => 'blank' } }
@@ -84,24 +72,6 @@ RSpec.describe An::BaseCorrectionDetector do
       end
     end
 
-    context 'with combined api_data and record conditions' do
-      it 'matches when all conditions are met' do
-        conditions = {
-          'api_data' => { 'uid' => input_api_data["uid"] },
-          'record' => { 'id' => record.id }
-        }
-        expect(subject.send(:matches_conditions?, conditions)).to be true
-      end
-
-      it 'does not match when any condition fails' do
-        conditions = {
-          'api_data' => { 'uid' => input_api_data["uid"] },
-          'record' => { 'id' => 999 }
-        }
-        expect(subject.send(:matches_conditions?, conditions)).to be false
-      end
-    end
-
     context 'with nil conditions' do
       it 'returns true for nil conditions' do
         expect(subject.send(:matches_conditions?, nil)).to be true
@@ -110,25 +80,16 @@ RSpec.describe An::BaseCorrectionDetector do
   end
 
   describe '#resolve_value' do
-    context 'with hash object' do
-      it 'resolves simple key' do
-        value = subject.send(:resolve_value, input_api_data, 'uid')
-        expect(value).to eq(input_api_data["uid"])
-      end
+    it 'resolves simple attribute' do
+      value = subject.send(:resolve_value, record, 'id')
+      expect(value).to eq(record.id)
     end
 
-    context 'with object' do
-      it 'resolves simple attribute' do
-        value = subject.send(:resolve_value, record, 'id')
-        expect(value).to eq(record.id)
-      end
-
-      it 'resolves nested attribute with dot notation' do
-        nested_obj = double('nested', value: 'test')
-        parent = double('parent', nested: nested_obj)
-        value = subject.send(:resolve_value, parent, 'nested.value')
-        expect(value).to eq(parent.nested.value)
-      end
+    it 'resolves nested attribute with dot notation' do
+      nested_obj = double('nested', value: 'test')
+      parent = double('parent', nested: nested_obj)
+      value = subject.send(:resolve_value, parent, 'nested.value')
+      expect(value).to eq(parent.nested.value)
     end
   end
 

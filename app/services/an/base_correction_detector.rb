@@ -1,9 +1,8 @@
 class An::BaseCorrectionDetector
-  attr_reader :record, :api_data, :session_id
+  attr_reader :record, :session_id
 
-  def initialize(record, api_data, session_id:)
+  def initialize(record, session_id:)
     @record = record
-    @api_data = api_data
     @session_id = session_id
   end
 
@@ -44,8 +43,7 @@ class An::BaseCorrectionDetector
   def matches_conditions?(conditions)
     return true if conditions.nil?
 
-    check_conditions(conditions["api_data"], api_data) &&
-      check_conditions(conditions["record"], record)
+    check_conditions(conditions["record"], record)
   end
 
   def apply_correction(config)
@@ -72,7 +70,7 @@ class An::BaseCorrectionDetector
 
   def resolve_value(object, path)
     path.to_s.split(".").reduce(object) do |obj, attr|
-      obj.is_a?(Hash) ? obj[attr] : obj&.public_send(attr)
+      obj&.public_send(attr)
     end
   end
 

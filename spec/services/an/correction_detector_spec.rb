@@ -2,10 +2,9 @@ require 'rails_helper'
 
 RSpec.describe An::CorrectionDetector do
   let(:session_id) { 'test_session_123' }
-  let(:api_data) { { 'uid' => 'PA123', 'typeOrgane' => 'ASSEMBLEE' } }
   let(:term) { create(:an_term) }
 
-  subject { described_class.new(term, api_data, session_id: session_id) }
+  subject { described_class.new(term, session_id: session_id) }
 
   describe '#initialize' do
     context 'with An::Term record' do
@@ -17,7 +16,6 @@ RSpec.describe An::CorrectionDetector do
         delegator = subject.instance_variable_get(:@delegator)
 
         expect(delegator.record).to eq(term)
-        expect(delegator.api_data).to eq(api_data)
         expect(delegator.session_id).to eq(session_id)
       end
     end
@@ -27,7 +25,7 @@ RSpec.describe An::CorrectionDetector do
 
       it 'raises ArgumentError with helpful message' do
         expect {
-          described_class.new(unsupported_record, api_data, session_id: session_id)
+          described_class.new(unsupported_record, session_id: session_id)
         }.to raise_error(ArgumentError, /No correction detector found for Country/)
       end
     end

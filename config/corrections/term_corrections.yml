@@ -16,10 +16,9 @@
 term_corrections:
   - name: senate_president_mislabeling
     conditions:
-      api_data:
-        typeOrgane: "SENAT"
       record:
         capacity: "president"
+        an_body.an_body_type.code: "SENAT"
     correction:
       field: capacity
       before: "president"
@@ -38,11 +37,10 @@ term_corrections:
 
   - name: missing_presidency_end_date_hollande
     conditions:
-      api_data:
-        typeOrgane: "PRESREP"
       record:
         end_date: null
         an_stakeholder.last_name: "Hollande"
+        an_body.an_body_type.code: "PRESREP"
     correction:
       field: end_date
       before: null

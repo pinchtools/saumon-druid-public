@@ -5,7 +5,7 @@ RSpec.describe An::TermCorrectionDetector do
   let(:body) { create(:an_body) }
   let(:session_id) { 'test_session_123' }
 
-  subject { described_class.new(record, api_data, session_id: session_id) }
+  subject { described_class.new(record, session_id: session_id) }
 
   describe '#detect_all' do
     let(:corrections_config) do
@@ -13,7 +13,6 @@ RSpec.describe An::TermCorrectionDetector do
         {
           "name" => "test_correction",
           "conditions" => {
-            "api_data" => { "typeOrgane" => "SENAT" },
             "record" => { "capacity" => "president" }
           },
           "correction" => {
@@ -32,7 +31,6 @@ RSpec.describe An::TermCorrectionDetector do
 
     context 'when conditions match' do
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
-      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'applies the correction' do
         corrections = subject.detect_all
@@ -49,30 +47,9 @@ RSpec.describe An::TermCorrectionDetector do
 
     context 'when record condition does not match' do
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'membre') }
-      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'does not apply the correction' do
         expect(subject.detect_all).to be_empty
-      end
-    end
-
-    context 'when api_data condition does not match' do
-      let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
-      let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
-
-      it 'does not apply the correction' do
-        expect(subject.detect_all).to be_empty
-      end
-    end
-
-    context 'when both conditions do not match' do
-      let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'membre') }
-      let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
-
-      it 'does not apply the correction' do
-        corrections = subject.detect_all
-
-        expect(corrections).to be_empty
       end
     end
 
@@ -102,7 +79,6 @@ RSpec.describe An::TermCorrectionDetector do
         ]
       end
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: nil, end_date: nil) }
-      let(:api_data) { {} }
 
       it 'applies all matching corrections' do
         corrections = subject.detect_all
@@ -119,7 +95,6 @@ RSpec.describe An::TermCorrectionDetector do
         {
           "name" => "test_correction",
           "conditions" => {
-            "api_data" => { "typeOrgane" => "SENAT" },
             "record" => { "capacity" => "president" }
           },
           "correction" => {
@@ -150,7 +125,6 @@ RSpec.describe An::TermCorrectionDetector do
 
     context 'when correction is found by name and conditions match' do
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
-      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'applies the correction' do
         fix = subject.detect_one('test_correction')
@@ -166,7 +140,6 @@ RSpec.describe An::TermCorrectionDetector do
 
     context 'when correction is found by name but conditions do not match' do
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'autre') }
-      let(:api_data) { { 'typeOrgane' => 'ASSEMBLEE' } }
 
       it 'returns nil' do
         result = subject.detect_one('test_correction')
@@ -177,7 +150,6 @@ RSpec.describe An::TermCorrectionDetector do
 
     context 'when correction is not found by name' do
       let(:record) { create(:an_term, an_stakeholder: stakeholder, an_body: body, capacity: 'president') }
-      let(:api_data) { { 'typeOrgane' => 'SENAT' } }
 
       it 'returns nil' do
         result = subject.detect_one('nonexistent_correction')

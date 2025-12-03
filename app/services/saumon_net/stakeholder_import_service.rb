@@ -61,11 +61,11 @@ module SaumonNet
       record.sync_search_fields if record.respond_to?(:sync_search_fields)
     end
 
-    def detect_and_apply_corrections(record, entity_data)
+    def detect_and_apply_corrections(record)
       # apply corrections at import only if the record is new
       return unless record.previously_new_record?
 
-      detector = An::CorrectionDetector.new(record, entity_data, session_id: @session_id)
+      detector = An::CorrectionDetector.new(record, session_id: @session_id)
       corrections_data = detector.detect_all
 
       corrections_data.each do |attrs|
@@ -256,8 +256,8 @@ module SaumonNet
         })
       end
 
-      detect_and_apply_corrections(term, mandate_data)
       upsert_substitutes(term, mandate_data)
+      detect_and_apply_corrections(term)
     rescue => e
       logger.error({
         message: "Failed to upsert single term",

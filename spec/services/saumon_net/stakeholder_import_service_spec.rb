@@ -500,7 +500,6 @@ RSpec.describe SaumonNet::StakeholderImportService do
   describe '#detect_and_apply_corrections' do
     let(:stakeholder) { create(:an_stakeholder) }
     let(:body) { create(:an_body) }
-    let(:mandate_data) { { "typeOrgane" => "SENAT" } }
     let!(:new_term) do
       create(:an_term,
              uid: "PM_NEW_123",
@@ -534,7 +533,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
       it 'applies corrections to newly created records' do
         expect {
-          service.send(:detect_and_apply_corrections, new_term, mandate_data)
+          service.send(:detect_and_apply_corrections, new_term)
         }.to change(An::Correction, :count).by(1)
 
         correction = An::Correction.last
@@ -551,10 +550,10 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
       it 'calls the detector for newly created records' do
         expect(An::CorrectionDetector).to receive(:new).
-          with(new_term, mandate_data, session_id: service.session_id).
+          with(new_term, session_id: service.session_id).
           and_return(mock_detector)
 
-        service.send(:detect_and_apply_corrections, new_term, mandate_data)
+        service.send(:detect_and_apply_corrections, new_term)
       end
     end
 
@@ -570,7 +569,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         expect(An::CorrectionDetector).not_to receive(:new)
 
         expect {
-          service.send(:detect_and_apply_corrections, existing_term, mandate_data)
+          service.send(:detect_and_apply_corrections, existing_term)
         }.not_to change(An::Correction, :count)
       end
     end
@@ -611,7 +610,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
       it 'creates all correction records' do
         expect {
-          service.send(:detect_and_apply_corrections, new_term, mandate_data)
+          service.send(:detect_and_apply_corrections, new_term)
         }.to change(An::Correction, :count).by(2)
 
         corrections = An::Correction.where(correctable: new_term)
@@ -630,7 +629,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
 
       it 'does not create any correction records' do
         expect {
-          service.send(:detect_and_apply_corrections, new_term, mandate_data)
+          service.send(:detect_and_apply_corrections, new_term)
         }.not_to change(An::Correction, :count)
       end
     end
