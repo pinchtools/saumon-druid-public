@@ -65,23 +65,7 @@ module SaumonNet
       # apply corrections at import only if the record is new
       return unless record.previously_new_record?
 
-      detector = An::CorrectionDetector.new(record, session_id: @session_id)
-      corrections_data = detector.detect_all
-
-      corrections_data.each do |attrs|
-        correction = An::Correction.create(correctable: record, **attrs)
-
-        unless correction.persisted?
-          logger.warn(
-            "Failed to create correction for #{record.class.name}##{record.id}: " \
-            "#{correction.errors.full_messages.join(', ')}",
-            component: SaumonNet::COMPONENT,
-            session_id: @session_id,
-            record_id: record.id,
-            correction_errors: correction.errors.full_messages
-          )
-        end
-      end
+      An::CorrectionApplier.new(record, session_id: @session_id).detect_all.apply
     end
 
     def extract_file_uid(acteur_data)

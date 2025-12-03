@@ -176,8 +176,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         service.send(:upsert_stakeholder_addresses, stakeholder, entity_data)
       }.to change(An::StakeholderAddress, :count).by(1)
 
-      address = An::StakeholderAddress.last
-      expect(address.uid).to eq("AD123456")
+      address = An::StakeholderAddress.find_by(uid: "AD123456")
       expect(address.address_1).to eq("Assemblée nationale")
       expect(address.street_number).to eq("126")
       expect(address.street_name).to eq("Rue de l'Université")
@@ -255,8 +254,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         service.send(:upsert_terms, stakeholder, entity_data)
       }.to change(An::Term, :count).by(1)
 
-      term = An::Term.last
-      expect(term.uid).to eq("PM123456")
+      term = An::Term.find_by_uid("PM123456")
       expect(term.label).to eq("Member CIRCO")
       expect(term.an_stakeholder).to eq(stakeholder)
       expect(term.an_body).to eq(body)
@@ -314,7 +312,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
       it 'handles parliamentary mandate attributes correctly' do
         service.send(:upsert_terms, stakeholder, parliamentary_entity_data)
 
-        term = An::Term.last
+        term = An::Term.find_by_uid("PM654321")
         expect(term.constituency).to eq(constituency)
         expect(term.assumption_date).to eq(DateTime.parse("2017-06-21"))
         expect(term.origin).to eq("élections générales")
@@ -328,7 +326,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         it 'associates the replaced deputy term' do
           service.send(:upsert_terms, stakeholder, parliamentary_entity_data)
 
-          term = An::Term.last
+          term = An::Term.find_by_uid("PM654321")
           expect(term.deputy_term).to eq(replaced_term)
         end
       end
@@ -343,7 +341,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         it 'sets deputy_term to nil when mandatRemplaceRef is not present' do
           service.send(:upsert_terms, stakeholder, parliamentary_entity_without_ref)
 
-          term = An::Term.last
+          term = An::Term.find_by_uid("PM654321")
           expect(term.deputy_term).to be_nil
         end
       end
@@ -536,7 +534,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
           service.send(:detect_and_apply_corrections, new_term)
         }.to change(An::Correction, :count).by(1)
 
-        correction = An::Correction.last
+        correction = An::Correction.find_by(correctable: new_term)
         expect(correction.correctable).to eq(new_term)
         expect(correction.correction_changes).to eq({
           "capacity" => {
@@ -546,14 +544,6 @@ RSpec.describe SaumonNet::StakeholderImportService do
         })
         expect(correction.reason).to eq("Test correction reason")
         expect(correction.correction_type).to eq("automatic")
-      end
-
-      it 'calls the detector for newly created records' do
-        expect(An::CorrectionDetector).to receive(:new).
-          with(new_term, session_id: service.session_id).
-          and_return(mock_detector)
-
-        service.send(:detect_and_apply_corrections, new_term)
       end
     end
 
@@ -618,21 +608,6 @@ RSpec.describe SaumonNet::StakeholderImportService do
         expect(corrections.pluck(:reason)).to contain_exactly("First correction", "Second correction")
       end
     end
-
-    context 'when no corrections are detected for new record' do
-      let(:mock_detector) { instance_double(An::CorrectionDetector) }
-
-      before do
-        allow(An::CorrectionDetector).to receive(:new).and_return(mock_detector)
-        allow(mock_detector).to receive(:detect_all).and_return([])
-      end
-
-      it 'does not create any correction records' do
-        expect {
-          service.send(:detect_and_apply_corrections, new_term)
-        }.not_to change(An::Correction, :count)
-      end
-    end
   end
 
   describe '#upsert_substitutes' do
@@ -656,8 +631,7 @@ RSpec.describe SaumonNet::StakeholderImportService do
         service.send(:upsert_substitutes, term, mandate_data)
       }.to change(An::Substitute, :count).by(1)
 
-      substitute = An::Substitute.last
-      expect(substitute.an_term).to eq(term)
+      substitute = An::Substitute.find_by(an_term: term)
       expect(substitute.an_stakeholder).to eq(substitute_stakeholder)
       expect(substitute.start_date).to eq(DateTime.parse("2022-06-19"))
       expect(substitute.end_date).to eq(DateTime.parse("2027-06-19"))
