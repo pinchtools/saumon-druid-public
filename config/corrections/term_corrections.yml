@@ -22,7 +22,7 @@ term_corrections:
     correction:
       field: capacity
       before: "president"
-      after: "president-du-senat"
+      after: "president_du_senat"
       reason: "President is too generic for Senate president role"
 
   - name: missing_capacity
