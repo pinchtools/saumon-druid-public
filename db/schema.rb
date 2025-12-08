@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_02_125839) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_08_101235) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -128,6 +128,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_02_125839) do
     t.index ["uid"], name: "index_an_countries_on_uid", unique: true
   end
 
+  create_table "an_searches", id: :uuid, default: -> { "uuidv7()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.vector "embedding", limit: 1024
+    t.tsvector "fts"
+    t.bigint "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.text "trigram"
+    t.datetime "updated_at", null: false
+    t.index ["embedding"], name: "index_an_searches_on_embedding", opclass: :vector_cosine_ops, using: :hnsw
+    t.index ["fts"], name: "index_an_searches_on_fts", using: :gin
+    t.index ["searchable_type", "searchable_id"], name: "index_an_searches_on_searchable"
+    t.index ["searchable_type", "searchable_id"], name: "index_an_searches_on_searchable_type_and_searchable_id", unique: true
+    t.index ["trigram"], name: "index_an_searches_on_trigram", opclass: :gin_trgm_ops, using: :gin
+  end
+
   create_table "an_stakeholder_addresses", force: :cascade do |t|
     t.string "address_1"
     t.string "address_2"
@@ -161,8 +176,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_02_125839) do
     t.string "occupation_category"
     t.string "occupation_family"
     t.string "phone_numbers", default: [], array: true
-    t.tsvector "search_identity_fts"
-    t.text "search_identity_trgm"
     t.string "uid"
     t.datetime "updated_at", null: false
     t.string "urls", default: [], array: true
@@ -172,8 +185,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_02_125839) do
     t.index ["occupation"], name: "index_an_stakeholders_on_occupation"
     t.index ["occupation_category"], name: "index_an_stakeholders_on_occupation_category"
     t.index ["occupation_family"], name: "index_an_stakeholders_on_occupation_family"
-    t.index ["search_identity_fts"], name: "idx_an_stakeholders_fts", using: :gin
-    t.index ["search_identity_trgm"], name: "idx_an_stakeholders_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["uid"], name: "index_an_stakeholders_on_uid", unique: true
   end
 
