@@ -233,6 +233,8 @@ GEM
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
     multipart-post (2.4.1)
+    neighbor (0.6.0)
+      activerecord (>= 7.1)
     nenv (0.3.0)
     net-http (0.7.0)
       uri
@@ -538,6 +540,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  neighbor
   newrelic_rpm
   pg (~> 1.1)
   propshaft
