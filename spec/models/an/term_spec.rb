@@ -35,6 +35,16 @@ RSpec.describe An::Term, type: :model do
       end
     end
 
+    describe '.past ' do
+      let!(:past_term) { create(:an_term, start_date: 1.month.ago, end_date: 1.week.ago) }
+      let!(:active_term) { create(:an_term, start_date: 1.month.ago, end_date: nil) }
+      let!(:future_term) { create(:an_term, start_date: nil, end_date: nil) }
+
+      it 'returns terms with a start and end dates' do
+        expect(An::Term.past).to eq([past_term])
+      end
+    end
+
     describe '.by_hierarchy' do
       let!(:body_type_low) { create(:an_body_type, hierarchy_level: 1) }
       let!(:body_type_high) { create(:an_body_type, hierarchy_level: 3) }
