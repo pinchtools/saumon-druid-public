@@ -25,7 +25,7 @@ module SaumonNet
       AddressProcessor.new(record, entity_data, session_id).process
       TermProcessor.new(record, entity_data, session_id).process
 
-      record.sync_search_fields if record.respond_to?(:sync_search_fields)
+      record.sync_lexical_search_content if record.respond_to?(:sync_lexical_search_content)
     end
 
     def extract_acteur_data(entity_data)

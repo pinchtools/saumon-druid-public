@@ -130,12 +130,12 @@ RSpec.describe SaumonNet::StakeholderImportService do
         service.send(:perform_additional_operations, stakeholder, entity_data, :created)
       end
 
-      it 'calls sync_search_fields when method is available' do
-        allow(stakeholder).to receive(:sync_search_fields)
+      it 'calls sync_lexical_search_content when method is available' do
+        allow(stakeholder).to receive(:sync_lexical_search_content)
 
         service.send(:perform_additional_operations, stakeholder, entity_data, :created)
 
-        expect(stakeholder).to have_received(:sync_search_fields)
+        expect(stakeholder).to have_received(:sync_lexical_search_content)
       end
     end
 
