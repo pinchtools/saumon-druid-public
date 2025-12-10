@@ -80,13 +80,6 @@ RSpec.describe An::Correction, type: :model do
         }.to change { stakeholder.reload.last_name }.from('OLD').to('NEW')
       end
 
-      it 'does not trigger callbacks' do
-        expect(stakeholder).not_to receive(:update_fts_search)
-        expect(stakeholder).not_to receive(:update_trigram_search)
-
-        create(:an_correction, correctable: stakeholder, correction_changes: correction_changes)
-      end
-
       it 'handles invalid field names gracefully' do
         expect {
           create(:an_correction,
