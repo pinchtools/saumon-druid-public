@@ -5,26 +5,31 @@ class An::Search < ApplicationRecord
 
   scope :fts_search, ->(query) {
     normalized_query = normalize_query(query)
-    where("fts @@ plainto_tsquery('french', ?)", normalized_query)
-      .order(Arel.sql("ts_rank_cd(fts, plainto_tsquery('french', #{connection.quote(normalized_query)})) DESC"))
+    fts_condition_node = fts_condition_node(normalized_query)
+    rank_node = fts_rank_node(normalized_query)
+
+    where(fts_condition_node)
+      .order(rank_node.desc)
   }
 
   scope :trigram_search, ->(query) {
     normalized_query = normalize_query(query)
-    where("word_similarity(?, trigram) > 0.6", normalized_query)
-      .order(Arel.sql("word_similarity(#{connection.quote(normalized_query)}, trigram) DESC"))
+    similarity_node = trigram_similarity_node(normalized_query)
+
+    where(similarity_node.gt(0.6))
+      .order(similarity_node.desc)
   }
 
   scope :lexical_search, ->(query, fts_weight: 0.7, trigram_weight: 0.3) do
     normalized_query = normalize_query(query)
 
-    fts_sql      = fts_rank_sql(normalized_query)
-    trigram_sql  = trigram_similarity_sql(normalized_query)
-    score_sql    = combined_score_sql(fts_sql, trigram_sql, fts_weight, trigram_weight)
+    fts_node = fts_rank_node(normalized_query)
+    trigram_node = trigram_similarity_node(normalized_query)
+    score_node = combined_score_node(fts_node, trigram_node, fts_weight, trigram_weight)
 
-    select("#{table_name}.*, #{score_sql} AS combined_score").
-      where("#{trigram_sql} > 0.6").
-      order(Arel.sql("#{score_sql} DESC"))
+    select(arel_table[Arel.star], score_node.as("combined_score"))
+      .where(trigram_node.gt(0.6))
+      .order(score_node.desc)
   end
 
   def self.semantic_search(query, limit: 10)
@@ -58,17 +63,37 @@ class An::Search < ApplicationRecord
     query.to_s.parameterize(separator: " ")
   end
 
-  def self.fts_rank_sql(query)
-    sanitized = connection.quote(query)
-    "ts_rank_cd(fts, plainto_tsquery('french', #{sanitized}))"
+  def self.fts_condition_node(query)
+    Arel::Nodes::InfixOperation.new("@@",
+      arel_table[:fts],
+      Arel::Nodes::NamedFunction.new("plainto_tsquery", [
+        Arel::Nodes.build_quoted("french"),
+        Arel::Nodes.build_quoted(query)
+      ])
+    )
   end
 
-  def self.trigram_similarity_sql(normalized_query)
-    sanitized = connection.quote(normalized_query)
-    "word_similarity(#{sanitized}, trigram)"
+  def self.fts_rank_node(query)
+    Arel::Nodes::NamedFunction.new("ts_rank_cd", [
+      arel_table[:fts],
+      Arel::Nodes::NamedFunction.new("plainto_tsquery", [
+        Arel::Nodes.build_quoted("french"),
+        Arel::Nodes.build_quoted(query)
+      ])
+    ])
   end
 
-  def self.combined_score_sql(fts_sql, trigram_sql, fts_weight, trigram_weight)
-    "(#{fts_weight} * #{fts_sql}) + (#{trigram_weight} * #{trigram_sql})"
+  def self.trigram_similarity_node(normalized_query)
+    Arel::Nodes::NamedFunction.new("word_similarity", [
+      Arel::Nodes.build_quoted(normalized_query),
+      arel_table[:trigram]
+    ])
+  end
+
+  def self.combined_score_node(fts_rank_node, trigram_similarity_node, fts_weight, trigram_weight)
+    Arel::Nodes::Addition.new(
+      Arel::Nodes::Multiplication.new(Arel::Nodes.build_quoted(fts_weight), fts_rank_node),
+      Arel::Nodes::Multiplication.new(Arel::Nodes.build_quoted(trigram_weight), trigram_similarity_node)
+    )
   end
 end
