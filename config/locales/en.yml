@@ -1,4 +1,24 @@
 en:
+  an:
+    stakeholder:
+      vector_search:
+        name: "Name: %{name}"
+        main_position: "Main mandate/main function in charge: %{position}"
+        old_top_position: "Old main mandate/main function in charge: %{position}"
+        liability_level: "Importance/Responsibility: %{rank}"
+        role: "Role: %{role}"
+        start_date: "Date of appointment: %{date}"
+        occupation: "Occupation: %{occupation}"
+        position: "Mandate/Fonction: %{position}"
+        past_positions: "Past mandates:"
+        period: "Period: %{period}"
+        institution: "Institution: %{institution}"
+    term:
+      role_rank:
+        very_high: "Very high"
+        high: "High"
+        medium: "Medium"
+        low: "Low"
   activerecord:
     attributes:
       an/body_type:

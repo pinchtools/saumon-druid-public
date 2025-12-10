@@ -7,5 +7,10 @@ FactoryBot.define do
     trans_legislature { false }
     local { false }
     has_substitute { false }
+    hierarchy_level { 3 }
+
+    trait :high_level do
+      hierarchy_level { 1 }
+    end
   end
 end

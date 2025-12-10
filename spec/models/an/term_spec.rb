@@ -41,7 +41,7 @@ RSpec.describe An::Term, type: :model do
       let!(:future_term) { create(:an_term, start_date: nil, end_date: nil) }
 
       it 'returns terms with a start and end dates' do
-        expect(An::Term.past).to eq([past_term])
+        expect(An::Term.past).to eq([ past_term ])
       end
     end
 
@@ -79,5 +79,34 @@ RSpec.describe An::Term, type: :model do
     it { should validate_presence_of(:an_stakeholder_id) }
     it { should validate_presence_of(:an_body_id) }
     it { should validate_length_of(:label).is_at_most(800) }
+  end
+
+  describe '#role_rank_label' do
+    let(:term) { build(:an_term) }
+
+    it 'returns very high for rank 1' do
+      term.role_rank = 1
+      expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.very_high'))
+    end
+
+    it 'returns high for ranks 2-4' do
+      term.role_rank = rand(2..4)
+      expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.high'))
+    end
+
+    it 'returns medium for ranks 5-30' do
+      term.role_rank = rand(5..30)
+      expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.medium'))
+    end
+
+    it 'returns low for ranks above 30' do
+      term.role_rank = rand(31..100)
+      expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.low'))
+    end
+
+    it 'returns low for nil rank' do
+      term.role_rank = nil
+      expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.low'))
+    end
   end
 end

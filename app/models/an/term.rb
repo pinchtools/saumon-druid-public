@@ -16,4 +16,17 @@ class An::Term < ApplicationRecord
   validates :uid, presence: true, uniqueness: true
   validates :an_stakeholder_id, :an_body_id, presence: true
   validates :label, length: { maximum: 800 }
+
+  def role_rank_label
+    case role_rank
+    when 1
+      I18n.t("an.term.role_rank.very_high")
+    when 2..4
+      I18n.t("an.term.role_rank.high")
+    when 5..30
+      I18n.t("an.term.role_rank.medium")
+    else
+      I18n.t("an.term.role_rank.low")
+    end
+  end
 end

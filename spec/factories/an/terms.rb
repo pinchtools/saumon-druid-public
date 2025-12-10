@@ -5,7 +5,7 @@ FactoryBot.define do
     sequence(:uid) { |n| "PM#{n}" }
     legislature { "16" }
     start_date { 1.year.ago }
-    end_date { 1.year.from_now }
+    end_date { 1.week.ago }
     publish_date { 1.year.ago }
     assumption_date { 1.year.ago }
     role_rank { 1 }
@@ -16,6 +16,8 @@ FactoryBot.define do
     collaborators { [] }
     constituency { nil }
     deputy_term { nil }
+    capacity { "deputy" }
+    label { "Député" }
 
     trait :with_constituency do
       association :constituency, factory: :an_body
@@ -27,6 +29,10 @@ FactoryBot.define do
 
     trait :main_term do
       main { true }
+    end
+
+    trait :major_responsibility do
+      an_body { create(:an_body, :high_level) }
     end
 
     trait :ended do

@@ -19,5 +19,9 @@ FactoryBot.define do
     trait :with_parent do
       association :parent, factory: :an_body
     end
+
+    trait :high_level do
+      an_body_type { create(:an_body_type, :high_level) }
+    end
   end
 end
