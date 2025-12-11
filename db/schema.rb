@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_08_101235) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_11_150413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -257,6 +257,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_08_101235) do
   add_foreign_key "agents", "agent_versions", column: "current_agent_version_id"
   add_foreign_key "an_bodies", "an_bodies", column: "parent_id"
   add_foreign_key "an_bodies", "an_body_types"
+  add_foreign_key "an_bodies_countries", "an_bodies", on_delete: :cascade
+  add_foreign_key "an_bodies_countries", "an_countries", on_delete: :cascade
   add_foreign_key "an_stakeholder_addresses", "an_stakeholders"
   add_foreign_key "an_substitutes", "an_stakeholders"
   add_foreign_key "an_substitutes", "an_terms"
