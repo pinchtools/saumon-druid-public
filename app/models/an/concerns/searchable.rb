@@ -20,9 +20,20 @@ module An::Concerns::Searchable
       search_results = An::Search.where(searchable_type: name)
                                  .semantic_search(query_embedding, limit: limit)
 
-      where(id: search_results.map(&:searchable_id))
+      ids = search_results.map(&:searchable_id).map(&:to_i)
+
+      order_clause = Arel::Nodes::NamedFunction.new(
+        "array_position",
+        [
+          Arel::Nodes::SqlLiteral.new("ARRAY[#{ids.join(',')}]::bigint[]"),
+          Arel::Nodes::SqlLiteral.new("#{table_name}.id")
+        ]
+      )
+
+      where(id: ids)
         .joins(:an_search)
-        .order(Arel.sql("array_position(ARRAY[#{search_results.map(&:searchable_id).join(',')}], #{table_name}.id)"))
+        .order(order_clause)
+        .limit(limit)
     end
   end
 
