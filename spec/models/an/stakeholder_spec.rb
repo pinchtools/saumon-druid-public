@@ -33,6 +33,14 @@ RSpec.describe An::Stakeholder, type: :model do
     it 'returns the first active term by hierarchy' do
       expect(stakeholder.current_top_position).to eq(top_active_term)
     end
+
+    context 'when an_terms are preloaded' do
+      it 'returns the first active term by hierarchy using in-memory sorting' do
+        preloaded_stakeholder = An::Stakeholder.includes(an_terms: { an_body: :an_body_type }).find(stakeholder.id)
+        expect(preloaded_stakeholder.an_terms).to be_loaded
+        expect(preloaded_stakeholder.current_top_position).to eq(top_active_term)
+      end
+    end
   end
 
   describe '#other_top_active_positions' do
@@ -43,6 +51,25 @@ RSpec.describe An::Stakeholder, type: :model do
     it 'returns active terms except top one' do
       expect(stakeholder.other_top_active_positions).to eq([ regular_active_term ])
     end
+
+    context 'when an_terms are preloaded' do
+      it 'returns active terms except top one using in-memory filtering' do
+        preloaded_stakeholder = An::Stakeholder.includes(an_terms: { an_body: :an_body_type }).find(stakeholder.id)
+        expect(preloaded_stakeholder.an_terms).to be_loaded
+        expect(preloaded_stakeholder.other_top_active_positions).to eq([ regular_active_term ])
+      end
+
+      it 'respects offset and limit parameters with preloaded data' do
+        second_term = create(:an_term, an_stakeholder: stakeholder, start_date: 2.months.ago, end_date: nil)
+        third_term = create(:an_term, an_stakeholder: stakeholder, start_date: 3.months.ago, end_date: nil)
+
+        preloaded_stakeholder = An::Stakeholder.includes(an_terms: { an_body: :an_body_type }).find(stakeholder.id)
+        expect(preloaded_stakeholder.an_terms).to be_loaded
+
+        result = preloaded_stakeholder.other_top_active_positions(offset: 2, limit: 2)
+        expect(result).to eq([ second_term, third_term ])
+      end
+    end
   end
 
   describe '#top_past_positions' do
@@ -52,6 +79,25 @@ RSpec.describe An::Stakeholder, type: :model do
 
     it 'only returns past positions' do
       expect(stakeholder.top_past_positions).to eq([ top_past_term ])
+    end
+
+    context 'when an_terms are preloaded' do
+      it 'only returns past positions using in-memory filtering' do
+        preloaded_stakeholder = An::Stakeholder.includes(an_terms: { an_body: :an_body_type }).find(stakeholder.id)
+        expect(preloaded_stakeholder.an_terms).to be_loaded
+        expect(preloaded_stakeholder.top_past_positions).to eq([ top_past_term ])
+      end
+
+      it 'respects limit parameter with preloaded data' do
+        second_past_term = create(:an_term, an_stakeholder: stakeholder, start_date: 2.years.ago, end_date: 1.year.ago)
+        third_past_term = create(:an_term, an_stakeholder: stakeholder, start_date: 3.years.ago, end_date: 2.years.ago)
+
+        preloaded_stakeholder = An::Stakeholder.includes(an_terms: { an_body: :an_body_type }).find(stakeholder.id)
+        expect(preloaded_stakeholder.an_terms).to be_loaded
+
+        result = preloaded_stakeholder.top_past_positions(limit: 2)
+        expect(result).to contain_exactly(top_past_term, second_past_term)
+      end
     end
   end
 end

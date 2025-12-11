@@ -19,12 +19,13 @@ class SaumonNet::StakeholderImportService < SaumonNet::BaseImportService
 
   def perform_additional_operations(record, entity_data, operation_type)
     super
+
     return unless record.persisted?
 
     SaumonNet::AddressProcessor.new(record, entity_data, session_id).process
     SaumonNet::TermProcessor.new(record, entity_data, session_id).process
 
-    record.sync_lexical_search_content if record.respond_to?(:sync_lexical_search_content)
+    An::Stakeholder.with_terms_hierarchy.find(record.id).sync_lexical_search_content
   end
 
   def extract_acteur_data(entity_data)
