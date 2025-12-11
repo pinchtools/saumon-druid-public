@@ -10,6 +10,8 @@ RSpec.describe An::Stakeholder, type: :model do
   end
 
   describe 'validations' do
+    subject { create(:an_stakeholder) }
+
     it { should validate_presence_of(:uid) }
     it { should validate_uniqueness_of(:uid) }
     it { should validate_presence_of(:first_name) }
