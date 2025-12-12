@@ -18,6 +18,7 @@ class SaumonNet::TermProcessor
     end
   rescue => e
     log_error(e)
+    raise
   end
 
   private

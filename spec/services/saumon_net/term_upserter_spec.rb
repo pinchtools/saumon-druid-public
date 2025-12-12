@@ -166,5 +166,24 @@ RSpec.describe SaumonNet::TermUpserter do
         expect(correction_applier).to have_received(:apply)
       end
     end
+
+    context 'when an exception occurs during upsert' do
+      let(:logger) { double('logger', error: nil, debug: nil) }
+      let(:error_message) { 'Test upsert error' }
+
+      before do
+        allow(upserter).to receive(:logger).and_return(logger)
+        allow_any_instance_of(An::Term).to receive(:save!).and_raise(StandardError.new(error_message))
+      end
+
+      it 'logs the error and re-raises the exception' do
+        expect { upserter.upsert }.to raise_error(StandardError, error_message)
+
+        expect(logger).to have_received(:error).with(hash_including(
+          message: "Failed to upsert single term",
+          error: error_message
+        ))
+      end
+    end
   end
 end

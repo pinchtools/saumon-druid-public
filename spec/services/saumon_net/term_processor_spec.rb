@@ -48,5 +48,24 @@ RSpec.describe SaumonNet::TermProcessor do
         expect { processor.process }.not_to change(An::Term, :count)
       end
     end
+
+    context 'when an exception occurs during processing' do
+      let(:logger) { double('logger', error: nil) }
+      let(:error_message) { 'Test processing error' }
+
+      before do
+        allow_any_instance_of(SaumonNet::TermUpserter).to receive(:upsert).and_raise(StandardError.new(error_message))
+        allow(processor).to receive(:logger).and_return(logger)
+      end
+
+      it 'logs the error and re-raises the exception' do
+        expect { processor.process }.to raise_error(StandardError, error_message)
+
+        expect(logger).to have_received(:error).with(hash_including(
+          message: "Failed to process stakeholder terms",
+          error: error_message
+        ))
+      end
+    end
   end
 end

@@ -17,6 +17,7 @@ class SaumonNet::AddressProcessor
     update_contact_info(contact_extractor)
   rescue => e
     log_error(e)
+    raise
   end
 
   private

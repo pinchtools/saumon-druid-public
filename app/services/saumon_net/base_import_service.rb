@@ -58,20 +58,6 @@ class SaumonNet:: BaseImportService
 
     entities.each do |entity_data|
       process_entity(entity_data)
-    rescue => e
-      stats.increment_failed
-      Rails.event.notify_with_tags("saumon_net.entity_processing_failed", {
-        session_id: session_id,
-        entity_id: entity_data["uid"],
-        error: e.message,
-        backtrace: e.backtrace
-      }, tags: { severity: :error })
-
-      Sentry.capture_exception(e, extra: {
-        session_id: session_id,
-        entity_type: entity_type,
-        entity_data: entity_data
-      })
     end
 
     log_batch_stats(batch_number)
@@ -80,27 +66,45 @@ class SaumonNet:: BaseImportService
   def process_entity(entity_data)
     stats.increment_processed
 
-    # Parse file content if file_url is present
-    enhanced_entity_data = parse_file_content(entity_data)
+    ApplicationRecord.transaction do
+      enhanced_entity_data = parse_file_content(entity_data)
+      mapped_attributes = map_entity_attributes(enhanced_entity_data)
+      record = find_or_initialize_record(mapped_attributes)
 
-    mapped_attributes = map_entity_attributes(enhanced_entity_data)
-    record = find_or_initialize_record(mapped_attributes)
+      if record.new_record?
+        record.save!
+        Rails.event.notify_with_tags("saumon_net.record_created", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        perform_additional_operations(record, enhanced_entity_data, :created)
+      elsif record.changed?
+        record.save!
+        Rails.event.notify_with_tags("saumon_net.record_updated", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        perform_additional_operations(record, enhanced_entity_data, :updated)
+      else
+        stats.increment_skipped
+        Rails.event.notify_with_tags("saumon_net.record_skipped", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        perform_additional_operations(record, enhanced_entity_data, :skipped)
+      end
 
-    if record.new_record?
-      record.save!
-      stats.increment_created
-      Rails.event.notify_with_tags("saumon_net.record_created", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
-      perform_additional_operations(record, enhanced_entity_data, :created)
-    elsif record.changed?
-      record.save!
-      stats.increment_updated
-      Rails.event.notify_with_tags("saumon_net.record_updated", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
-      perform_additional_operations(record, enhanced_entity_data, :updated)
-    else
-      stats.increment_skipped
-      Rails.event.notify_with_tags("saumon_net.record_skipped", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
-      perform_additional_operations(record, enhanced_entity_data, :skipped)
+      if record.previously_new_record?
+        stats.increment_created
+      else
+        stats.increment_updated
+      end
     end
+  rescue => e
+    stats.increment_failed
+    Rails.event.notify_with_tags("saumon_net.entity_processing_failed", {
+      session_id: session_id,
+      entity_id: entity_data["uid"],
+      error: e.message,
+      backtrace: e.backtrace
+    }, tags: { severity: :error })
+
+    Sentry.capture_exception(e, extra: {
+      session_id: session_id,
+      entity_type: entity_type,
+      entity_data: entity_data
+    })
   end
 
   def map_entity_attributes(entity_data)

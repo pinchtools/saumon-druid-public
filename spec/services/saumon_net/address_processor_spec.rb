@@ -111,7 +111,7 @@ RSpec.describe SaumonNet::AddressProcessor do
       allow_any_instance_of(SaumonNet::ContactInfoExtractor).to receive(:extract_emails).and_raise(StandardError.new("Test error"))
       allow(processor).to receive(:logger).and_return(logger)
 
-      processor.process
+      expect { processor.process }.to raise_error(StandardError)
 
       expect(logger).to have_received(:error).with(hash_including(
         message: "Failed to process stakeholder addresses",

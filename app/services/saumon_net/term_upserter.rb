@@ -27,6 +27,7 @@ class SaumonNet::TermUpserter
     apply_corrections(term)
   rescue => e
     log_error(term_uid, e)
+    raise
   end
 
   private

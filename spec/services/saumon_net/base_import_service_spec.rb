@@ -29,7 +29,7 @@ RSpec.describe SaumonNet::BaseImportService do
     end
 
     context 'when creating a new record' do
-      let(:record) { double("Record", new_record?: true, save!: true) }
+      let(:record) { double("Record", new_record?: true, previously_new_record?: true, save!: true) }
 
       before do
         allow(service).to receive(:find_or_initialize_record).and_return(record)
@@ -57,7 +57,7 @@ RSpec.describe SaumonNet::BaseImportService do
     end
 
     context 'when updating an existing record' do
-      let(:record) { double("Record", new_record?: false, changed?: true, save!: true) }
+      let(:record) { double("Record", new_record?: false, previously_new_record?: false, changed?: true, save!: true) }
 
       before do
         allow(service).to receive(:find_or_initialize_record).and_return(record)
@@ -78,7 +78,7 @@ RSpec.describe SaumonNet::BaseImportService do
     end
 
     context 'when record is unchanged' do
-      let(:record) { double("Record", new_record?: false, changed?: false) }
+      let(:record) { double("Record", new_record?: false, previously_new_record?: false, changed?: false) }
 
       before do
         allow(service).to receive(:find_or_initialize_record).and_return(record)
@@ -143,6 +143,77 @@ RSpec.describe SaumonNet::BaseImportService do
             )
           )
         )
+      end
+    end
+
+    context 'when perform_additional_operations raises an exception' do
+      let(:test_service_class) do
+        Class.new(described_class) do
+          attr_accessor :test_record
+
+          def map_entity_attributes(entity_data)
+            { uid: entity_data["uid"], name: entity_data["name"] }
+          end
+
+          def find_or_initialize_record(attributes)
+            stakeholder = An::Stakeholder.find_or_initialize_by(uid: attributes[:uid])
+            stakeholder.first_name = attributes[:name]
+            stakeholder.last_name = "Test"
+            @test_record = stakeholder
+          end
+
+          def perform_additional_operations(record, entity_data, operation_type)
+            raise StandardError, "Additional operations failed"
+          end
+        end
+      end
+
+      let(:test_service) { test_service_class.new(entity_type) }
+      let(:entity_data) { { "uid" => "TEST123", "name" => "John" } }
+
+      before do
+        allow(Rails.event).to receive(:notify_with_tags)
+        allow(Sentry).to receive(:capture_exception)
+      end
+
+      context 'when creating a new record' do
+        it 'rolls back the entire transaction including record creation' do
+          expect {
+            test_service.send(:process_batch, [ entity_data ], 1)
+          }.not_to change(An::Stakeholder, :count)
+
+          expect(An::Stakeholder.find_by(uid: "TEST123")).to be_nil
+        end
+
+        it 'increments failed stats' do
+          test_service.send(:process_batch, [ entity_data ], 1)
+
+          expect(test_service.stats.failed).to eq(1)
+          expect(test_service.stats.created).to eq(0)
+          expect(test_service.stats.processed).to eq(1)
+        end
+      end
+
+      context 'when updating an existing record' do
+        let!(:existing_stakeholder) do
+          create(:an_stakeholder, uid: "TEST123", first_name: "Original", last_name: "Name")
+        end
+
+        it 'rolls back the entire transaction including record updates' do
+          test_service.send(:process_batch, [ entity_data ], 1)
+
+          existing_stakeholder.reload
+          expect(existing_stakeholder.first_name).to eq("Original")
+          expect(existing_stakeholder.last_name).to eq("Name")
+        end
+
+        it 'increments failed stats' do
+          test_service.send(:process_batch, [ entity_data ], 1)
+
+          expect(test_service.stats.failed).to eq(1)
+          expect(test_service.stats.updated).to eq(0)
+          expect(test_service.stats.processed).to eq(1)
+        end
       end
     end
   end
