@@ -12,8 +12,12 @@ module An::Concerns::Searchable
       joins(:an_search).merge(An::Search.trigram_search(query))
     }
 
-    scope :lexical_search, ->(query) {
-      joins(:an_search).merge(An::Search.lexical_search(query))
+    scope :lexical_search, ->(query, fts_weight: 0.7, trigram_weight: 0.3, with_score: false) {
+      select(arel_table[Arel.star]).
+        joins(:an_search).merge(An::Search.lexical_search(query,
+                                                          fts_weight: fts_weight,
+                                                          trigram_weight: trigram_weight,
+                                                          with_score: with_score))
     }
 
     def self.semantic_search(query_embedding, limit: 10)

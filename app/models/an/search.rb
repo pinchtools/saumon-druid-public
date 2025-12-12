@@ -20,14 +20,16 @@ class An::Search < ApplicationRecord
       .order(similarity_node.desc)
   }
 
-  scope :lexical_search, ->(query, fts_weight: 0.7, trigram_weight: 0.3) do
+  scope :lexical_search, ->(query, fts_weight: 0.7, trigram_weight: 0.3, with_score: false) do
     normalized_query = normalize_query(query)
 
     fts_node = fts_rank_node(normalized_query)
     trigram_node = trigram_similarity_node(normalized_query)
     score_node = combined_score_node(fts_node, trigram_node, fts_weight, trigram_weight)
 
-    select(arel_table[Arel.star], score_node.as("combined_score"))
+    selection = (!with_score) ? self : select("searchable_type", "searchable_id", score_node.as("combined_score"))
+
+    selection
       .where(trigram_node.gt(0.6))
       .order(score_node.desc)
   end
