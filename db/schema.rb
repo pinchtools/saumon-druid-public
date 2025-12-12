@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_11_151254) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_12_100104) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -221,9 +221,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_11_151254) do
     t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["an_body_id"], name: "index_an_terms_on_an_body_id"
+    t.index ["an_stakeholder_id", "end_date", "start_date"], name: "index_an_terms_by_stakeholder_active", where: "((start_date IS NOT NULL) AND (end_date IS NULL))"
+    t.index ["an_stakeholder_id", "start_date", "end_date"], name: "index_an_terms_by_stakeholder_past", where: "((start_date IS NOT NULL) AND (end_date IS NOT NULL))"
     t.index ["an_stakeholder_id"], name: "index_an_terms_on_an_stakeholder_id"
     t.index ["constituency_id"], name: "index_an_terms_on_constituency_id"
     t.index ["deputy_term_id"], name: "index_an_terms_on_deputy_term_id"
+    t.index ["start_date", "end_date"], name: "index_terms_on_dates"
     t.index ["uid"], name: "index_an_terms_on_uid", unique: true
   end
 
