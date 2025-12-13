@@ -1,12 +1,15 @@
 services:
   postgresql:
-    image: pgvector/pgvector:pg18
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     restart: always
     volumes:
       - ~/data/postgres/saumon-druid:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=foo
       - POSTGRES_DB=saumon_druid_development
+    command: postgres -c shared_preload_libraries=timescaledb
     ports:
       - "5433:5432"
     networks:

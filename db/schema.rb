@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_12_100104) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_13_152738) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
+  enable_extension "timescaledb"
   enable_extension "vector"
 
   create_table "agent_version_llm_models", force: :cascade do |t|
@@ -251,7 +252,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_12_100104) do
     t.index ["external_id"], name: "index_llm_models_on_external_id", unique: true
     t.index ["family"], name: "index_llm_models_on_family"
     t.index ["tier"], name: "index_llm_models_on_tier"
-    t.check_constraint "tier::text = ANY (ARRAY['tiny'::character varying, 'small'::character varying, 'medium'::character varying, 'strong'::character varying, 'top'::character varying]::text[])", name: "valid_tier"
+    t.check_constraint "tier::text = ANY (ARRAY['tiny'::character varying::text, 'small'::character varying::text, 'medium'::character varying::text, 'strong'::character varying::text, 'top'::character varying::text])", name: "valid_tier"
   end
 
   add_foreign_key "agent_version_llm_models", "agent_versions"
