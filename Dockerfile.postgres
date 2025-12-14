@@ -10,5 +10,20 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure PostgreSQL to preload TimescaleDB
+# Configure PostgreSQL to preload TimescaleDB in sample config (for new DBs)
 RUN echo "shared_preload_libraries = 'timescaledb'" >> /usr/share/postgresql/postgresql.conf.sample
+
+# Create init script to ensure timescaledb is preloaded in existing data directories
+RUN mkdir -p /docker-entrypoint-initdb.d
+COPY <<EOF /docker-entrypoint-initdb.d/001-enable-timescaledb.sh
+#!/bin/bash
+# Ensure timescaledb is in shared_preload_libraries
+PGCONF="\$PGDATA/postgresql.conf"
+if [ -f "\$PGCONF" ]; then
+    if ! grep -q "shared_preload_libraries.*timescaledb" "\$PGCONF"; then
+        echo "shared_preload_libraries = 'timescaledb'" >> "\$PGCONF"
+        echo "TimescaleDB added to shared_preload_libraries"
+    fi
+fi
+EOF
+RUN chmod +x /docker-entrypoint-initdb.d/001-enable-timescaledb.sh
