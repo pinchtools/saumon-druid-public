@@ -1,7 +1,8 @@
-class SaumonNet:: BaseImportService
+class SaumonNet::BaseImportService
   include ActiveSupport::Benchmarkable
+  include ServiceEventable
 
-  attr_reader :entity_type, :session_id, :stats
+  attr_reader :entity_type, :stats
 
   def initialize(entity_type)
     @entity_type = entity_type
@@ -11,21 +12,21 @@ class SaumonNet:: BaseImportService
   end
 
   def import_all
-    Rails.event.notify_with_tags("saumon_net.import_started", { session_id: session_id, entity_type: entity_type }, tags: { severity: :info })
+    track_event(:started, category: "import", payload: { entity_type: entity_type })
 
     import_entities
 
-    log_final_stats
+    track_completed_event
     record_successful_import
     stats
   end
 
   def import_since(date)
-    Rails.event.notify_with_tags("saumon_net.incremental_import_started", { session_id: session_id, entity_type: entity_type, since: date }, tags: { severity: :info })
+    track_event(:incremental_started, category: "import", payload: { entity_type: entity_type, since: date.iso8601 })
 
     import_entities(since: date)
 
-    log_final_stats
+    track_completed_event
     record_successful_import
     stats
   end
@@ -48,13 +49,16 @@ class SaumonNet:: BaseImportService
       end
     end
   rescue => e
-    Rails.event.notify_with_tags("saumon_net.import_failed", { session_id: session_id, error: e.message, backtrace: e.backtrace }, tags: { severity: :error })
-    Sentry.capture_exception(e, extra: { session_id: session_id, entity_type: entity_type })
+    track_event(:failed, category: "import", severity: :error, payload: {
+      entity_type: entity_type,
+      error: e.message,
+      backtrace: e.backtrace&.first(10)
+    })
     raise
   end
 
   def process_batch(entities, batch_number)
-    Rails.event.notify_with_tags("saumon_net.batch_processing", { session_id: session_id, batch: batch_number, count: entities.size }, tags: { severity: :info })
+    track_event(:batch_processing, category: "import", payload: { batch: batch_number, count: entities.size })
 
     entities.each do |entity_data|
       process_entity(entity_data)
@@ -73,15 +77,15 @@ class SaumonNet:: BaseImportService
 
       if record.new_record?
         record.save!
-        Rails.event.notify_with_tags("saumon_net.record_created", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        track_event(:record_created, category: "import", severity: :debug, payload: { uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :created)
       elsif record.changed?
         record.save!
-        Rails.event.notify_with_tags("saumon_net.record_updated", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        track_event(:record_updated, category: "import", severity: :debug, payload: { uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :updated)
       else
         stats.increment_skipped
-        Rails.event.notify_with_tags("saumon_net.record_skipped", { session_id: session_id, uid: entity_data["uid"] }, tags: { severity: :debug })
+        track_event(:record_skipped, category: "import", severity: :debug, payload: { uid: entity_data["uid"] })
         perform_additional_operations(record, enhanced_entity_data, :skipped)
       end
 
@@ -93,17 +97,11 @@ class SaumonNet:: BaseImportService
     end
   rescue => e
     stats.increment_failed
-    Rails.event.notify_with_tags("saumon_net.entity_processing_failed", {
-      session_id: session_id,
+    track_event(:entity_processing_failed, category: "import", severity: :error, payload: {
       entity_id: entity_data["uid"],
-      error: e.message,
-      backtrace: e.backtrace
-    }, tags: { severity: :error })
-
-    Sentry.capture_exception(e, extra: {
-      session_id: session_id,
       entity_type: entity_type,
-      entity_data: entity_data
+      error: e.message,
+      backtrace: e.backtrace&.first(10)
     })
   end
 
@@ -139,28 +137,26 @@ class SaumonNet:: BaseImportService
   def log_batch_stats(batch_number)
     return unless batch_number % 10 == 0 # Log every 10 batches
 
-    Rails.event.notify_with_tags("saumon_net.batch_progress", {
-      session_id: session_id,
+    track_event(:batch_progress, category: "import", payload: {
       batch: batch_number,
       processed: stats.processed,
       created: stats.created,
       updated: stats.updated,
       skipped: stats.skipped,
       failed: stats.failed
-    }, tags: { severity: :info })
+    })
   end
 
-  def log_final_stats
-    Rails.event.notify_with_tags("saumon_net.import_completed", {
-      session_id: session_id,
+  def track_completed_event
+    track_event(:completed, category: "import", payload: {
       entity_type: entity_type,
-      total_processed: stats.processed,
+      processed: stats.processed,
       created: stats.created,
       updated: stats.updated,
       skipped: stats.skipped,
       failed: stats.failed,
       success_rate: stats.success_rate
-    }, tags: { severity: :info })
+    })
   end
 
   def record_successful_import
@@ -178,11 +174,10 @@ class SaumonNet:: BaseImportService
       response = HTTParty.get(file_url)
 
       unless response.success?
-        Rails.event.notify_with_tags("saumon_net.file_fetch_failed", {
-          session_id: session_id,
+        track_event(:file_fetch_failed, category: "import", severity: :warn, payload: {
           file_url: file_url,
           status_code: response.code
-        }, tags: { severity: :warn })
+        })
         return entity_data
       end
 
@@ -196,11 +191,10 @@ class SaumonNet:: BaseImportService
       entity_data.merge("file_details" => nested_data)
 
     rescue => e
-      Rails.event.notify_with_tags("saumon_net.file_parsing_error", {
-        session_id: session_id,
+      track_event(:file_parsing_error, category: "import", severity: :error, payload: {
         file_url: file_url,
         error: e.message
-      }, tags: { severity: :error })
+      })
 
       # Return original data on error
       entity_data

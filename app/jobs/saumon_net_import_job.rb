@@ -1,10 +1,15 @@
 class SaumonNetImportJob < ApplicationJob
+  include ServiceEventable
+
   queue_as :default
 
-  discard_on(SaumonNet::AuthenticationError) { |job, error|  notify_discarded_job(job, error) }
-  discard_on(SaumonNet::ConfigurationError) { |job, error|  notify_discarded_job(job, error) }
+  discard_on(SaumonNet::AuthenticationError) { |job, error| notify_discarded_job(job, error) }
+  discard_on(SaumonNet::ConfigurationError) { |job, error| notify_discarded_job(job, error) }
 
   def perform(entity_type, since_date = nil)
+    @session_id = SecureRandom.uuid
+    Current.job_id = job_id
+
     import_service = build_import_service(entity_type)
 
     if since_date.present?
@@ -14,21 +19,20 @@ class SaumonNetImportJob < ApplicationJob
       stats = import_service.import_all
     end
 
-    track_import_metrics(entity_type, stats)
-
-    Rails.event.notify_with_tags("saumon_net.import_job_completed", {
-                      entity_type: entity_type,
-                      since_date: since_date,
-                      stats: stats_summary(stats)
-                    }, tags: { severity: :info })
-
+    track_event(:job_completed, category: "system", payload: {
+      job_class: self.class.name,
+      entity_type: entity_type,
+      since_date: since_date,
+      **stats_summary(stats)
+    })
   rescue => e
-    Rails.event.notify_with_tags("saumon_net.import_job_failed", {
-                       entity_type: entity_type,
-                       since_date: since_date,
-                       error: e.message,
-                       backtrace: e.backtrace
-                     }, tags: { severity: :error })
+    track_event(:job_failed, category: "system", severity: :error, payload: {
+      job_class: self.class.name,
+      entity_type: entity_type,
+      since_date: since_date,
+      error: e.message,
+      backtrace: e.backtrace&.first(10)
+    })
 
     raise
   end
@@ -66,16 +70,6 @@ class SaumonNetImportJob < ApplicationJob
     end
     rescue Date::Error
       raise ArgumentError, "Invalid since_date format: #{since_date}"
-  end
-
-  def track_import_metrics(entity_type, stats)
-    if defined?(NewRelic::Agent)
-      NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/Processed", stats.processed)
-      NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/Created", stats.created)
-      NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/Updated", stats.updated)
-      NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/Failed", stats.failed)
-      NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/SuccessRate", stats.success_rate)
-    end
   end
 
   def stats_summary(stats)

@@ -4,6 +4,20 @@ class SaumonNet::HealthMonitoringService
   class << self
     def logger = Rails.logger
 
+    def track_health_event(action, payload: {}, severity: :info)
+      Event.create!(
+        category: "health",
+        action: action.to_s,
+        severity: severity.to_s,
+        eventable_type: name,
+        eventable_id: nil,
+        payload: payload,
+        session_id: Current.session_id,
+        request_id: Current.request_id,
+        job_id: Current.job_id
+      )
+    end
+
     def record_successful_import(entity_type, stats = nil)
       cache_data = {
         timestamp: Time.current.iso8601,
@@ -24,17 +38,6 @@ class SaumonNet::HealthMonitoringService
         cache_data,
         expires_in: 30.days
       )
-
-      if stats && defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccess", Time.current.to_i)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Import/#{entity_type}/LastSuccessRate", stats.success_rate)
-
-        NewRelic::Agent.add_custom_attributes({
-          "saumon_net.import.entity_type" => entity_type,
-          "saumon_net.import.processed" => stats.processed,
-          "saumon_net.import.success_rate" => stats.success_rate
-        })
-      end
     end
 
     def last_import_status(entity_type)
@@ -52,14 +55,15 @@ class SaumonNet::HealthMonitoringService
         if last_import.nil?
           results[entity_type] = { status: "never_imported", healthy: false }
 
-          if defined?(NewRelic::Agent)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/NeverImported", 1)
-          end
+          track_health_event(:import_check, payload: {
+            entity_type: entity_type,
+            never_imported: true,
+            healthy: false
+          })
         else
           last_time = Time.parse(last_import[:timestamp])
           age_hours = (Time.current - last_time) / 1.hour
 
-          # Consider healthy if imported within last 24 hours
           healthy = age_hours < 24
           healthy_count += 1 if healthy
 
@@ -71,20 +75,22 @@ class SaumonNet::HealthMonitoringService
             stats: last_import[:stats]
           }
 
-          if defined?(NewRelic::Agent)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/AgeHours", age_hours)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/Health/#{entity_type}/Healthy", healthy ? 1 : 0)
-          end
+          track_health_event(:import_check, payload: {
+            entity_type: entity_type,
+            healthy: healthy,
+            age_hours: age_hours.round(2),
+            last_import: last_import[:timestamp]
+          })
         end
       end
 
       overall_healthy = results.values.all? { |r| r[:healthy] }
 
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/Healthy", overall_healthy ? 1 : 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/HealthyEntityCount", healthy_count)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/Overall/TotalEntityCount", entity_types.size)
-      end
+      track_health_event(:import_check, payload: {
+        overall_healthy: overall_healthy,
+        healthy_count: healthy_count,
+        total_count: entity_types.size
+      })
 
       {
         overall_healthy: overall_healthy,
@@ -101,11 +107,11 @@ class SaumonNet::HealthMonitoringService
         SaumonNet::Entity.list_all(type: "organe") do |entities|
           response_time = ((Time.current - start_time) * 1000).round(2)
 
-          if defined?(NewRelic::Agent)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/API/ResponseTime", response_time)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 1)
-            NewRelic::Agent.record_metric("Custom/SaumonNet/API/ConnectivityCheck", 1)
-          end
+          track_health_event(:api_check, payload: {
+            healthy: true,
+            response_time_ms: response_time,
+            entity_count: entities.size
+          })
 
           return {
             healthy: true,
@@ -115,13 +121,12 @@ class SaumonNet::HealthMonitoringService
           }
         end
 
-        # If we get here without an exception, API is healthy
         response_time = ((Time.current - start_time) * 1000).round(2)
 
-        if defined?(NewRelic::Agent)
-          NewRelic::Agent.record_metric("Custom/SaumonNet/API/ResponseTime", response_time)
-          NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 1)
-        end
+        track_health_event(:api_check, payload: {
+          healthy: true,
+          response_time_ms: response_time
+        })
 
         {
           healthy: true,
@@ -132,19 +137,11 @@ class SaumonNet::HealthMonitoringService
 
       result
     rescue => e
-      Rails.event.notify_with_tags("saumon_net.api_health_check_failed", {
-                         error: e.message,
-                         backtrace: e.backtrace
-                       }, tags: { severity: :error })
-
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/API/Healthy", 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/API/Errors", 1)
-        NewRelic::Agent.notice_error(e, custom_params: {
-          health_check: "api_connectivity",
-          component: "saumon_net_api"
-        })
-      end
+      track_health_event(:api_check_failed, severity: :error, payload: {
+        error: e.message,
+        error_type: e.class.name,
+        backtrace: e.backtrace&.first(10)
+      })
 
       {
         healthy: false,
@@ -161,7 +158,6 @@ class SaumonNet::HealthMonitoringService
       queues = Sidekiq::Queue.all
       failed = Sidekiq::RetrySet.new
 
-      # Define thresholds
       max_queue_size = 1000
       max_failed_jobs = 100
       max_retry_jobs = 50
@@ -169,12 +165,17 @@ class SaumonNet::HealthMonitoringService
       queue_sizes = queues.map { |q| [ q.name, q.size ] }.to_h
       total_enqueued = queue_sizes.values.sum
 
-      large_queues = queue_sizes.select { |name, size| size > max_queue_size }
+      large_queues = queue_sizes.select { |_name, size| size > max_queue_size }
 
       healthy = total_enqueued < max_queue_size &&
                failed.size < max_failed_jobs &&
                stats.retry_size < max_retry_jobs &&
                large_queues.empty?
+
+      alerts = []
+      alerts << "QueueSizeExceeded" if total_enqueued >= max_queue_size
+      alerts << "TooManyFailedJobs" if failed.size >= max_failed_jobs
+      alerts << "LargeQueuesDetected" if large_queues.any?
 
       result = {
         healthy: healthy,
@@ -187,47 +188,24 @@ class SaumonNet::HealthMonitoringService
         failed_today: stats.failed
       }
 
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", healthy ? 1 : 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/TotalEnqueued", total_enqueued)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/FailedCount", failed.size)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/RetryCount", stats.retry_size)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/ProcessedToday", stats.processed)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/FailedToday", stats.failed)
-
-        # Record individual queue sizes
-        queue_sizes.each do |queue_name, size|
-          NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Queue/#{queue_name}/Size", size)
-        end
-
-        # Record threshold violations
-        if total_enqueued >= max_queue_size
-          NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Alerts/QueueSizeExceeded", 1)
-        end
-
-        if failed.size >= max_failed_jobs
-          NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Alerts/TooManyFailedJobs", 1)
-        end
-
-        if large_queues.any?
-          NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Alerts/LargeQueuesDetected", large_queues.size)
-        end
-      end
+      track_health_event(:queue_check, payload: {
+        healthy: healthy,
+        total_enqueued: total_enqueued,
+        failed_count: failed.size,
+        retry_count: stats.retry_size,
+        queue_sizes: queue_sizes,
+        processed_today: stats.processed,
+        failed_today: stats.failed,
+        alerts: alerts.presence
+      })
 
       result
     rescue => e
-      Rails.event.notify_with_tags("saumon_net.sidekiq_health_check_failed", {
-                         error: e.message,
-                         backtrace: e.backtrace
-                       }, tags: { severity: :error })
-
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Sidekiq/Healthy", 0)
-        NewRelic::Agent.notice_error(e, custom_params: {
-          health_check: "queue_monitoring",
-          component: "sidekiq_monitoring"
-        })
-      end
+      track_health_event(:queue_check_failed, severity: :error, payload: {
+        error: e.message,
+        error_type: e.class.name,
+        backtrace: e.backtrace&.first(10)
+      })
 
       {
         healthy: false,
@@ -239,12 +217,6 @@ class SaumonNet::HealthMonitoringService
     def full_health_check
       results = {}
       overall_healthy = true
-
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.add_custom_attributes({
-          "saumon_net.health_check.timestamp" => Time.current.iso8601
-        })
-      end
 
       import_status = import_health_status
       results[:imports] = import_status
@@ -258,26 +230,19 @@ class SaumonNet::HealthMonitoringService
       results[:queues] = queue_status
       overall_healthy &&= queue_status[:healthy]
 
-      if defined?(NewRelic::Agent)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/Overall", overall_healthy ? 1 : 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/ImportsHealthy", import_status[:overall_healthy] ? 1 : 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/APIHealthy", api_status[:healthy] ? 1 : 0)
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/QueuesHealthy", queue_status[:healthy] ? 1 : 0)
+      failed_checks = []
+      failed_checks << "imports" unless import_status[:overall_healthy]
+      failed_checks << "api" unless api_status[:healthy]
+      failed_checks << "queues" unless queue_status[:healthy]
 
-        NewRelic::Agent.add_custom_attributes({
-          "saumon_net.health.overall" => overall_healthy,
-          "saumon_net.health.imports" => import_status[:overall_healthy],
-          "saumon_net.health.api" => api_status[:healthy],
-          "saumon_net.health.queues" => queue_status[:healthy]
-        })
-
-        failed_checks = []
-        failed_checks << "imports" unless import_status[:overall_healthy]
-        failed_checks << "api" unless api_status[:healthy]
-        failed_checks << "queues" unless queue_status[:healthy]
-
-        NewRelic::Agent.record_metric("Custom/SaumonNet/Health/FullCheck/FailedCheckCount", failed_checks.size)
-      end
+      track_health_event(:full_check, payload: {
+        healthy: overall_healthy,
+        timestamp: Time.current.iso8601,
+        imports_healthy: import_status[:overall_healthy],
+        api_healthy: api_status[:healthy],
+        queues_healthy: queue_status[:healthy],
+        failed_check_count: failed_checks.size
+      })
 
       {
         healthy: overall_healthy,

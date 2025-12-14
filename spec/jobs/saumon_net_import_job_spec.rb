@@ -1,33 +1,30 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe SaumonNetImportJob, type: :job do
   include ActiveJob::TestHelper
 
-  describe '#perform' do
-    let(:entity_type) { 'organe' }
+  describe "#perform" do
+    let(:entity_type) { "organe" }
     let(:since_date) { nil }
     let(:import_service) { instance_double(SaumonNet::BodyImportService) }
-    let(:stats) { double('stats', processed: 10, created: 5, updated: 3, skipped: 1, failed: 1, success_rate: 0.9) }
+    let(:stats) { double("stats", processed: 10, created: 5, updated: 3, skipped: 1, failed: 1, success_rate: 0.9) }
 
     before do
       allow(SaumonNet::BodyImportService).to receive(:new).and_return(import_service)
       allow(import_service).to receive(:import_all).and_return(stats)
       allow(import_service).to receive(:import_since).and_return(stats)
-      allow(Rails.logger).to receive(:info)
-      allow(Rails.logger).to receive(:error)
-      allow(NewRelic::Agent).to receive(:record_metric) if defined?(NewRelic::Agent)
     end
 
-    context 'with organe entity type' do
-      it 'builds BodyImportService and calls import_all when no since_date' do
+    context "with organe entity type" do
+      it "builds BodyImportService and calls import_all when no since_date" do
         expect(SaumonNet::BodyImportService).to receive(:new)
         expect(import_service).to receive(:import_all)
 
         described_class.new.perform(entity_type)
       end
 
-      it 'calls import_since when since_date is provided' do
-        since_date = '2023-01-01'
+      it "calls import_since when since_date is provided" do
+        since_date = "2023-01-01"
         parsed_date = DateTime.parse(since_date)
 
         expect(import_service).to receive(:import_since).with(parsed_date)
@@ -36,8 +33,8 @@ RSpec.describe SaumonNetImportJob, type: :job do
       end
     end
 
-    context 'with pays entity type' do
-      let(:entity_type) { 'pays' }
+    context "with pays entity type" do
+      let(:entity_type) { "pays" }
       let(:import_service) { instance_double(SaumonNet::CountryImportService) }
 
       before do
@@ -45,157 +42,125 @@ RSpec.describe SaumonNetImportJob, type: :job do
         allow(import_service).to receive(:import_all).and_return(stats)
       end
 
-      it 'builds CountryImportService' do
+      it "builds CountryImportService" do
         expect(SaumonNet::CountryImportService).to receive(:new)
 
         described_class.new.perform(entity_type)
       end
     end
 
-    context 'with unknown entity type' do
-      let(:entity_type) { 'unknown' }
+    context "with unknown entity type" do
+      let(:entity_type) { "unknown" }
 
-      it 'raises ArgumentError' do
+      it "raises ArgumentError" do
         expect {
           described_class.new.perform(entity_type)
         }.to raise_error(ArgumentError, "Unknown entity type: unknown")
       end
     end
 
-    context 'logging' do
-      it 'logs successful completion with stats' do
-        expected_stats = {
-          processed: 10,
-          created: 5,
-          updated: 3,
-          skipped: 1,
-          failed: 1,
-          success_rate: 0.9
-        }
+    context "event tracking" do
+      it "creates job_completed event with stats on success" do
+        expect {
+          described_class.new.perform(entity_type, since_date)
+        }.to change { Event.by_category("system").by_action("job_completed").count }.by(1)
 
-        expect(Rails.event).to receive(:notify_with_tags).with(
-          "saumon_net.import_job_completed",
-          {
-            entity_type: entity_type,
-            since_date: since_date,
-            stats: expected_stats
-          },
-          tags: { severity: :info }
-        )
-
-        described_class.new.perform(entity_type, since_date)
+        event = Event.by_action("job_completed").last
+        expect(event.payload["entity_type"]).to eq(entity_type)
+        expect(event.payload["processed"]).to eq(stats.processed)
+        expect(event.payload["created"]).to eq(stats.created)
+        expect(event.payload["updated"]).to eq(stats.updated)
+        expect(event.payload["failed"]).to eq(stats.failed)
+        expect(event.payload["success_rate"]).to eq(stats.success_rate)
       end
 
-      it 'logs errors and re-raises them' do
+      it "sets Current.job_id for correlation" do
+        job = described_class.new
+        job.perform(entity_type)
+
+        event = Event.by_action("job_completed").last
+        expect(event.job_id).to eq(job.job_id)
+      end
+
+      it "creates job_failed event and re-raises on error" do
         error = StandardError.new("Import failed")
         allow(import_service).to receive(:import_all).and_raise(error)
 
-        expect(Rails.event).to receive(:notify_with_tags).with(
-          "saumon_net.import_job_failed",
-          {
-            entity_type: entity_type,
-            since_date: since_date,
-            error: "Import failed",
-            backtrace: kind_of(Array)
-          },
-          tags: { severity: :error }
-        )
-
         expect {
-          described_class.new.perform(entity_type, since_date)
-        }.to raise_error(StandardError, "Import failed")
-      end
-    end
+          expect {
+            described_class.new.perform(entity_type, since_date)
+          }.to raise_error(StandardError, "Import failed")
+        }.to change { Event.by_category("system").by_action("job_failed").count }.by(1)
 
-    context 'metrics tracking' do
-      context 'when NewRelic is available' do
-        before do
-          allow(NewRelic::Agent).to receive(:record_metric)
-        end
-
-        it 'records metrics for the import' do
-          expect(NewRelic::Agent).to receive(:record_metric).with("Custom/SaumonNet/Import/#{entity_type}/Processed", 10)
-          expect(NewRelic::Agent).to receive(:record_metric).with("Custom/SaumonNet/Import/#{entity_type}/Created", 5)
-          expect(NewRelic::Agent).to receive(:record_metric).with("Custom/SaumonNet/Import/#{entity_type}/Updated", 3)
-          expect(NewRelic::Agent).to receive(:record_metric).with("Custom/SaumonNet/Import/#{entity_type}/Failed", 1)
-          expect(NewRelic::Agent).to receive(:record_metric).with("Custom/SaumonNet/Import/#{entity_type}/SuccessRate", 0.9)
-
-          described_class.new.perform(entity_type)
-        end
-      end
-
-      context 'when NewRelic is not available' do
-        before do
-          hide_const('NewRelic::Agent') if defined?(NewRelic::Agent)
-        end
-
-        it 'does not attempt to record metrics' do
-          expect { described_class.new.perform(entity_type) }.not_to raise_error
-        end
+        event = Event.by_action("job_failed").last
+        expect(event.severity).to eq("error")
+        expect(event.payload["entity_type"]).to eq(entity_type)
+        expect(event.payload["error"]).to eq("Import failed")
+        expect(event.payload["backtrace"]).to be_an(Array)
       end
     end
   end
 
-  describe '#build_import_service' do
+  describe "#build_import_service" do
     let(:job) { described_class.new }
 
-    it 'returns BodyImportService for organe entity type' do
-      service = job.send(:build_import_service, 'organe')
+    it "returns BodyImportService for organe entity type" do
+      service = job.send(:build_import_service, "organe")
       expect(service).to be_an_instance_of(SaumonNet::BodyImportService)
     end
 
-    it 'returns CountryImportService for pays entity type' do
-      service = job.send(:build_import_service, 'pays')
+    it "returns CountryImportService for pays entity type" do
+      service = job.send(:build_import_service, "pays")
       expect(service).to be_an_instance_of(SaumonNet::CountryImportService)
     end
 
-    it 'returns StakeholderImportService for acteur entity type' do
-      service = job.send(:build_import_service, 'acteur')
+    it "returns StakeholderImportService for acteur entity type" do
+      service = job.send(:build_import_service, "acteur")
       expect(service).to be_an_instance_of(SaumonNet::StakeholderImportService)
     end
 
-    it 'raises ArgumentError for unknown entity type' do
+    it "raises ArgumentError for unknown entity type" do
       expect {
-        job.send(:build_import_service, 'unknown')
+        job.send(:build_import_service, "unknown")
       }.to raise_error(ArgumentError, "Unknown entity type: unknown")
     end
   end
 
-  describe '#parse_since_date' do
+  describe "#parse_since_date" do
     let(:job) { described_class.new }
 
-    context 'with string date' do
-      it 'parses valid date string' do
-        result = job.send(:parse_since_date, '2023-01-01')
+    context "with string date" do
+      it "parses valid date string" do
+        result = job.send(:parse_since_date, "2023-01-01")
         expect(result).to be_a(DateTime)
         expect(result.year).to eq(2023)
         expect(result.month).to eq(1)
         expect(result.day).to eq(1)
       end
 
-      it 'parses ISO 8601 date string' do
-        result = job.send(:parse_since_date, '2023-01-01T10:30:00Z')
+      it "parses ISO 8601 date string" do
+        result = job.send(:parse_since_date, "2023-01-01T10:30:00Z")
         expect(result).to be_a(DateTime)
         expect(result.year).to eq(2023)
         expect(result.hour).to eq(10)
         expect(result.min).to eq(30)
       end
 
-      it 'raises ArgumentError for invalid date string' do
+      it "raises ArgumentError for invalid date string" do
         expect {
-          job.send(:parse_since_date, 'invalid-date')
+          job.send(:parse_since_date, "invalid-date")
         }.to raise_error(ArgumentError, /Invalid since_date format/)
       end
     end
 
-    context 'with invalid type' do
-      it 'raises ArgumentError for integer' do
+    context "with invalid type" do
+      it "raises ArgumentError for integer" do
         expect {
           job.send(:parse_since_date, 123)
         }.to raise_error(ArgumentError, "Invalid since_date format: 123")
       end
 
-      it 'raises ArgumentError for nil' do
+      it "raises ArgumentError for nil" do
         expect {
           job.send(:parse_since_date, nil)
         }.to raise_error(ArgumentError, "Invalid since_date format: ")
@@ -203,11 +168,11 @@ RSpec.describe SaumonNetImportJob, type: :job do
     end
   end
 
-  describe '#stats_summary' do
+  describe "#stats_summary" do
     let(:job) { described_class.new }
-    let(:stats) { double('stats', processed: 10, created: 5, updated: 3, skipped: 1, failed: 1, success_rate: 0.9) }
+    let(:stats) { double("stats", processed: 10, created: 5, updated: 3, skipped: 1, failed: 1, success_rate: 0.9) }
 
-    it 'returns a hash with all stats' do
+    it "returns a hash with all stats" do
       result = job.send(:stats_summary, stats)
 
       expect(result).to eq({
@@ -221,40 +186,40 @@ RSpec.describe SaumonNetImportJob, type: :job do
     end
   end
 
-  describe 'job configuration' do
-    it 'is queued on default queue' do
-      expect(described_class.queue_name).to eq('default')
+  describe "job configuration" do
+    it "is queued on default queue" do
+      expect(described_class.queue_name).to eq("default")
     end
 
-    it 'discards SaumonNet::AuthenticationError' do
+    it "discards SaumonNet::AuthenticationError" do
       allow(SaumonNet::BodyImportService).to receive(:new).and_raise(SaumonNet::AuthenticationError)
 
       expect(Rails.logger).to receive(:warn).with(/Discarded job .* because of SaumonNet::AuthenticationError/)
 
       perform_enqueued_jobs do
-        described_class.perform_later('organe')
+        described_class.perform_later("organe")
       end
 
       expect(enqueued_jobs).to be_empty
     end
 
-    it 'discards SaumonNet::ConfigurationError' do
+    it "discards SaumonNet::ConfigurationError" do
       allow(SaumonNet::BodyImportService).to receive(:new).and_raise(SaumonNet::ConfigurationError)
 
       expect(Rails.logger).to receive(:warn).with(/Discarded job .* because of SaumonNet::ConfigurationError/)
 
       perform_enqueued_jobs do
-        described_class.perform_later('organe')
+        described_class.perform_later("organe")
       end
 
       expect(enqueued_jobs).to be_empty
     end
 
-    it 'does not discard other errors' do
+    it "does not discard other errors" do
       job = described_class.new
       allow(job).to receive(:build_import_service).and_raise(StandardError, "Other error")
 
-      expect { job.perform('organe') }.to raise_error(StandardError, "Other error")
+      expect { job.perform("organe") }.to raise_error(StandardError, "Other error")
     end
   end
 end
