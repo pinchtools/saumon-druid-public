@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+return if Rails.env.test?
+
 Sentry.init do |config|
   config.breadcrumbs_logger = [ :active_support_logger, :http_logger ]
   config.dsn = Rails.application.credentials.sentry.dsn!

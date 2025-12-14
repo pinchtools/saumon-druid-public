@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_13_152738) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_14_102158) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -229,6 +229,29 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_13_152738) do
     t.index ["deputy_term_id"], name: "index_an_terms_on_deputy_term_id"
     t.index ["start_date", "end_date"], name: "index_terms_on_dates"
     t.index ["uid"], name: "index_an_terms_on_uid", unique: true
+  end
+
+  create_table "events", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.string "actor_type"
+    t.string "category", null: false
+    t.timestamptz "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.bigint "eventable_id"
+    t.string "eventable_type"
+    t.uuid "id", default: -> { "uuidv7()" }, null: false
+    t.string "job_id"
+    t.jsonb "payload", default: {}, null: false
+    t.string "request_id"
+    t.uuid "session_id"
+    t.string "severity", default: "info", null: false
+    t.index ["category", "action", "created_at"], name: "index_events_on_category_and_action_and_created_at"
+    t.index ["created_at"], name: "events_created_at_idx", order: :desc
+    t.index ["eventable_type", "eventable_id", "created_at"], name: "index_events_on_eventable_type_and_eventable_id_and_created_at"
+    t.index ["id", "created_at"], name: "index_events_on_id_and_created_at", unique: true
+    t.index ["payload"], name: "index_events_on_payload", using: :gin
+    t.index ["session_id", "created_at"], name: "index_events_on_session_id_and_created_at"
+    t.index ["severity", "created_at"], name: "index_events_on_severity_and_created_at", where: "((severity)::text = ANY ((ARRAY['warn'::character varying, 'error'::character varying])::text[]))"
   end
 
   create_table "llm_models", force: :cascade do |t|
