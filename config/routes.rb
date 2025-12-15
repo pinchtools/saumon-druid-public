@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get "health/imports" => "health#imports", as: :imports_health_check
   get "health/api" => "health#api", as: :api_health_check
   get "health/queues" => "health#queues", as: :queues_health_check
+  get "health/events" => "health#events", as: :events_health_check
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

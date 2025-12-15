@@ -38,4 +38,16 @@ class HealthController < ApplicationController
 
     render json: queue_status, status: status_code
   end
+
+  def events
+    Event.create!(
+      category: "health",
+      action: "ping",
+      payload: { timestamp: Time.current }
+    )
+
+    render json: { status: "ok", events_count: Event.count }
+  rescue => e
+    render json: { status: "error", message: e.message }, status: :service_unavailable
+  end
 end
