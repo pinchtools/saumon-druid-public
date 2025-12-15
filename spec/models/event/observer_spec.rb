@@ -1,48 +1,46 @@
 require "rails_helper"
 
 RSpec.describe Event::Observer do
-  let(:event) { build_stubbed(:event) }
+  include ActiveJob::TestHelper
+
+  let(:event) { create(:event) }
   let(:observer) { described_class.new(event) }
   let(:logger) { instance_double(Event::Logger, log: nil) }
-  let(:metrics) { instance_double(Event::Metrics, record: nil) }
-  let(:error_reporter) { instance_double(Event::ErrorReporter, report: nil) }
 
   before do
     allow(Event::Logger).to receive(:new).with(event).and_return(logger)
-    allow(Event::Metrics).to receive(:new).with(event).and_return(metrics)
-    allow(Event::ErrorReporter).to receive(:new).with(event).and_return(error_reporter)
   end
 
   describe "#observe" do
-    it "logs the event" do
+    it "logs the event synchronously" do
       observer.observe
 
       expect(logger).to have_received(:log)
     end
 
-    it "records metrics" do
-      observer.observe
-
-      expect(metrics).to have_received(:record)
+    it "enqueues the metrics job" do
+      expect {
+        observer.observe
+      }.to have_enqueued_job(Event::MetricsJob).with(event.id)
     end
 
     context "with error severity" do
-      let(:event) { build_stubbed(:event, :error) }
+      let(:event) { create(:event, :error) }
 
-      it "reports the error" do
-        observer.observe
-
-        expect(error_reporter).to have_received(:report)
+      it "enqueues the error reporter job" do
+        expect {
+          observer.observe
+        }.to have_enqueued_job(Event::ErrorReporterJob).with(event.id)
       end
     end
 
     context "with non-error severity" do
-      let(:event) { build_stubbed(:event, severity: "info") }
+      let(:event) { create(:event, severity: "info") }
 
-      it "does not report an error" do
-        observer.observe
-
-        expect(error_reporter).not_to have_received(:report)
+      it "does not enqueue the error reporter job" do
+        expect {
+          observer.observe
+        }.not_to have_enqueued_job(Event::ErrorReporterJob)
       end
     end
   end

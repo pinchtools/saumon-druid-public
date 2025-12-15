@@ -7,8 +7,8 @@ class Event::Observer
 
   def observe
     log_event
-    record_metrics
-    capture_error if event.severity == "error"
+    enqueue_metrics_job
+    enqueue_error_reporter_job if event.severity == "error"
   end
 
   private
@@ -17,11 +17,11 @@ class Event::Observer
     Event::Logger.new(event).log
   end
 
-  def record_metrics
-    Event::Metrics.new(event).record
+  def enqueue_metrics_job
+    Event::MetricsJob.perform_later(event.id)
   end
 
-  def capture_error
-    Event::ErrorReporter.new(event).report
+  def enqueue_error_reporter_job
+    Event::ErrorReporterJob.perform_later(event.id)
   end
 end
