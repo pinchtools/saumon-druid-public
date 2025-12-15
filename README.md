@@ -6,36 +6,25 @@
 
 ---
 
-## Architecture
+## Design Principles
 
-```mermaid
-flowchart LR
-    API[Assemblée Nationale API] --> ETL[Import Pipeline]
-    ETL --> DB[(PostgreSQL)]
-    DB --> Search[Hybrid Search]
-    DB --> Agents[LLM Agents]
-    Search --> UI[Web Interface]
-    Agents --> UI
+This project builds on top of Saumon-Net, which is responsible for collecting raw data from the Assemblée Nationale open data APIs and preserving its full history.
 
-    subgraph Observability
-        Events[Event System]
-        Sentry
-        NewRelic[New Relic]
-    end
+Saumon-Net provides a reliable, versioned data source. This project focuses on the next step: transforming that raw data into a clean, normalized knowledge base designed for AI agents. The data is structured to make relationships explicit, consistent, and easy to query.
 
-    ETL -.-> Events
-    Search -.-> Events
-```
+On top of this foundation, an AI-powered question-answering system allows users to explore parliamentary data using natural language. The system retrieves relevant information and generates clear answers, making complex institutional data accessible to non-experts.
+
+The platform is designed with scalability and observability in mind, ensuring that data processing and AI workflows can be monitored, extended, and maintained over time.
 
 ## Engineering Highlights
-
-**Observability** — Single `track_event` entry point for all instrumentation. Events are persisted to TimescaleDB for audit, then asynchronously routed to Sentry (errors) and New Relic (metrics). No scattered `Rails.logger` or direct SDK calls.
 
 **Data Lineage** — ETL pipeline with transaction safety: all-or-nothing imports with automatic rollback. Each run tracks processed/created/updated/skipped/failed counts. Supports incremental sync via date filtering.
 
 **Hybrid Search** — Combines French full-text search (stemming, stopwords) with trigram fuzzy matching and pgvector semantic embeddings. Weighted scoring adapts to query type.
 
 **LLM Agents** — YAML-configured agents with schema-validated inputs/outputs. Decouples prompt engineering from code.
+
+**Observability** — Single `track_event` entry point for all instrumentation. Events are persisted to TimescaleDB for audit, then asynchronously routed to Sentry (errors) and New Relic (metrics). No scattered `Rails.logger` or direct SDK calls.
 
 ## Tech Stack
 
