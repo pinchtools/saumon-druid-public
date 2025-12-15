@@ -40,28 +40,41 @@ jobs:
   spec:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: ghcr.io/pinchtools/saumon-druid-postgres:latest
-        ports: ['5432:5432']
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: saumon_druid_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       RAILS_ENV: test
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY_TEST }}
       POSTGRES_HOST: localhost
       POSTGRES_PASSWORD: password
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Build Postgres image
+        run: docker build -f Dockerfile.postgres -t saumon-druid-postgres .
+
+      - name: Start Postgres container
+        run: |
+          docker run -d \
+            --name postgres \
+            -p 5432:5432 \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=password \
+            -e POSTGRES_DB=saumon_druid_test \
+            saumon-druid-postgres
+
+      - name: Wait for Postgres to be ready
+        run: |
+          for i in {1..30}; do
+            if docker exec postgres pg_isready -U postgres; then
+              echo "Postgres is ready"
+              exit 0
+            fi
+            echo "Waiting for Postgres... ($i/30)"
+            sleep 2
+          done
+          echo "Postgres failed to start"
+          exit 1
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
