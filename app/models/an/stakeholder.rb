@@ -1,6 +1,10 @@
 class An::Stakeholder < ApplicationRecord
   include An::Concerns::Searchable
   include An::Stakeholder::SearchContentBuilder
+  include Eventable
+
+  after_commit :track_creation, on: :create
+  after_commit :track_update, on: :update, if: :saved_changes?
 
   has_many :an_stakeholder_addresses, class_name: "An::StakeholderAddress", foreign_key: :an_stakeholder_id, inverse_of: :an_stakeholder, dependent: :destroy
   has_many :an_terms, class_name: "An::Term", foreign_key: :an_stakeholder_id, inverse_of: :an_stakeholder, dependent: :destroy
@@ -58,5 +62,13 @@ class An::Stakeholder < ApplicationRecord
     else
                                   an_terms.past.by_hierarchy
     end
+  end
+
+  def track_creation
+    track_event(:created, payload: { uid: uid })
+  end
+
+  def track_update
+    track_event(:updated, payload: { uuid: uid, changes: saved_changes })
   end
 end

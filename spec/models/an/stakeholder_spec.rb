@@ -26,6 +26,39 @@ RSpec.describe An::Stakeholder, type: :model do
     end
   end
 
+  describe 'event tracking' do
+    describe 'on create' do
+      let(:stakeholder) { build(:an_stakeholder) }
+
+      it 'tracks a created event after commit' do
+        expect { stakeholder.save! }.to change { stakeholder.events.where(action: 'created').count }.by(1)
+
+        event = stakeholder.events.find_by(action: 'created')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uid' => stakeholder.uid)
+      end
+    end
+
+    describe 'on update' do
+      let!(:stakeholder) { create(:an_stakeholder, first_name: 'Jean') }
+
+      it 'tracks an updated event after commit when changes are saved' do
+        expect { stakeholder.update!(first_name: 'Pierre') }.to change {
+          stakeholder.events.where(action: 'updated').count
+        }.by(1)
+
+        event = stakeholder.events.find_by(action: 'updated')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uuid' => stakeholder.uid)
+        expect(event.payload['changes']).to include('first_name')
+      end
+
+      it 'does not track an event when no changes are made' do
+        expect { stakeholder.save! }.not_to change { stakeholder.events.where(action: 'updated').count }
+      end
+    end
+  end
+
   describe '#current_top_position' do
     let(:stakeholder) { create(:an_stakeholder) }
     let!(:regular_active_term) { create(:an_term, an_stakeholder: stakeholder, start_date: 1.month.ago, end_date: nil) }

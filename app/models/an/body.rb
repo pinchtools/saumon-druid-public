@@ -1,4 +1,9 @@
 class An::Body < ApplicationRecord
+  include Eventable
+
+  after_commit :track_creation, on: :create
+  after_commit :track_update, on: :update, if: :saved_changes?
+
   belongs_to :an_body_type, class_name: "An::BodyType", inverse_of: :an_bodies
   belongs_to :parent, class_name: "An::Body", optional: true
   has_many :children, class_name: "An::Body", foreign_key: :parent_id, dependent: :destroy
@@ -15,4 +20,14 @@ class An::Body < ApplicationRecord
   validates :an_body_type_id, presence: true
 
   scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
+
+  private
+
+  def track_creation
+    track_event(:created, payload: { uid: uid })
+  end
+
+  def track_update
+    track_event(:updated, payload: { uuid: uid, changes: saved_changes })
+  end
 end

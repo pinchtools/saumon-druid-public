@@ -1,4 +1,9 @@
 class An::Term < ApplicationRecord
+  include Eventable
+
+  after_commit :track_creation, on: :create
+  after_commit :track_update, on: :update, if: :saved_changes?
+
   belongs_to :an_stakeholder, class_name: "An::Stakeholder", inverse_of: :an_terms
   belongs_to :an_body, class_name: "An::Body", inverse_of: :an_terms
   belongs_to :constituency, class_name: "An::Body", optional: true
@@ -28,5 +33,15 @@ class An::Term < ApplicationRecord
     else
       I18n.t("an.term.role_rank.low")
     end
+  end
+
+  private
+
+  def track_creation
+    track_event(:created, payload: { uid: uid })
+  end
+
+  def track_update
+    track_event(:updated, payload: { uid: uid, changes: saved_changes })
   end
 end

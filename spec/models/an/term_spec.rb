@@ -109,4 +109,37 @@ RSpec.describe An::Term, type: :model do
       expect(term.role_rank_label).to eq(I18n.t('an.term.role_rank.low'))
     end
   end
+
+  describe 'event tracking' do
+    describe 'on create' do
+      let(:stakeholder) { create(:an_stakeholder) }
+      let(:body) { create(:an_body) }
+      let(:term) { build(:an_term, an_stakeholder: stakeholder, an_body: body) }
+
+      it 'tracks a created event after commit' do
+        expect { term.save! }.to change { term.events.where(action: 'created').count }.by(1)
+
+        event = term.events.find_by(action: 'created')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uid' => term.uid)
+      end
+    end
+
+    describe 'on update' do
+      let!(:term) { create(:an_term, label: 'Old Label') }
+
+      it 'tracks an updated event after commit when changes are saved' do
+        expect { term.update!(label: 'New Label') }.to change { term.events.where(action: 'updated').count }.by(1)
+
+        event = term.events.find_by(action: 'updated')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uid' => term.uid)
+        expect(event.payload['changes']).to include('label')
+      end
+
+      it 'does not track an event when no changes are made' do
+        expect { term.save! }.not_to change { term.events.where(action: 'updated').count }
+      end
+    end
+  end
 end

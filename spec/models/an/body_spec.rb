@@ -18,4 +18,36 @@ RSpec.describe An::Body, type: :model do
     it { should validate_uniqueness_of(:uid) }
     it { should validate_presence_of(:an_body_type_id) }
   end
+
+  describe 'event tracking' do
+    describe 'on create' do
+      let(:body_type) { create(:an_body_type) }
+      let(:body) { build(:an_body, an_body_type: body_type) }
+
+      it 'tracks a created event after commit' do
+        expect { body.save! }.to change { body.events.where(action: 'created').count }.by(1)
+
+        event = body.events.find_by(action: 'created')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uid' => body.uid)
+      end
+    end
+
+    describe 'on update' do
+      let!(:body) { create(:an_body, label: 'Old Label') }
+
+      it 'tracks an updated event after commit when changes are saved' do
+        expect { body.update!(label: 'New Label') }.to change { body.events.where(action: 'updated').count }.by(1)
+
+        event = body.events.find_by(action: 'updated')
+        expect(event.category).to eq('data')
+        expect(event.payload).to include('uuid' => body.uid)
+        expect(event.payload['changes']).to include('label')
+      end
+
+      it 'does not track an event when no changes are made' do
+        expect { body.save! }.not_to change { body.events.where(action: 'updated').count }
+      end
+    end
+  end
 end
