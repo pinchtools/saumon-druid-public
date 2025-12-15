@@ -2,7 +2,6 @@ require_relative "boot"
 
 require "rails/all"
 require_relative "../app/lib/component_logger_formatter"
-require_relative "../app/lib/rails_event_logger_subscriber"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -29,11 +28,6 @@ module SaumonDruid
     config.log_formatter = ComponentLoggerFormatter.new
 
     config.log_file_size = 250.megabytes
-
-    # Register the Rails event logger subscriber
-    config.after_initialize do
-      Rails.event.subscribe(RailsEventLoggerSubscriber.new)
-    end
 
     config.generators do |g|
       g.test_framework :rspec
