@@ -39,7 +39,12 @@ class An::Search < ApplicationRecord
 
     nearest_neighbors(:embedding, embedding&.first, distance: "cosine").limit(limit)
   rescue Llm::OpenrouterEmbeddingService::EmbeddingError => e
-    Rails.event.notify_with_tags("llm.embedding-server-error", { error: e.message }, tags: { severity: :error })
+    Event.create!(
+      category: "llm",
+      action: "embedding_server_error",
+      severity: "error",
+      payload: { error: e.message, query: query }
+    )
 
     []
   end

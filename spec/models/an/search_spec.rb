@@ -90,7 +90,14 @@ RSpec.describe An::Search, type: :model do
 
     context 'when embedding service fails' do
       before do
-        allow(embedding_service).to receive(:embed).and_raise(Llm::OpenrouterEmbeddingService::EmbeddingError.new('API error'))
+        allow(embedding_service).to receive(:embed).
+          and_raise(Llm::OpenrouterEmbeddingService::EmbeddingError.new('API error'))
+      end
+
+      it 'create an event' do
+        expect { described_class.semantic_search(query) }.to change {
+          Event.by_action("embedding_server_error").count
+        }.by(1)
       end
 
       it 'returns empty array' do
