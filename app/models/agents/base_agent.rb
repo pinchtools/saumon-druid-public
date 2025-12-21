@@ -1,4 +1,6 @@
 class Agents::BaseAgent
+  include JsonRepairable
+
   attr_reader :agent, :current_version, :enabled_models, :input
 
   delegate :agent_name, to: :class
@@ -45,25 +47,11 @@ class Agents::BaseAgent
 
   protected
 
-  def extract_json_from_response(content)
-    content = content.strip
-
-    # Handle JSON wrapped in markdown code blocks
-    if content.start_with?("```json") && content.end_with?("```")
-      content = content[7..-4].strip  # Remove ```json and ```
-    elsif content.start_with?("```") && content.end_with?("```")
-      content = content[3..-4].strip   # Remove ``` and ```
-    end
-
-    content
-  end
-
   def parse_and_validate_json_response(response)
-    content = extract_json_from_response(response.content)
-    data = JSON.parse(content)
+    data = repair_json(response.content)
     validate_output(data)
     data
-  rescue JSON::ParserError => e
+  rescue JsonRepairable::RepairError => e
     raise ArgumentError, "Invalid JSON response from LLM: #{e.message}"
   end
 
