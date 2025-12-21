@@ -69,6 +69,25 @@ RSpec.describe An::Term, type: :model do
         expect(An::Term.by_hierarchy).to include(term_low, term_mid, term_high)
       end
     end
+
+    describe ".by_body_type" do
+      let(:search_body_type) { "CONFPT" }
+      let(:body_type) { create(:an_body_type, code: existing_type) }
+      let(:body) { create(:an_body, an_body_type: body_type) }
+      let!(:term) { create(:an_term, an_body: body) }
+
+      context "when searched body_type exists" do
+        let(:existing_type) { search_body_type }
+
+        it { expect(described_class.by_body_type(search_body_type)).to include(term) }
+      end
+
+      context "when searched body_type doesn't exist" do
+        let(:existing_type) { "UNKNOWN" }
+
+        it { expect(described_class.by_body_type(search_body_type)).not_to include(term) }
+      end
+    end
   end
 
   describe 'validations' do

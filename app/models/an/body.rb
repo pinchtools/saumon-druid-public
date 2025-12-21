@@ -21,6 +21,11 @@ class An::Body < ApplicationRecord
 
   scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
 
+  scope :by_type, ->(*codes) {
+    codes = codes.flatten
+    joins(:an_body_type).where(an_body_types: { code: codes })
+  }
+
   private
 
   def track_creation

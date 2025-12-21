@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe An::Body, type: :model do
-  describe 'associations ' do
+  describe 'associations' do
     it { should belong_to(:an_body_type).class_name('An::BodyType') }
     it { should belong_to(:parent).class_name('An::Body').optional }
     it { should have_many(:children).class_name('An::Body').with_foreign_key(:parent_id).dependent(:destroy) }
@@ -17,6 +17,26 @@ RSpec.describe An::Body, type: :model do
     it { should validate_presence_of(:uid) }
     it { should validate_uniqueness_of(:uid) }
     it { should validate_presence_of(:an_body_type_id) }
+  end
+
+  describe 'scopes' do
+    describe ".by_type" do
+      let(:search_body_type) { "CONFPT" }
+      let(:body_type) { create(:an_body_type, code: existing_type) }
+      let!(:body) { create(:an_body, an_body_type: body_type) }
+
+      context "when searched body_type exists" do
+        let(:existing_type) { search_body_type }
+
+        it { expect(described_class.by_type(search_body_type)).to include(body) }
+      end
+
+      context "when searched body_type doesn't exist" do
+        let(:existing_type) { "UNKNOWN" }
+
+        it { expect(described_class.by_type(search_body_type)).not_to include(body) }
+      end
+    end
   end
 
   describe 'event tracking' do

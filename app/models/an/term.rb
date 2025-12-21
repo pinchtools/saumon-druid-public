@@ -18,6 +18,11 @@ class An::Term < ApplicationRecord
   scope :past, -> { where.not(start_date: nil).where.not(end_date: nil) }
   scope :by_hierarchy, -> { joins(an_body: :an_body_type).order("an_body_types.hierarchy_level ASC") }
 
+  scope :by_body_type, ->(*codes) {
+    codes = codes.flatten
+    joins(an_body: :an_body_type).where(an_body_types: { code: codes })
+  }
+
   validates :uid, presence: true, uniqueness: true
   validates :an_stakeholder_id, :an_body_id, presence: true
   validates :label, length: { maximum: 800 }
