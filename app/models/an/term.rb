@@ -1,5 +1,6 @@
 class An::Term < ApplicationRecord
   include Eventable
+  include DateFilterable
 
   after_commit :track_creation, on: :create
   after_commit :track_update, on: :update, if: :saved_changes?
@@ -14,8 +15,6 @@ class An::Term < ApplicationRecord
   has_many :corrections, as: :correctable, class_name: "An::Correction", dependent: :destroy
 
   scope :main, -> { where(main: true) }
-  scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
-  scope :past, -> { where.not(start_date: nil).where.not(end_date: nil) }
   scope :by_hierarchy, -> { joins(an_body: :an_body_type).order("an_body_types.hierarchy_level ASC") }
 
   scope :by_body_type, ->(*codes) {

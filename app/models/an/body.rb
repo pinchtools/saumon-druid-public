@@ -1,5 +1,6 @@
 class An::Body < ApplicationRecord
   include Eventable
+  include DateFilterable
 
   after_commit :track_creation, on: :create
   after_commit :track_update, on: :update, if: :saved_changes?
@@ -18,8 +19,6 @@ class An::Body < ApplicationRecord
 
   validates :uid, presence: true, uniqueness: true
   validates :an_body_type_id, presence: true
-
-  scope :active, -> { where.not(start_date: nil).and(where(end_date: nil)) }
 
   scope :by_type, ->(*codes) {
     codes = codes.flatten
