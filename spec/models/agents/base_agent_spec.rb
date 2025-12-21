@@ -4,7 +4,7 @@ RSpec.describe Agents::BaseAgent do
   subject(:base_agent) { described_class.new }
 
   let(:agent) { create(:agent, name: "Test Agent", active: true) }
-  let(:agent_version) { create(:agent_version, agent: agent) }
+  let(:agent_version) { create(:agent_version, agent: agent, hyperparams: {}, instructions: "Test instructions") }
   let(:llm_model) { create(:llm_model) }
   let!(:agent_version_llm_model) { create(:agent_version_llm_model, agent_version: agent_version, llm_model: llm_model, enabled: true) }
 
@@ -111,6 +111,139 @@ RSpec.describe Agents::BaseAgent do
 
       it 'returns underscored class name' do
         expect(described_class.agent_name).to eq("test_agent")
+      end
+    end
+  end
+
+  describe '#ask' do
+    let(:mock_chat) { instance_double(RubyLLM::Chat) }
+    let(:mock_response) { instance_double("Response", raw: mock_raw_response, content: "{}") }
+    let(:mock_raw_response) do
+      instance_double(
+        Faraday::Response,
+        status: 200,
+        headers: { "content-type" => "application/json" },
+        body: {
+          "id" => "gen-123",
+          "model" => "test-model",
+          "choices" => [
+            { "message" => { "role" => "assistant", "content" => "Hello world" } }
+          ],
+          "usage" => { "prompt_tokens" => 10, "completion_tokens" => 20 }
+        }
+      )
+    end
+
+    before do
+      allow(RubyLLM).to receive(:chat).and_return(mock_chat)
+      allow(mock_chat).to receive(:with_instructions).and_return(mock_chat)
+      allow(mock_chat).to receive(:with_temperature).and_return(mock_chat)
+      allow(mock_chat).to receive(:with_params).and_return(mock_chat)
+      allow(mock_chat).to receive(:ask).and_return(mock_response)
+      allow(mock_raw_response).to receive(:is_a?).with(Faraday::Response).and_return(true)
+      base_agent.send(:chat)
+    end
+
+    after { Current.reset }
+
+    it "calls chat.ask and returns response" do
+      response = base_agent.send(:ask, "test question")
+
+      expect(mock_chat).to have_received(:ask).with("test question")
+      expect(response).to eq(mock_response)
+    end
+
+    it "creates request event before LLM call" do
+      expect { base_agent.send(:ask, "test") }.to change(Event, :count).by(2)
+
+      request_event = Event.find_by(action: "request")
+
+      expect(request_event.category).to eq("llm")
+      expect(request_event.severity).to eq("info")
+      expect(request_event.payload["agent"]).to eq(agent.normalized_name)
+      expect(request_event.payload["agent_version"]).to eq(agent_version.version)
+      expect(request_event.payload["model"]).to eq(llm_model.external_id)
+    end
+
+    it "creates response event after LLM call" do
+      base_agent.send(:ask, "test")
+
+      response_event = Event.find_by(action: "response")
+
+      expect(response_event.category).to eq("llm")
+      expect(response_event.severity).to eq("info")
+      expect(response_event.payload["status"]).to eq(200)
+      expect(response_event.payload["body"]["id"]).to eq("gen-123")
+      expect(response_event.payload["body"]["usage"]).to be_present
+    end
+
+    it "filters content from response payload" do
+      base_agent.send(:ask, "test")
+
+      response_event = Event.find_by(action: "response")
+      choice = response_event.payload.dig("body", "choices", 0, "message")
+
+      expect(choice).not_to have_key("content")
+      expect(choice["role"]).to eq("assistant")
+    end
+
+    it "captures Current context in events" do
+      Current.session_id = SecureRandom.uuid
+      Current.request_id = SecureRandom.uuid
+      Current.job_id = SecureRandom.uuid
+
+      base_agent.send(:ask, "test")
+
+      Event.where(category: "llm").each do |event|
+        expect(event.session_id).to eq(Current.session_id)
+        expect(event.request_id).to eq(Current.request_id)
+        expect(event.job_id).to eq(Current.job_id)
+      end
+    end
+  end
+
+  describe '#filter_response_payload' do
+    it "returns empty hash for non-Faraday::Response" do
+      result = base_agent.send(:filter_response_payload, { "foo" => "bar" })
+
+      expect(result).to eq({})
+    end
+
+    it "extracts status, headers, and filtered body" do
+      raw = instance_double(
+        Faraday::Response,
+        status: 200,
+        headers: { "x-request-id" => "abc" },
+        body: { "id" => "123", "choices" => [] }
+      )
+      allow(raw).to receive(:is_a?).with(Faraday::Response).and_return(true)
+
+      result = base_agent.send(:filter_response_payload, raw)
+
+      expect(result[:status]).to eq(200)
+      expect(result[:headers]).to eq({ "x-request-id" => "abc" })
+      expect(result[:body]["id"]).to eq("123")
+    end
+
+    it "removes content from all choices" do
+      raw = instance_double(
+        Faraday::Response,
+        status: 200,
+        headers: {},
+        body: {
+          "choices" => [
+            { "index" => 0, "message" => { "role" => "assistant", "content" => "secret content" } },
+            { "index" => 1, "message" => { "role" => "assistant", "content" => "more content" } }
+          ]
+        }
+      )
+      allow(raw).to receive(:is_a?).with(Faraday::Response).and_return(true)
+
+      result = base_agent.send(:filter_response_payload, raw)
+
+      result[:body]["choices"].each do |choice|
+        expect(choice["message"]).not_to have_key("content")
+        expect(choice["message"]["role"]).to eq("assistant")
       end
     end
   end

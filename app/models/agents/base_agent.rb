@@ -1,7 +1,10 @@
 class Agents::BaseAgent
+  include ActiveSupport::Callbacks
   include JsonRepairable
 
-  attr_reader :agent, :current_version, :enabled_models, :input
+  define_callbacks :llm_call
+
+  attr_reader :agent, :current_version, :enabled_models, :input, :last_response
 
   delegate :agent_name, to: :class
 
@@ -88,12 +91,70 @@ class Agents::BaseAgent
   end
 
   def chat(model = primary_model)
-    params = hyperparams
-    chat = RubyLLM.chat(model: model.external_id)
+    params = hyperparams.dup
+    @current_chat = RubyLLM.chat(model: model.external_id)
+    @current_model = model
 
-    chat.with_instructions(@current_version.instructions)
-    chat.with_temperature(hyperparams.delete(:temperature)) if params[:temperature]
-    chat.with_params(**params) if params.any?
-    chat
+    @current_chat.with_instructions(@current_version.instructions)
+    @current_chat.with_temperature(params.delete(:temperature)) if params[:temperature]
+    @current_chat.with_params(**params) if params.any?
+    @current_chat
+  end
+
+  # Wrapper for chat.ask that tracks events before/after the LLM call
+  def ask(question)
+    run_callbacks :llm_call do
+      @last_response = @current_chat.ask(question)
+    end
+    @last_response
+  end
+
+  set_callback :llm_call, :before, :track_llm_request
+  set_callback :llm_call, :after, :track_llm_response
+
+  private
+
+  def track_llm_request
+    Event.create!(
+      category: "llm",
+      action: "request",
+      severity: "info",
+      payload: {
+        agent: agent_name,
+        agent_version: version,
+        model: @current_model&.external_id,
+        hyperparams: hyperparams
+      },
+      session_id: Current.session_id,
+      request_id: Current.request_id,
+      job_id: Current.job_id
+    )
+  end
+
+  def track_llm_response
+    return unless @last_response
+
+    Event.create!(
+      category: "llm",
+      action: "response",
+      severity: "info",
+      payload: filter_response_payload(@last_response.raw),
+      session_id: Current.session_id,
+      request_id: Current.request_id,
+      job_id: Current.job_id
+    )
+  end
+
+  def filter_response_payload(raw)
+    return {} unless raw.is_a?(Faraday::Response)
+
+    filtered_body = raw.body.deep_dup
+    # Remove content from choices[].message.content
+    if filtered_body["choices"].is_a?(Array)
+      filtered_body["choices"].each do |choice|
+        choice["message"]&.delete("content") if choice["message"].is_a?(Hash)
+      end
+    end
+    { status: raw.status, headers: raw.headers, body: filtered_body }
   end
 end
