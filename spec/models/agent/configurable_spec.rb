@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Agents::ConfigurationService do
+RSpec.describe Agent::Configurable do
   let(:agent_name) { "test_agent" }
   let(:agent_description) { "A test agent" }
   let(:agent_role) { "Test role" }
@@ -24,32 +24,30 @@ RSpec.describe Agents::ConfigurationService do
     }
   end
 
-  describe '#initialize' do
-    it 'validates and stores YAML data' do
-      service = described_class.new(valid_yaml)
-      expect(service.yaml["name"]).to eq(agent_name)
+  describe '.configure_from_yaml' do
+    let!(:llm_model) { create(:llm_model, external_id: gpt_35_turbo) }
+    let!(:gpt4_model) { create(:llm_model, external_id: gpt_4) }
+
+    it 'validates YAML data' do
+      result = Agent.configure_from_yaml(valid_yaml)
+      expect(result.agent.name).to eq(agent_name)
     end
 
     it 'raises error for invalid YAML' do
       invalid_yaml = { "invalid" => "structure" }
-      expect { described_class.new(invalid_yaml) }.to raise_error(ArgumentError)
+      expect { Agent.configure_from_yaml(invalid_yaml) }.to raise_error(ArgumentError)
     end
-  end
-
-  describe '#call' do
-    let!(:llm_model) { create(:llm_model, external_id: gpt_35_turbo) }
-    let!(:gpt4_model) { create(:llm_model, external_id: gpt_4) }
-    let(:service) { described_class.new(valid_yaml) }
 
     context 'with new agent' do
       it 'creates agent and agent_version' do
-        expect { service.call }.to change(Agent, :count).by(1)
+        expect { Agent.configure_from_yaml(valid_yaml) }
+          .to change(Agent, :count).by(1)
           .and change(AgentVersion, :count).by(1)
       end
 
       it 'returns success result' do
-        result = service.call
-        expect(result).to be_a(Agents::ConfigurationResult)
+        result = Agent.configure_from_yaml(valid_yaml)
+        expect(result).to be_a(Agent::Configurable::Result)
         expect(result.success?).to be true
       end
     end
@@ -70,7 +68,7 @@ RSpec.describe Agents::ConfigurationService do
       before { create(:agent_version_llm_model, agent_version: existing_version, llm_model: llm_model, priority: 1) }
 
       it 'does not create new version when unchanged' do
-        expect { service.call }.not_to change(AgentVersion, :count)
+        expect { Agent.configure_from_yaml(valid_yaml) }.not_to change(AgentVersion, :count)
       end
     end
 
@@ -80,11 +78,11 @@ RSpec.describe Agents::ConfigurationService do
       let!(:existing_version) { create(:agent_version, agent: existing_agent, instructions: "old instructions") }
 
       it 'creates new version when changed' do
-        expect { service.call }.to change(AgentVersion, :count).by(1)
+        expect { Agent.configure_from_yaml(valid_yaml) }.to change(AgentVersion, :count).by(1)
       end
 
       it 'updates current_agent_version' do
-        service.call
+        Agent.configure_from_yaml(valid_yaml)
         expect(existing_agent.reload.current_agent_version.instructions).to include(agent_role)
       end
     end
@@ -100,11 +98,11 @@ RSpec.describe Agents::ConfigurationService do
         before { create(:agent_version_llm_model, agent_version: existing_version, llm_model: gpt4_model, priority: 1) }
 
         it 'creates new version when models are different' do
-          expect { service.call }.to change(AgentVersion, :count).by(1)
+          expect { Agent.configure_from_yaml(valid_yaml) }.to change(AgentVersion, :count).by(1)
         end
 
         it 'updates to new model list' do
-          service.call
+          Agent.configure_from_yaml(valid_yaml)
           new_version = existing_agent.reload.current_agent_version
 
           expect(new_version.enabled_llm_models.pluck(:external_id)).to eq([ gpt_35_turbo ])
@@ -116,12 +114,12 @@ RSpec.describe Agents::ConfigurationService do
         before { create(:agent_version_llm_model, agent_version: existing_version, llm_model: llm_model, priority: 1) }
 
         it 'does not create new version' do
-          expect { service.call }.not_to change(AgentVersion, :count)
+          expect { Agent.configure_from_yaml(valid_yaml) }.not_to change(AgentVersion, :count)
         end
 
         it 'preserves existing model associations' do
           original_count = existing_version.agent_version_llm_models.count
-          service.call
+          Agent.configure_from_yaml(valid_yaml)
 
           expect(existing_version.reload.agent_version_llm_models.count).to eq(original_count)
           expect(existing_version.enabled_llm_models.first.external_id).to eq(gpt_35_turbo)
@@ -130,12 +128,11 @@ RSpec.describe Agents::ConfigurationService do
 
       context 'with multiple models' do
         let(:multi_models_yaml) { valid_yaml.deep_merge("agent" => { "models" => [ gpt_4, gpt_35_turbo ] }) }
-        let(:multi_service) { described_class.new(multi_models_yaml) }
 
         before { create(:agent_version_llm_model, agent_version: existing_version, llm_model: llm_model, priority: 1) }
 
         it 'maintains correct priority order' do
-          multi_service.call
+          Agent.configure_from_yaml(multi_models_yaml)
           new_version = existing_agent.reload.current_agent_version
 
           priorities = new_version.agent_version_llm_models.order(:priority).pluck(:priority)

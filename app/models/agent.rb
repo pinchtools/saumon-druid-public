@@ -1,4 +1,6 @@
 class Agent < ApplicationRecord
+  include Agent::Configurable
+
   belongs_to :current_agent_version, class_name: "AgentVersion", optional: true
   has_many :agent_versions
 

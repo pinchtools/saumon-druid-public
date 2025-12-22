@@ -5,7 +5,7 @@ class Agents::SynchronisationService
     Dir[path].each do |file|
       yaml = YAML.safe_load_file(file, permitted_classes: [ Symbol ])
 
-      Agents::ConfigurationService.new(yaml).call
+      Agent.configure_from_yaml(yaml)
     end
   end
 end
