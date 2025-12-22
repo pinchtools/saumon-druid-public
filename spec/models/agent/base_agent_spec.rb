@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Agents::BaseAgent do
+RSpec.describe Agent::BaseAgent do
   subject(:base_agent) { described_class.new }
 
   let(:agent) { create(:agent, name: "Test Agent", active: true) }
@@ -106,7 +106,7 @@ RSpec.describe Agents::BaseAgent do
 
     context 'when no parameter and no cached name' do
       before do
-        allow(described_class).to receive(:name).and_return("Agents::TestAgent")
+        allow(described_class).to receive(:name).and_return("Agent::TestAgent")
       end
 
       it 'returns underscored class name' do

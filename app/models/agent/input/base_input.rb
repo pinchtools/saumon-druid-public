@@ -1,4 +1,4 @@
-class Agents::Inputs::BaseInput
+class Agent::Input::BaseInput
   include ActiveModel::Model
   include ActiveModel::Validations
   include ActiveModel::Attributes

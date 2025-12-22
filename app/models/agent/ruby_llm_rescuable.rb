@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Agents::RubyLlmRescuable
+module Agent::RubyLlmRescuable
   extend ActiveSupport::Concern
 
   included do

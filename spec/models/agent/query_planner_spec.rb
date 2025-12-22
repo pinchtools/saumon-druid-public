@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Agents::QueryPlanner do
+RSpec.describe Agent::QueryPlanner do
   subject(:query_planner) { described_class.new }
 
   let(:agent) { create(:agent, name: "Query Planner", active: true) }

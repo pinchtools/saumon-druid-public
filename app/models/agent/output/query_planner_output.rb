@@ -1,4 +1,4 @@
-class Agents::Outputs::QueryPlannerOutput < Agents::Outputs::BaseOutput
+class Agent::Output::QueryPlannerOutput < Agent::Output::BaseOutput
   VALID_MODELS = %w[an_stakeholders an_bodies an_body_types an_terms an_stakeholder_addresses].freeze
   VALID_OPERATORS = %w[= != > < >= <= IN LIKE ILIKE BETWEEN].freeze
   VALID_JOIN_TYPES = %w[INNER LEFT RIGHT].freeze

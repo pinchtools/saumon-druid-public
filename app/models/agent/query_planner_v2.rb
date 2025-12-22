@@ -1,4 +1,4 @@
-class Agents::QueryPlannerV2 < Agents::BaseAgent
+class Agent::QueryPlannerV2 < Agent::BaseAgent
   agent_name "query_planner_v2"
 
   def call(input)

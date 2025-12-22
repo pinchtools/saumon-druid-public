@@ -1,4 +1,4 @@
-class Agents::Inputs::QueryPlannerInput < Agents::Inputs::BaseInput
+class Agent::Input::QueryPlannerV2Input < Agent::Input::BaseInput
   attribute :question, :string
   attribute :trace_id, :string
   attribute :message_id, :string

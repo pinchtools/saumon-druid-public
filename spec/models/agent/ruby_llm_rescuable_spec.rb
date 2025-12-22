@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Agents::RubyLlmRescuable do
+RSpec.describe Agent::RubyLlmRescuable do
   let(:test_class) do
     Class.new do
-      include Agents::RubyLlmRescuable
+      include Agent::RubyLlmRescuable
 
       attr_accessor :current_model
 

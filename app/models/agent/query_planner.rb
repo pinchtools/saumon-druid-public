@@ -1,4 +1,4 @@
-class Agents::QueryPlanner < Agents::BaseAgent
+class Agent::QueryPlanner < Agent::BaseAgent
   agent_name "query_planner"
 
 

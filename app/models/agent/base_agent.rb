@@ -1,7 +1,7 @@
-class Agents::BaseAgent
+class Agent::BaseAgent
   include ActiveSupport::Callbacks
   include JsonRepairable
-  include Agents::RubyLlmRescuable
+  include Agent::RubyLlmRescuable
 
   define_callbacks :llm_call
 
@@ -68,13 +68,13 @@ class Agents::BaseAgent
   end
 
   def build_output_validator(data)
-    "Agents::Outputs::#{self.class.name.demodulize}Output".constantize.new(data)
+    "Agent::Output::#{self.class.name.demodulize}Output".constantize.new(data)
   rescue NameError
     nil
   end
 
   def input_validator
-    @input_validator ||= "Agents::Inputs::#{self.class.name.demodulize}Input".constantize.new(@input)
+    @input_validator ||= "Agent::Input::#{self.class.name.demodulize}Input".constantize.new(@input)
   end
 
   def self.agent_name(name = nil)

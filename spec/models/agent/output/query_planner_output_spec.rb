@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Agents::Outputs::QueryPlannerOutput, type: :model do
+RSpec.describe Agent::Output::QueryPlannerOutput, type: :model do
   describe 'validations' do
     let(:valid_step) do
       {

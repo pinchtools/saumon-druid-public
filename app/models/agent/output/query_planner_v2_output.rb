@@ -1,4 +1,4 @@
-class Agents::Outputs::QueryPlannerV2Output < Agents::Outputs::BaseOutput
+class Agent::Output::QueryPlannerV2Output < Agent::Output::BaseOutput
   VALID_MODELS = %w[stakeholder terms body].freeze
   VALID_SCOPES = %w[active past at_date main].freeze
   VALID_QUANTIFIERS = %w[one many].freeze

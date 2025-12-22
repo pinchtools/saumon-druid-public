@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Agents::Inputs::QueryPlannerInput do
+RSpec.describe Agent::Input::QueryPlannerInput do
   describe 'validations' do
     let(:valid_attributes) do
       {
