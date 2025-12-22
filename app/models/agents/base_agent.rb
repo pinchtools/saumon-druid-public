@@ -1,6 +1,7 @@
 class Agents::BaseAgent
   include ActiveSupport::Callbacks
   include JsonRepairable
+  include Agents::RubyLlmRescuable
 
   define_callbacks :llm_call
 
@@ -91,22 +92,26 @@ class Agents::BaseAgent
   end
 
   def chat(model = primary_model)
-    params = hyperparams.dup
-    @current_chat = RubyLLM.chat(model: model.external_id)
-    @current_model = model
+    with_llm_error_handling do
+      params = hyperparams.dup
+      @current_chat = RubyLLM.chat(model: model.external_id)
+      @current_model = model
 
-    @current_chat.with_instructions(@current_version.instructions)
-    @current_chat.with_temperature(params.delete(:temperature)) if params[:temperature]
-    @current_chat.with_params(**params) if params.any?
-    @current_chat
+      @current_chat.with_instructions(@current_version.instructions)
+      @current_chat.with_temperature(params.delete(:temperature)) if params[:temperature]
+      @current_chat.with_params(**params) if params.any?
+      @current_chat
+    end
   end
 
   # Wrapper for chat.ask that tracks events before/after the LLM call
   def ask(question)
-    run_callbacks :llm_call do
-      @last_response = @current_chat.ask(question)
+    with_llm_error_handling do
+      run_callbacks :llm_call do
+        @last_response = @current_chat.ask(question)
+      end
+      @last_response
     end
-    @last_response
   end
 
   set_callback :llm_call, :before, :track_llm_request
