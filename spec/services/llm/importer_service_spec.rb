@@ -16,7 +16,7 @@ RSpec.describe Llm::ImporterService do
     before do
       allow(subject).to receive(:yaml).and_return(yaml_content)
       allow(RubyLLM.models).to receive(:refresh!)
-      allow_any_instance_of(Llm::ModelImporter).to receive(:call).and_return(true)
+      allow(LlmModel).to receive(:configure_from_yaml).and_return(true)
     end
 
     context 'with valid models configuration' do
@@ -31,11 +31,10 @@ RSpec.describe Llm::ImporterService do
       end
 
       it 'processes all models from configuration' do
-        allow(Llm::ModelImporter).to receive_message_chain(:new, :call)
-        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'gpt-4', 'tier' => 'strong' })
-        expect(Llm::ModelImporter).to receive(:new).with({ 'id' => 'claude-3', 'tier' => 'top' })
-
         subject.call
+
+        expect(LlmModel).to have_received(:configure_from_yaml).with({ 'id' => 'gpt-4', 'tier' => 'strong' })
+        expect(LlmModel).to have_received(:configure_from_yaml).with({ 'id' => 'claude-3', 'tier' => 'top' })
       end
     end
 

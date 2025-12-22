@@ -6,7 +6,9 @@ class Llm::ImporterService
   def call
     sync!
 
-    yaml.values.flatten.each(&method(:import_model))
+    yaml.values.flatten.each do |model_config|
+      LlmModel.configure_from_yaml(model_config)
+    end
 
     true
   end
@@ -19,9 +21,5 @@ class Llm::ImporterService
 
   def sync!
     RubyLLM.models.refresh!
-  end
-
-  def import_model(model_config)
-    Llm::ModelImporter.new(model_config).call
   end
 end

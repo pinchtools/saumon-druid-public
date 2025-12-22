@@ -1,4 +1,6 @@
 class LlmModel < ApplicationRecord
+  include LlmModel::Configurable
+
   TIERS = %w[tiny small medium strong top].freeze
 
   validates :external_id, presence: true, uniqueness: true
