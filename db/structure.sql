@@ -277,7 +277,7 @@ CREATE TABLE public.an_corrections (
     session_id character varying,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    CONSTRAINT check_correctable_type CHECK (((correctable_type)::text = ANY ((ARRAY['An::Stakeholder'::character varying, 'An::Term'::character varying, 'An::Body'::character varying])::text[])))
+    CONSTRAINT check_correctable_type CHECK (((correctable_type)::text = ANY (ARRAY[('An::Stakeholder'::character varying)::text, ('An::Term'::character varying)::text, ('An::Body'::character varying)::text])))
 );
 
 
@@ -557,7 +557,7 @@ CREATE TABLE public.llm_models (
     updated_at timestamp(6) without time zone NOT NULL,
     free boolean DEFAULT false,
     supported_params jsonb DEFAULT '[]'::jsonb,
-    CONSTRAINT valid_tier CHECK (((tier)::text = ANY ((ARRAY['tiny'::character varying, 'small'::character varying, 'medium'::character varying, 'strong'::character varying, 'top'::character varying])::text[])))
+    CONSTRAINT valid_tier CHECK (((tier)::text = ANY (ARRAY[('tiny'::character varying)::text, ('small'::character varying)::text, ('medium'::character varying)::text, ('strong'::character varying)::text, ('top'::character varying)::text])))
 );
 
 
@@ -1133,7 +1133,7 @@ CREATE INDEX index_events_on_session_id_and_created_at ON public.events USING bt
 -- Name: index_events_on_severity_and_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_events_on_severity_and_created_at ON public.events USING btree (severity, created_at) WHERE ((severity)::text = ANY ((ARRAY['warn'::character varying, 'error'::character varying])::text[]));
+CREATE INDEX index_events_on_severity_and_created_at ON public.events USING btree (severity, created_at) WHERE ((severity)::text = ANY (ARRAY[('warn'::character varying)::text, ('error'::character varying)::text]));
 
 
 --
