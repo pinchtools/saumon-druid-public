@@ -28,7 +28,14 @@ RUN apt-get update -qq && apt-get upgrade -y && \
     libyaml-dev \
     curl \
     libvips-dev \
-    watchman
+    watchman \
+    lsb-release \
+    gnupg
+
+# Add PostgreSQL APT repository for PostgreSQL 18 client tools
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update
 
 
 COPY Gemfile Gemfile.lock ./
@@ -47,7 +54,7 @@ RUN bundle exec bootsnap precompile app/ lib/
 RUN apt-get update -qq && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     vim \
-    postgresql-client \
+    postgresql-client-18 \
     bash
 
 RUN chmod +x bin/dev
