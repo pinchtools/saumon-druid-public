@@ -25,6 +25,8 @@ module SaumonDruid
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    config.active_record.schema_format = :sql
+
     config.log_formatter = ComponentLoggerFormatter.new
 
     config.log_file_size = 250.megabytes
