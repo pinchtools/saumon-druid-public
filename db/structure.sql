@@ -109,7 +109,8 @@ CREATE TABLE public.agent_versions (
     hyperparams jsonb,
     version integer DEFAULT 1 NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    tools jsonb DEFAULT '[]'::jsonb NOT NULL
 );
 
 
@@ -1291,6 +1292,7 @@ ALTER TABLE ONLY public.an_stakeholder_addresses
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251226135247'),
 ('20251214102158'),
 ('20251213152738'),
 ('20251212100104'),
