@@ -3,6 +3,15 @@ class Agent::BaseAgent
   include JsonRepairable
   include Agent::RubyLlmRescuable
 
+  class OutputValidationError < StandardError
+    attr_reader :data
+
+    def initialize(message, data: nil)
+      super(message)
+      @data = data
+    end
+  end
+
   define_callbacks :llm_call
 
   attr_reader :agent, :current_version, :enabled_models, :input, :last_response
@@ -51,18 +60,37 @@ class Agent::BaseAgent
 
   protected
 
-  def parse_and_validate_json_response(response)
+  def parse_and_validate_json_response(response, retry_count: 0)
     data = repair_json(response.content)
     validate_output(data)
     data
   rescue JsonRepairable::RepairError => e
     raise ArgumentError, "Invalid JSON response from LLM: #{e.message}"
+  rescue OutputValidationError => e
+    # If this is the first attempt, try to handle it as a tool response
+    if retry_count == 0
+      handle_tool_response_retry(e.data, response)
+    else
+      raise ArgumentError, e.message
+    end
+  end
+
+  def handle_tool_response_retry(data, original_response)
+    # Override this method in subclasses to customize retry behavior
+    # Default implementation re-raises the validation error
+    raise OutputValidationError.new(
+      "Output validation failed: model returned unexpected format",
+      data: data
+    )
   end
 
   def validate_output(data)
     output_validator = build_output_validator(data)
     unless output_validator.valid?
-      raise ArgumentError, "Output validation failed: #{output_validator.errors.full_messages.join(', ')}"
+      raise OutputValidationError.new(
+        "Output validation failed: #{output_validator.errors.full_messages.join(', ')}",
+        data: data
+      )
     end
     data
   end
@@ -102,7 +130,7 @@ class Agent::BaseAgent
       @current_chat.with_params(**params) if params.any?
 
       @current_chat.with_tools(*tools)
-      
+
       @current_chat
     end
   end

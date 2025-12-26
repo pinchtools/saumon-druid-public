@@ -139,6 +139,7 @@ RSpec.describe Agent::BaseAgent do
       allow(mock_chat).to receive(:with_instructions).and_return(mock_chat)
       allow(mock_chat).to receive(:with_temperature).and_return(mock_chat)
       allow(mock_chat).to receive(:with_params).and_return(mock_chat)
+      allow(mock_chat).to receive(:with_tools).and_return(mock_chat)
       allow(mock_chat).to receive(:ask).and_return(mock_response)
       allow(mock_raw_response).to receive(:is_a?).with(Faraday::Response).and_return(true)
       base_agent.send(:chat)
@@ -282,10 +283,30 @@ RSpec.describe Agent::BaseAgent do
 
     context 'with validation failure' do
       let(:content) { '{"test": true}' }
+      let(:data) { { "test" => true } }
 
-      it 'raises ArgumentError when validation fails' do
-        allow(base_agent).to receive(:validate_output).and_raise(ArgumentError, "Validation failed")
+      it 'raises OutputValidationError when validation fails and default retry handler is used' do
+        validation_error = Agent::BaseAgent::OutputValidationError.new("Validation failed", data: data)
+        allow(base_agent).to receive(:validate_output).and_raise(validation_error)
+
         expect { base_agent.send(:parse_and_validate_json_response, response) }
+          .to raise_error(Agent::BaseAgent::OutputValidationError, /model returned unexpected format/)
+      end
+
+      it 'allows retry on first attempt when validation fails' do
+        validation_error = Agent::BaseAgent::OutputValidationError.new("Validation failed", data: data)
+        allow(base_agent).to receive(:validate_output).and_raise(validation_error)
+        expect(base_agent).to receive(:handle_tool_response_retry).with(data, response).and_raise(validation_error)
+
+        expect { base_agent.send(:parse_and_validate_json_response, response) }
+          .to raise_error(Agent::BaseAgent::OutputValidationError)
+      end
+
+      it 'raises ArgumentError on second attempt when validation fails' do
+        validation_error = Agent::BaseAgent::OutputValidationError.new("Validation failed", data: data)
+        allow(base_agent).to receive(:validate_output).and_raise(validation_error)
+
+        expect { base_agent.send(:parse_and_validate_json_response, response, retry_count: 1) }
           .to raise_error(ArgumentError, "Validation failed")
       end
     end
