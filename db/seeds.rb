@@ -12,3 +12,7 @@
 body_type_list = YAML.load_file(Rails.root.join("db", "seeds", "an_body_types.yml"))
 
 An::BodyType.upsert_all(body_type_list, unique_by: :code)
+
+Llm::ImporterService.new.call
+
+Agents::SynchronisationService.new.call
