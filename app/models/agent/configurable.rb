@@ -84,7 +84,8 @@ module Agent::Configurable
   def version_attributes
     {
       instructions: build_instructions,
-      hyperparams: @configuration_yaml["hyperparams"]
+      hyperparams: @configuration_yaml["hyperparams"],
+      tools: @configuration_yaml["tools"] || []
     }
   end
 

@@ -58,5 +58,47 @@ RSpec.describe Agents::YamlValidatorService do
         expect { validator.valid_params }.not_to raise_error
       end
     end
+
+    context 'with tools' do
+      context 'when tools is a valid array' do
+        let(:yaml_with_tools) do
+          valid_yaml.deep_merge("agent" => { "tools" => [ "PositionCatalog", "AnotherTool" ] })
+        end
+
+        it 'accepts valid tools array' do
+          validator = described_class.new(yaml_with_tools)
+          expect { validator.valid_params }.not_to raise_error
+        end
+
+        it 'includes tools in permitted params' do
+          validator = described_class.new(yaml_with_tools)
+          params = validator.valid_params
+
+          expect(params["tools"]).to eq([ "PositionCatalog", "AnotherTool" ])
+        end
+      end
+
+      context 'when tools is invalid' do
+        let(:yaml_with_invalid_tools) do
+          valid_yaml.deep_merge("agent" => { "tools" => "not_an_array" })
+        end
+
+        it 'raises ArgumentError for invalid tools' do
+          validator = described_class.new(yaml_with_invalid_tools)
+          expect { validator.valid_params }.to raise_error(ArgumentError, /tools must be an array/)
+        end
+      end
+
+      context 'when tools is an empty array' do
+        let(:yaml_with_empty_tools) do
+          valid_yaml.deep_merge("agent" => { "tools" => [] })
+        end
+
+        it 'raises ArgumentError for empty tools array' do
+          validator = described_class.new(yaml_with_empty_tools)
+          expect { validator.valid_params }.to raise_error(ArgumentError, /tools array cannot be empty/)
+        end
+      end
+    end
   end
 end

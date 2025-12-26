@@ -50,6 +50,20 @@ RSpec.describe Agent::Configurable do
         expect(result).to be_a(Agent::Configurable::Result)
         expect(result.success?).to be true
       end
+
+      it 'sets empty tools array when tools not specified' do
+        result = Agent.configure_from_yaml(valid_yaml)
+        expect(result.agent.current_agent_version.tools).to eq([])
+      end
+
+      context 'with tools specified' do
+        let(:yaml_with_tools) { valid_yaml.deep_merge("agent" => { "tools" => [ "PositionCatalog" ] }) }
+
+        it 'saves tools to agent_version' do
+          result = Agent.configure_from_yaml(yaml_with_tools)
+          expect(result.agent.current_agent_version.tools).to eq([ "PositionCatalog" ])
+        end
+      end
     end
 
     shared_examples 'an existing agent setup' do
@@ -140,6 +154,66 @@ RSpec.describe Agent::Configurable do
 
           expect(priorities).to eq([ 1, 2 ])
           expect(model_ids).to eq([ gpt_4, gpt_35_turbo ])
+        end
+      end
+    end
+
+    context 'tools changes' do
+      include_examples 'an existing agent setup'
+
+      let!(:existing_version) do
+        create(:agent_version, agent: existing_agent, instructions: agent_instructions, hyperparams: hyperparams, tools: [])
+      end
+
+      before { create(:agent_version_llm_model, agent_version: existing_version, llm_model: llm_model, priority: 1) }
+
+      context 'when tools change' do
+        let(:yaml_with_tools) { valid_yaml.deep_merge("agent" => { "tools" => [ "PositionCatalog" ] }) }
+
+        it 'creates new version when tools are different' do
+          expect { Agent.configure_from_yaml(yaml_with_tools) }.to change(AgentVersion, :count).by(1)
+        end
+
+        it 'updates to new tools list' do
+          Agent.configure_from_yaml(yaml_with_tools)
+          new_version = existing_agent.reload.current_agent_version
+
+          expect(new_version.tools).to eq([ "PositionCatalog" ])
+        end
+      end
+
+      context 'when tools stay the same' do
+        it 'does not create new version' do
+          expect { Agent.configure_from_yaml(valid_yaml) }.not_to change(AgentVersion, :count)
+        end
+
+        it 'preserves existing tools' do
+          Agent.configure_from_yaml(valid_yaml)
+          expect(existing_version.reload.tools).to eq([])
+        end
+      end
+
+      context 'with multiple tools' do
+        let!(:existing_version_with_one_tool) do
+          create(:agent_version, agent: existing_agent, instructions: agent_instructions, hyperparams: hyperparams, tools: [ "PositionCatalog" ])
+        end
+
+        let(:yaml_with_multiple_tools) { valid_yaml.deep_merge("agent" => { "tools" => [ "PositionCatalog", "AnotherTool" ] }) }
+
+        before do
+          existing_agent.update!(current_agent_version: existing_version_with_one_tool)
+          create(:agent_version_llm_model, agent_version: existing_version_with_one_tool, llm_model: llm_model, priority: 1)
+        end
+
+        it 'creates new version when tools list changes' do
+          expect { Agent.configure_from_yaml(yaml_with_multiple_tools) }.to change(AgentVersion, :count).by(1)
+        end
+
+        it 'saves all tools in order' do
+          Agent.configure_from_yaml(yaml_with_multiple_tools)
+          new_version = existing_agent.reload.current_agent_version
+
+          expect(new_version.tools).to eq([ "PositionCatalog", "AnotherTool" ])
         end
       end
     end

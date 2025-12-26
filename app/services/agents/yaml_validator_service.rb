@@ -51,6 +51,7 @@ class Agents::YamlValidatorService
     end
 
     validate_array("models", agent_data["models"])
+    validate_array("tools", agent_data["tools"]) if agent_data["tools"]
     validate_json("context_format", agent_data["context_format"]) if agent_data["context_format"]
     validate_hash("hyperparams", agent_data["hyperparams"]) if agent_data["hyperparams"]
   end
@@ -92,6 +93,7 @@ class Agents::YamlValidatorService
       "directives" => agent_data["directives"],
       "context_format" => agent_data["context_format"],
       "hyperparams" => agent_data["hyperparams"],
+      "tools" => agent_data["tools"],
       "models" => agent_data["models"]
     }.compact
   end

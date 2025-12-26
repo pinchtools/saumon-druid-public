@@ -100,6 +100,9 @@ class Agent::BaseAgent
       @current_chat.with_instructions(@current_version.instructions)
       @current_chat.with_temperature(params.delete(:temperature)) if params[:temperature]
       @current_chat.with_params(**params) if params.any?
+
+      @current_chat.with_tools(*tools)
+      
       @current_chat
     end
   end
@@ -161,5 +164,9 @@ class Agent::BaseAgent
       end
     end
     { status: raw.status, headers: raw.headers, body: filtered_body }
+  end
+
+  def tools
+    @current_version.tools.map { |tool_name| "Agent::Tool::#{tool_name}".constantize }
   end
 end
