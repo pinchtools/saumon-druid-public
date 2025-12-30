@@ -43,7 +43,7 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 gem "foreman"
-gem "dotenv", "~> 3.1"
+gem "dotenv", "~> 3.2"
 gem "httparty", "~> 0.23.2"
 gem "decent_exposure"
 
