@@ -12,4 +12,9 @@ RubyLLM.configure do |config|
   config.log_stream_debug = Rails.env.development?
 
   config.use_new_acts_as = true
+
+  config.model_registry_file = Rails.root.join("tmp", "ruby_llm_models.json")
 end
+
+RubyLLM.models.refresh!
+RubyLLM.models.save_to_json
