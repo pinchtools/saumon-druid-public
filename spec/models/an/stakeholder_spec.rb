@@ -1,6 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe An::Stakeholder, type: :model do
+  describe 'concerns' do
+    it 'includes Searchable' do
+      expect(described_class.ancestors).to include(An::Concerns::Searchable)
+    end
+
+    it 'responds to searchable scopes' do
+      expect(described_class).to respond_to(:fts_search)
+      expect(described_class).to respond_to(:trigram_search)
+      expect(described_class).to respond_to(:lexical_search)
+      expect(described_class).to respond_to(:semantic_search)
+    end
+  end
+
   describe 'associations' do
     it { should have_many(:an_stakeholder_addresses).class_name('An::StakeholderAddress').with_foreign_key(:an_stakeholder_id).dependent(:destroy) }
     it { should have_many(:an_terms).class_name('An::Term').with_foreign_key(:an_stakeholder_id).dependent(:destroy) }
