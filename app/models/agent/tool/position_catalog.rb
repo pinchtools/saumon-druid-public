@@ -6,12 +6,15 @@ class Agent::Tool::PositionCatalog < RubyLLM::Tool
   end
 
   def execute(search_query:)
-    matching_labels = An::Term.select(:label)
-      .distinct
-      .where("label ILIKE ?", "%#{search_query}%")
-      .where("LENGTH(label) < ?", 50)
-      .limit(5)
-      .pluck(:label)
+    # Make only lexical query as a start.
+    # When the response is empty the model try by it-self to re-label the position
+    # to maximize the chance for the runner to resolve the query.
+    # Use Vector and cache system later-on.
+
+    matching_labels = An::Term
+                        .lexical_search(search_query)
+                        .limit(5)
+                        .pluck(:label)
 
     {
       note: "#{self.class} #{search_query} results found: #{matching_labels.count}",

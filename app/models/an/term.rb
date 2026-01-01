@@ -1,6 +1,8 @@
 class An::Term < ApplicationRecord
   include Eventable
   include DateFilterable
+  include An::Concerns::Searchable
+  include An::Term::SearchContentBuilder
 
   after_commit :track_creation, on: :create
   after_commit :track_update, on: :update, if: :saved_changes?

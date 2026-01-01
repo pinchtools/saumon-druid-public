@@ -1,6 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe An::Term, type: :model do
+  describe 'concerns' do
+    it 'includes Searchable' do
+      expect(described_class.ancestors).to include(An::Concerns::Searchable)
+    end
+
+    it 'responds to searchable scopes' do
+      expect(described_class).to respond_to(:fts_search)
+      expect(described_class).to respond_to(:trigram_search)
+      expect(described_class).to respond_to(:lexical_search)
+      expect(described_class).to respond_to(:semantic_search)
+    end
+  end
+
   describe 'associations' do
     it { should belong_to(:an_stakeholder).class_name('An::Stakeholder') }
     it { should belong_to(:an_body).class_name('An::Body') }
@@ -10,6 +23,7 @@ RSpec.describe An::Term, type: :model do
     it { should have_many(:an_substitutes).class_name('An::Substitute').with_foreign_key(:an_term_id).inverse_of(:an_term).dependent(:destroy) }
     it { should have_one(:an_body_type).through(:an_body) }
     it { should have_many(:corrections).class_name('An::Correction').dependent(:destroy) }
+    it { should have_one(:an_search).class_name('An::Search').dependent(:destroy) }
   end
 
   describe 'scopes' do
