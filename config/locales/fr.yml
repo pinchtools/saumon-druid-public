@@ -1,4 +1,10 @@
 fr:
+  agents:
+    answer_composer:
+      errors:
+        answer_required: "La réponse doit contenir un champ 'answer'"
+        sources_must_be_array: "doit être un tableau"
+        source_item_must_be_string: "l'élément %{index} doit être une chaîne de caractères"
   date:
     abbr_day_names:
       - dim

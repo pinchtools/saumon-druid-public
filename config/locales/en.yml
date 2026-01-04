@@ -1,4 +1,10 @@
 en:
+  agents:
+    answer_composer:
+      errors:
+        answer_required: "Response must contain 'answer'"
+        sources_must_be_array: "must be an array"
+        source_item_must_be_string: "item %{index} must be a string"
   an:
     stakeholder:
       vector_search:

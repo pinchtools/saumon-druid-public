@@ -1,0 +1,129 @@
+# frozen_string_literal: true
+
+# Answer Composer Agent
+# Generates French language responses from query results about the French National Assembly
+class Agent::AnswerComposer < Agent::BaseAgent
+  agent_name "answer_composer"
+
+  MAX_INLINE_RESULTS = 10
+  SAMPLE_SIZE = 5
+  RELEVANT_KEYS = %w[id uid first_name last_name name label title start_date end_date gender occupation capacity].freeze
+
+  def call(input)
+    @start_time = Time.current
+    super
+
+    track_composition_started
+    chat
+    response = ask(build_prompt)
+    result = parse_and_validate_json_response(response)
+    track_composition_completed(result)
+    result
+  rescue StandardError => e
+    track_composition_error(e)
+    raise
+  end
+
+  private
+
+  def build_prompt
+    <<~PROMPT
+      User's original question:
+      #{input_validator.question}
+
+      Search results (raw data):
+      #{format_results}
+
+      Query plan confidence level: #{input_validator.confidence || "not specified"}/5
+
+      Instructions:
+      - Generate a clear and concise response in French
+      - Base your response only on the provided data
+      - If results are empty or insufficient, state it clearly
+      - Format lists in a readable manner
+      - Include relevant sources (names, titles, dates)
+
+      Respond in the following JSON format:
+      {
+        "answer": "Your response in French",
+        "sources": ["source1", "source2"],
+        "confidence_note": "Optional note about response reliability"
+      }
+    PROMPT
+  end
+
+  def format_results
+    results = input_validator.results
+    return "No results available" if results.blank?
+
+    results.filter_map do |step_id, data|
+      next if data.blank?
+
+      formatted_data = data.is_a?(Array) ? format_array_results(data) : data.to_json
+      "=== Step: #{step_id} ===\n#{formatted_data}"
+    end.join("\n\n")
+  end
+
+  def format_array_results(data)
+    return "No data" if data.empty?
+
+    if data.size <= MAX_INLINE_RESULTS
+      data.map { |item| format_item(item) }.join("\n")
+    else
+      sample = data.first(SAMPLE_SIZE)
+      formatted_sample = sample.map { |item| format_item(item) }.join("\n")
+      "#{data.size} results found. Here are the first #{SAMPLE_SIZE}:\n#{formatted_sample}"
+    end
+  end
+
+  def format_item(item)
+    return item.to_s unless item.is_a?(Hash)
+
+    item.slice(*RELEVANT_KEYS).compact.map { |k, v| "#{k}: #{v}" }.join(", ")
+  end
+
+  # Event tracking methods
+
+  def track_composition_started
+    track_composition_event("started", payload: {
+      question: input_validator.question.truncate(200),
+      result_count: input_validator.results&.size || 0,
+      confidence: input_validator.confidence
+    })
+  end
+
+  def track_composition_completed(result)
+    track_composition_event("completed", payload: {
+      duration_ms: elapsed_time_ms,
+      answer_length: result["answer"]&.length || 0,
+      sources_count: result["sources"]&.size || 0,
+      has_confidence_note: result["confidence_note"].present?
+    })
+  end
+
+  def track_composition_error(exception)
+    track_composition_event("error", severity: :error, payload: {
+      duration_ms: elapsed_time_ms,
+      error_class: exception.class.name,
+      error_message: exception.message.truncate(500)
+    })
+  end
+
+  def track_composition_event(action, severity: :info, payload: {})
+    Event.create!(
+      category: "agent",
+      action: "answer_composer.#{action}",
+      severity: severity.to_s,
+      payload: payload,
+      session_id: Current.session_id,
+      request_id: Current.request_id,
+      job_id: Current.job_id
+    )
+  end
+
+  def elapsed_time_ms
+    return 0 unless @start_time
+
+    ((Time.current - @start_time) * 1000).round
+  end
+end
