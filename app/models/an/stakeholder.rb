@@ -1,6 +1,7 @@
 class An::Stakeholder < ApplicationRecord
   include An::Concerns::Searchable
   include An::Stakeholder::SearchContentBuilder
+  include An::Stakeholder::QueryActions
   include Eventable
 
   after_commit :track_creation, on: :create

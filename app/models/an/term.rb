@@ -3,6 +3,7 @@ class An::Term < ApplicationRecord
   include DateFilterable
   include An::Concerns::Searchable
   include An::Term::SearchContentBuilder
+  include An::Term::QueryActions
 
   after_commit :track_creation, on: :create
   after_commit :track_update, on: :update, if: :saved_changes?

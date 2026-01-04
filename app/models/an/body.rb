@@ -1,6 +1,7 @@
 class An::Body < ApplicationRecord
   include Eventable
   include DateFilterable
+  include An::Body::QueryActions
 
   after_commit :track_creation, on: :create
   after_commit :track_update, on: :update, if: :saved_changes?
