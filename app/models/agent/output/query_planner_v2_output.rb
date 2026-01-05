@@ -8,7 +8,7 @@ class Agent::Output::QueryPlannerV2Output < Agent::Output::BaseOutput
   VALID_ACTIONS = {
     "stakeholder" => %w[search search_by_gender search_by_occupation search_by_department search_by_political_group search_by_political_orientation],
     "terms" => %w[get_all by_body_type by_capacity],
-    "body" => %w[search by_type get_members]
+    "body" => %w[search by_type get_members by_political_orientation]
   }.freeze
 
   attribute :confidence, :integer

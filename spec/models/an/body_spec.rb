@@ -37,6 +37,15 @@ RSpec.describe An::Body, type: :model do
         it { expect(described_class.by_type(search_body_type)).not_to include(body) }
       end
     end
+
+    describe ".by_political_orientation" do
+      it 'returns bodies matching the political camp' do
+        left_body = create(:an_body, :political_group, political_camp_value: "left")
+        right_body = create(:an_body, :political_group, political_camp_value: "right")
+
+        expect(described_class.by_political_orientation("left")).to contain_exactly(left_body)
+      end
+    end
   end
 
   describe 'event tracking' do
