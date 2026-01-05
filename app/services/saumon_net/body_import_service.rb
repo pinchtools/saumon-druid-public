@@ -1,9 +1,21 @@
 class SaumonNet::BodyImportService < SaumonNet::BaseImportService
+  POLITICAL_CAMP_CONFIG_PATH = Rails.root.join("config/consolidations/bodies_group_political_camp.yml")
+
   def initialize
     super("organe")
   end
 
   private
+
+  def political_camp_mapping
+    @political_camp_mapping ||= YAML.load_file(POLITICAL_CAMP_CONFIG_PATH).index_by { |entry| entry["label_abbr"] }
+  end
+
+  def find_political_camp(label_abbr)
+    return nil if label_abbr.blank?
+
+    political_camp_mapping.dig(label_abbr, :camp)
+  end
 
   def map_entity_attributes(entity_data)
     file_details = entity_data["file_details"] || entity_data
@@ -13,13 +25,14 @@ class SaumonNet::BodyImportService < SaumonNet::BaseImportService
     vi_mo_de = file_details["viMoDe"] || {}
 
     file_uid = extract_file_uid(file_details)
+    label_abbr = file_details["libelleAbrev"]
 
     {
       uid: file_uid,
       an_body_type: body_type,
       parent: parent_body,
       label: file_details["libelle"],
-      label_abbr: file_details["libelleAbrev"],
+      label_abbr: label_abbr,
       label_code: file_details["libelleEdition"],
       start_date: parse_date(vi_mo_de["dateDebut"]),
       end_date: parse_date(vi_mo_de["dateFin"]),
@@ -29,7 +42,8 @@ class SaumonNet::BodyImportService < SaumonNet::BaseImportService
       legislature: file_details["legislature"],
       number: file_details["numero"],
       province: extract_province(file_details),
-      department_code: extract_department_code(file_details)
+      department_code: extract_department_code(file_details),
+      political_camp: find_political_camp(label_abbr)
     }
   end
 

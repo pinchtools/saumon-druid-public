@@ -370,4 +370,91 @@ RSpec.describe SaumonNet::BodyImportService do
       expect(result).to be_nil
     end
   end
+
+  describe '#find_political_camp' do
+    it 'returns camp for known label_abbr' do
+      result = service.send(:find_political_camp, "SOC")
+      expect(result).to eq("left")
+    end
+
+    it 'returns camp for another known label_abbr' do
+      result = service.send(:find_political_camp, "RN")
+      expect(result).to eq("far_right")
+    end
+
+    it 'returns nil for unknown label_abbr' do
+      result = service.send(:find_political_camp, "UNKNOWN_ABBR")
+      expect(result).to be_nil
+    end
+
+    it 'returns nil for blank label_abbr' do
+      expect(service.send(:find_political_camp, nil)).to be_nil
+      expect(service.send(:find_political_camp, "")).to be_nil
+    end
+  end
+
+  describe '#political_camp_mapping' do
+    it 'loads and indexes config by label_abbr' do
+      mapping = service.send(:political_camp_mapping)
+
+      expect(mapping).to be_a(Hash)
+      expect(mapping["SOC"]).to include(camp: "left")
+      expect(mapping["RN"]).to include(camp: "far_right")
+      expect(mapping["LR"]).to include(camp: "right")
+    end
+
+    it 'memoizes the mapping' do
+      first_call = service.send(:political_camp_mapping)
+      second_call = service.send(:political_camp_mapping)
+
+      expect(first_call).to be(second_call)
+    end
+  end
+
+  describe 'political_camp in map_entity_attributes' do
+    let(:body_type) { create(:an_body_type, code: "GP") }
+
+    before do
+      allow(service).to receive(:find_or_create_body_type).and_return(body_type)
+      allow(service).to receive(:find_parent_body).and_return(nil)
+    end
+
+    context 'when label_abbr matches a political group' do
+      let(:entity_data) do
+        {
+          "file_details" => {
+            "uid" => "ORGANE_GP_SOC",
+            "libelle" => "Socialiste",
+            "libelleAbrev" => "SOC",
+            "codeType" => "GP"
+          }
+        }
+      end
+
+      it 'sets political_camp from config' do
+        result = service.send(:map_entity_attributes, entity_data)
+
+        expect(result[:political_camp]).to eq("left")
+      end
+    end
+
+    context 'when label_abbr does not match any political group' do
+      let(:entity_data) do
+        {
+          "file_details" => {
+            "uid" => "ORGANE_AN",
+            "libelle" => "Assemblée nationale",
+            "libelleAbrev" => "AN",
+            "codeType" => "AN"
+          }
+        }
+      end
+
+      it 'sets political_camp to nil' do
+        result = service.send(:map_entity_attributes, entity_data)
+
+        expect(result[:political_camp]).to be_nil
+      end
+    end
+  end
 end
