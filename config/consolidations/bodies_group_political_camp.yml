@@ -1,0 +1,163 @@
+---
+- :group: La France insoumise
+  :camp: far_left
+  label_abbr: FI
+- :group: Gauche démocrate et républicaine
+  :camp: left
+  label_abbr: GDR
+- :group: Libertés et Territoires
+  :camp: center_left
+  label_abbr: LT
+- :group: Horizons & Indépendants
+  :camp: center_right
+  label_abbr: HOR
+- :group: Non inscrit
+  :camp: center
+  label_abbr: NI
+- :group: Agir ensemble
+  :camp: center_right
+  label_abbr: AGIR-E
+- :group: Union pour la Démocratie Française
+  :camp: center_right
+  label_abbr: UDF
+- :group: Écologiste - NUPES
+  :camp: left
+  label_abbr: ECOLO
+- :group: Mouvement Démocrate et apparentés
+  :camp: center
+  label_abbr: MODEM
+- :group: Les Républicains
+  :camp: right
+  label_abbr: LR
+- :group: Nouveau Centre
+  :camp: center_right
+  label_abbr: NC
+- :group: Union pour un Mouvement Populaire
+  :camp: right
+  label_abbr: UMP
+- :group: Écologiste et Social
+  :camp: left
+  label_abbr: ECOS
+- :group: Ensemble pour la République
+  :camp: center
+  label_abbr: EPR
+- :group: Député-e-s Communistes et Républicains
+  :camp: far_left
+  label_abbr: CR
+- :group: Socialiste, radical, citoyen et divers gauche
+  :camp: left
+  label_abbr: S.R.C.
+- :group: Horizons et apparentés
+  :camp: center_right
+  label_abbr: HOR
+- :group: Démocrate (MoDem et Indépendants)
+  :camp: center
+  label_abbr: DEM
+- :group: 'Les Constructifs : républicains, UDI, indépendants'
+  :camp: center_right
+  label_abbr: LC
+- :group: Écologie Démocratie Solidarité
+  :camp: left
+  label_abbr: EDS
+- :group: Renaissance
+  :camp: center
+  label_abbr: RE
+- :group: UDI, Agir et Indépendants
+  :camp: center_right
+  label_abbr: UDI-AGIR
+- :group: Socialiste
+  :camp: left
+  label_abbr: SOC
+- :group: Nouvelle Gauche
+  :camp: left
+  label_abbr: NG
+- :group: UDI et Indépendants
+  :camp: center_right
+  label_abbr: UDI_I
+- :group: Rassemblement National
+  :camp: far_right
+  label_abbr: RN
+- :group: Gauche démocrate et républicaine - NUPES
+  :camp: left
+  label_abbr: GDR-NUPES
+- :group: Union des droites pour la République
+  :camp: right
+  label_abbr: UDDPLR
+- :group: La France insoumise - Nouvelle Union Populaire écologique et sociale
+  :camp: far_left
+  label_abbr: LFI-NUPES
+- :group: UDR
+  :camp: right
+  label_abbr: UDR
+- :group: À Droite
+  :camp: right
+  label_abbr: AD
+- :group: Libertés, Indépendants, Outre-mer et Territoires
+  :camp: center
+  label_abbr: LIOT
+- :group: Députés n'appartenant à aucun groupe
+  :camp: center
+  label_abbr: NI
+- :group: Union des démocrates et indépendants
+  :camp: center_right
+  label_abbr: UDI
+- :group: Socialiste, républicain et citoyen
+  :camp: left
+  label_abbr: SRC
+- :group: Rassemblement - Union pour un Mouvement Populaire
+  :camp: right
+  label_abbr: R-UMP
+- :group: La France insoumise - Nouveau Front Populaire
+  :camp: far_left
+  label_abbr: LFI-NFP
+- :group: Socialistes et apparentés
+  :camp: left
+  label_abbr: SOC
+- :group: Mouvement Démocrate (MoDem) et Démocrates apparentés
+  :camp: center
+  label_abbr: DEM
+- :group: Écologiste
+  :camp: left
+  label_abbr: ECOLO
+- :group: Socialistes et apparentés (membre de l’intergroupe NUPES)
+  :camp: left
+  label_abbr: SOC
+- :group: Radical, républicain, démocrate et progressiste
+  :camp: center_left
+  label_abbr: RRDP
+- :group: Les Démocrates
+  :camp: center
+  label_abbr: DEM
+- :group: Gauche Démocrate et Républicaine
+  :camp: left
+  label_abbr: GDR
+- :group: La République en Marche
+  :camp: center
+  label_abbr: LAREM
+- :group: Droite Républicaine
+  :camp: right
+  label_abbr: DR
+- :group: Socialiste, écologiste et républicain
+  :camp: left
+  label_abbr: SER
+- :group: Union pour la démocratie française et du Centre
+  :camp: center_right
+  label_abbr: UDF
+- :group: Non-Inscrit
+  :camp: center
+  label_abbr: NI
+- :group: Rassemblement pour la République
+  :camp: right
+  label_abbr: RPR
+- :group: Radical, Citoyen et Vert
+  :camp: left
+  label_abbr: RCV
+- :group: Union pour la démocratie française
+  :camp: center_right
+  label_abbr: UDF
+- :group: Union pour la démocratie française-Alliance
+  :camp: center_right
+  label_abbr: UDF
+- :group: Démocratie libérale et indépendants
+  :camp: center_right
+  label_abbr: DL
