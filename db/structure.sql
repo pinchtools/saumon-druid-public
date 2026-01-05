@@ -190,7 +190,8 @@ CREATE TABLE public.an_bodies (
     department_code character varying,
     parent_id bigint,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    political_camp character varying
 );
 
 
@@ -1292,6 +1293,7 @@ ALTER TABLE ONLY public.an_stakeholder_addresses
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260105123255'),
 ('20251226135247'),
 ('20251214102158'),
 ('20251213152738'),
