@@ -23,5 +23,15 @@ FactoryBot.define do
     trait :high_level do
       an_body_type { create(:an_body_type, :high_level) }
     end
+
+    trait :political_group do
+      transient do
+        political_camp_value { "left" }
+      end
+
+      an_body_type { An::BodyType.find_or_create_by!(code: "GP") }
+      sequence(:label) { |n| "Groupe politique #{n}" }
+      political_camp { political_camp_value }
+    end
   end
 end

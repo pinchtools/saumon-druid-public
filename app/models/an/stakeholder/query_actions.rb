@@ -26,11 +26,10 @@ module An::Stakeholder::QueryActions
         .distinct
     }
 
-    # TODO: Implement proper political orientation filtering
     scope :by_political_orientation, ->(orientation) {
       joins(an_terms: { an_body: :an_body_type })
         .where(an_body_types: { code: "GP" })
-        .where("an_bodies.label ILIKE ?", "%#{sanitize_sql_like(orientation)}%")
+        .where(an_bodies: { political_camp: orientation })
         .distinct
     }
   end

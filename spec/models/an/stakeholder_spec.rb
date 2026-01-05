@@ -148,4 +148,19 @@ RSpec.describe An::Stakeholder, type: :model do
       end
     end
   end
+
+  describe '.by_political_orientation' do
+    it 'returns stakeholders with terms in political groups matching the camp' do
+      left_group = create(:an_body, :political_group, political_camp_value: "left")
+      right_group = create(:an_body, :political_group, political_camp_value: "right")
+      left_stakeholder = create(:an_stakeholder)
+      right_stakeholder = create(:an_stakeholder)
+      create(:an_term, an_stakeholder: left_stakeholder, an_body: left_group)
+      create(:an_term, an_stakeholder: right_stakeholder, an_body: right_group)
+
+      result = described_class.by_political_orientation("left")
+
+      expect(result).to contain_exactly(left_stakeholder)
+    end
+  end
 end
