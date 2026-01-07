@@ -516,6 +516,22 @@ CREATE TABLE public.ar_internal_metadata (
 
 
 --
+-- Name: conversations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.conversations (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    status character varying DEFAULT 'active'::character varying NOT NULL,
+    title character varying(255),
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    session_id uuid,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT check_conversation_status CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'completed'::character varying, 'failed'::character varying, 'cancelled'::character varying])::text[])))
+);
+
+
+--
 -- Name: events; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -580,6 +596,24 @@ CREATE SEQUENCE public.llm_models_id_seq
 --
 
 ALTER SEQUENCE public.llm_models_id_seq OWNED BY public.llm_models.id;
+
+
+--
+-- Name: messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.messages (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    conversation_id uuid NOT NULL,
+    role character varying NOT NULL,
+    content text,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    CONSTRAINT check_message_role CHECK (((role)::text = ANY ((ARRAY['user'::character varying, 'assistant'::character varying])::text[]))),
+    CONSTRAINT check_message_status CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'processing'::character varying, 'completed'::character varying, 'failed'::character varying])::text[])))
+);
 
 
 --
@@ -773,11 +807,27 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
+-- Name: conversations conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.conversations
+    ADD CONSTRAINT conversations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: llm_models llm_models_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.llm_models
     ADD CONSTRAINT llm_models_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: messages messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT messages_pkey PRIMARY KEY (id);
 
 
 --
@@ -1097,6 +1147,27 @@ CREATE UNIQUE INDEX index_an_terms_on_uid ON public.an_terms USING btree (uid);
 
 
 --
+-- Name: index_conversations_on_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_created_at ON public.conversations USING btree (created_at);
+
+
+--
+-- Name: index_conversations_on_session_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_session_id ON public.conversations USING btree (session_id);
+
+
+--
+-- Name: index_conversations_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_conversations_on_status ON public.conversations USING btree (status);
+
+
+--
 -- Name: index_events_on_category_and_action_and_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1160,6 +1231,34 @@ CREATE INDEX index_llm_models_on_tier ON public.llm_models USING btree (tier);
 
 
 --
+-- Name: index_messages_on_conversation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_messages_on_conversation_id ON public.messages USING btree (conversation_id);
+
+
+--
+-- Name: index_messages_on_conversation_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_messages_on_conversation_id_and_created_at ON public.messages USING btree (conversation_id, created_at);
+
+
+--
+-- Name: index_messages_on_role; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_messages_on_role ON public.messages USING btree (role);
+
+
+--
+-- Name: index_messages_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_messages_on_status ON public.messages USING btree (status);
+
+
+--
 -- Name: index_terms_on_dates; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1220,6 +1319,14 @@ ALTER TABLE ONLY public.an_terms
 
 ALTER TABLE ONLY public.an_bodies_countries
     ADD CONSTRAINT fk_rails_7f0d5352f5 FOREIGN KEY (an_body_id) REFERENCES public.an_bodies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: messages fk_rails_7f927086d2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT fk_rails_7f927086d2 FOREIGN KEY (conversation_id) REFERENCES public.conversations(id);
 
 
 --
@@ -1293,6 +1400,8 @@ ALTER TABLE ONLY public.an_stakeholder_addresses
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260106104740'),
+('20260106104733'),
 ('20260105123255'),
 ('20251226135247'),
 ('20251214102158'),
