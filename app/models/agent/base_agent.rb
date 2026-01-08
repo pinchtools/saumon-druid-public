@@ -156,6 +156,7 @@ class Agent::BaseAgent
       action: "request",
       severity: "info",
       payload: {
+        input: input,
         agent: agent_name,
         agent_version: version,
         model: @current_model&.external_id,
@@ -191,7 +192,8 @@ class Agent::BaseAgent
         choice["message"]&.delete("content") if choice["message"].is_a?(Hash)
       end
     end
-    { status: raw.status, headers: raw.headers, body: filtered_body }
+
+    { input: input, status: raw.status, headers: raw.headers, body: filtered_body }
   end
 
   def tools
