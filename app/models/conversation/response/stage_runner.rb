@@ -109,12 +109,12 @@ class Conversation
       end
 
       def extract_results(execution_result)
-        execution_result[:results] || execution_result["results"] || {}
+        execution_result[:results] || {}
       end
 
       def extract_confidence
         planner_result = context.get_result("query_planner")
-        planner_result&.dig("confidence") || planner_result&.dig(:confidence)
+        planner_result&.dig(:confidence)
       end
 
       def process_signals(result)
@@ -125,17 +125,15 @@ class Conversation
       end
 
       def process_halt_signal(result)
-        return unless result[:halt] || result["halt"]
+        return unless result[:halt]
 
-        halt_reason = result[:halt_reason] || result["halt_reason"]
-        context.halt!(reason: halt_reason)
+        context.halt!(reason: result[:halt_reason])
       end
 
       def process_skip_signal(result)
-        return unless result[:skip_remaining] || result["skip_remaining"]
+        return unless result[:skip_remaining]
 
-        skip_reason = result[:skip_reason] || result["skip_reason"]
-        context.skip_remaining!(reason: skip_reason)
+        context.skip_remaining!(reason: result[:skip_reason])
       end
 
       def handle_error(error)

@@ -13,15 +13,19 @@ module QueryExecution
     end
 
     def get_result(step_id)
-      @results[step_id]
+      result = @results[step_id]
+      ensure_indifferent_access(result)
     end
 
     def all_results
-      @results.to_h
+      @results.to_h.transform_values { |v| ensure_indifferent_access(v) }
     end
 
     def results_data
-      @results.transform_values { |result| result.success? ? result.data : nil }
+      @results.transform_values do |result|
+        data = result.success? ? result.data : nil
+        ensure_indifferent_access(data)
+      end
     end
 
     def execution_failed?
@@ -42,6 +46,19 @@ module QueryExecution
 
     def complete?
       @results.values.all? { |r| r.success? || r.failed? || r.skipped? }
+    end
+
+    private
+
+    def ensure_indifferent_access(value)
+      case value
+      when Hash
+        value.with_indifferent_access
+      when Array
+        value.map { |v| ensure_indifferent_access(v) }
+      else
+        value
+      end
     end
   end
 end
