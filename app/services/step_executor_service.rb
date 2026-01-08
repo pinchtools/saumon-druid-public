@@ -240,7 +240,9 @@ class StepExecutorService
   end
 
   def serialize_record(record)
-    record.attributes.transform_keys(&:to_s)
+    record.attributes
+      .except("uid", "created_at", "updated_at")
+      .transform_keys(&:to_s)
   end
 
   def validate_params!(params, expected_count, action)

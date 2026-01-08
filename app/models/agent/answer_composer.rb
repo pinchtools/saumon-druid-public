@@ -7,7 +7,6 @@ class Agent::AnswerComposer < Agent::BaseAgent
 
   MAX_INLINE_RESULTS = 10
   SAMPLE_SIZE = 5
-  RELEVANT_KEYS = %w[id uid first_name last_name name label title start_date end_date gender occupation capacity].freeze
 
   def call(input)
     @start_time = Time.current
@@ -31,24 +30,14 @@ class Agent::AnswerComposer < Agent::BaseAgent
       User's original question:
       #{input_validator.question}
 
-      Search results (raw data):
+      Query execution results:
+      The following data comes from executing a multi-step query plan.
+      Each section corresponds to a step in the plan, identified by its step ID.
+
       #{format_results}
 
-      Query plan confidence level: #{input_validator.confidence || "not specified"}/5
-
-      Instructions:
-      - Generate a clear and concise response in French
-      - Base your response only on the provided data
-      - If results are empty or insufficient, state it clearly
-      - Format lists in a readable manner
-      - Include relevant sources (names, titles, dates)
-
-      Respond in the following JSON format:
-      {
-        "answer": "Your response in French",
-        "sources": ["source1", "source2"],
-        "confidence_note": "Optional note about response reliability"
-      }
+      Query planner confidence level: #{input_validator.confidence || "not specified"}/5
+      (This indicates how confidently the query planner understood and decomposed the user's question)
     PROMPT
   end
 
@@ -79,7 +68,7 @@ class Agent::AnswerComposer < Agent::BaseAgent
   def format_item(item)
     return item.to_s unless item.is_a?(Hash)
 
-    item.slice(*RELEVANT_KEYS).compact.map { |k, v| "#{k}: #{v}" }.join(", ")
+    item.compact.map { |k, v| "#{k}: #{v}" }.join(", ")
   end
 
   # Event tracking methods
@@ -96,7 +85,6 @@ class Agent::AnswerComposer < Agent::BaseAgent
     track_composition_event("completed", payload: {
       duration_ms: elapsed_time_ms,
       answer_length: result["answer"]&.length || 0,
-      sources_count: result["sources"]&.size || 0,
       has_confidence_note: result["confidence_note"].present?
     })
   end

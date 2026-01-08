@@ -36,7 +36,6 @@ RSpec.describe Agent::AnswerComposer do
     let(:valid_json_response) do
       {
         "answer" => "Le président est Yaël Braun-Pivet.",
-        "sources" => [ "Source officielle" ],
         "confidence_note" => "Basé sur les données actuelles"
       }
     end
@@ -86,7 +85,6 @@ RSpec.describe Agent::AnswerComposer do
         expect(event.severity).to eq("info")
         expect(event.payload["duration_ms"]).to be_a(Integer)
         expect(event.payload["answer_length"]).to be > 0
-        expect(event.payload["sources_count"]).to eq(1)
         expect(event.payload["has_confidence_note"]).to be true
       end
     end
