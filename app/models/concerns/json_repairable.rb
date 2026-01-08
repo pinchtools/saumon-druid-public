@@ -70,6 +70,10 @@ module JsonRepairable
   def apply_safe_repairs(str)
     result = str.dup
 
+    # Escape literal newlines, carriage returns, and tabs within JSON strings
+    # This is a common issue with LLM outputs that use multiline strings
+    result = escape_literal_whitespace_in_strings(result)
+
     # Python booleans and None (safe - these are reserved keywords)
     result.gsub!(/\bTrue\b/, "true")
     result.gsub!(/\bFalse\b/, "false")
@@ -91,6 +95,48 @@ module JsonRepairable
     result.gsub!(/\r\n/, "\n")
 
     result.strip
+  end
+
+  def escape_literal_whitespace_in_strings(str)
+    # Find all string values in the JSON and escape literal newlines/tabs within them
+    # This handles the case where LLMs output strings with actual newlines instead of \n
+    result = []
+    in_string = false
+    escape_next = false
+    i = 0
+
+    while i < str.length
+      char = str[i]
+
+      if escape_next
+        result << char
+        escape_next = false
+      elsif char == '\\'
+        result << char
+        escape_next = true
+      elsif char == '"'
+        result << char
+        in_string = !in_string
+      elsif in_string
+        # We're inside a JSON string - escape literal whitespace characters
+        case char
+        when "\n"
+          result << "\\n"
+        when "\r"
+          result << "\\r"
+        when "\t"
+          result << "\\t"
+        else
+          result << char
+        end
+      else
+        result << char
+      end
+
+      i += 1
+    end
+
+    result.join
   end
 
   def apply_aggressive_repairs(str)
