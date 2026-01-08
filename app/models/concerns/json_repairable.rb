@@ -111,7 +111,7 @@ module JsonRepairable
       if escape_next
         result << char
         escape_next = false
-      elsif char == '\\'
+      elsif char == "\\"
         result << char
         escape_next = true
       elsif char == '"'

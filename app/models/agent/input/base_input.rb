@@ -12,7 +12,7 @@ class Agent::Input::BaseInput
   def as_json
     {
       trace_id: trace_id,
-      message_id: message_id,
+      message_id: message_id
     }
   end
 end
