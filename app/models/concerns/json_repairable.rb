@@ -87,10 +87,6 @@ module JsonRepairable
     # Remove trailing commas before closing braces/brackets (safe)
     result.gsub!(/,(\s*[}\]])/, '\1')
 
-    # Remove JavaScript-style comments (not valid in JSON)
-    result.gsub!(%r{//[^\n]*(?:\n|$)}, "")
-    result.gsub!(%r{/\*.*?\*/}m, "")
-
     # Normalize whitespace
     result.gsub!(/\r\n/, "\n")
 
@@ -98,8 +94,9 @@ module JsonRepairable
   end
 
   def escape_literal_whitespace_in_strings(str)
-    # Find all string values in the JSON and escape literal newlines/tabs within them
+    # Find all string values in the JSON and escape control characters within them
     # This handles the case where LLMs output strings with actual newlines instead of \n
+    # JSON forbids all control characters (0x00-0x1F) inside strings unless escaped
     result = []
     in_string = false
     escape_next = false
@@ -118,14 +115,20 @@ module JsonRepairable
         result << char
         in_string = !in_string
       elsif in_string
-        # We're inside a JSON string - escape literal whitespace characters
-        case char
-        when "\n"
-          result << "\\n"
-        when "\r"
-          result << "\\r"
-        when "\t"
-          result << "\\t"
+        # We're inside a JSON string - escape control characters
+        ord = char.ord
+        if ord < 0x20
+          # All control characters must be escaped in JSON strings
+          case char
+          when "\n" then result << "\\n"
+          when "\r" then result << "\\r"
+          when "\t" then result << "\\t"
+          when "\b" then result << "\\b"
+          when "\f" then result << "\\f"
+          else
+            # Other control chars: use Unicode escape \u00XX
+            result << format("\\u%04x", ord)
+          end
         else
           result << char
         end
