@@ -1,4 +1,6 @@
 class Event < ApplicationRecord
+  include Event::Debuggable
+
   # Explicitly set primary key since we use custom id without Rails-managed PK
   # (Required for TimescaleDB hypertable compatibility)
   self.primary_key = "id"
