@@ -79,6 +79,7 @@ class Agent::BaseAgent
     validate_output(data)
     data
   rescue JsonRepairable::RepairError => e
+    track_llm_json_error(response.content)
     raise ArgumentError, "Invalid JSON response from LLM: #{e.message}"
   rescue OutputValidationError => e
     # If this is the first attempt, try to handle it as a tool response
@@ -203,6 +204,17 @@ class Agent::BaseAgent
       category: "llm",
       action: "response",
       payload: filter_response_payload(@last_response.raw)
+    )
+  end
+
+  def track_llm_json_error(response)
+    track_event(
+      category: "llm",
+      action: "invalid_json_response",
+      severity: :error,
+      payload: {
+        output: response
+      }
     )
   end
 
