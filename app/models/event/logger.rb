@@ -23,6 +23,8 @@ class Event::Logger
   end
 
   def formatted_message
+    truncated_payload = Event::PayloadTruncator.new(event.payload).truncate
+
     {
       event: event.full_action,
       severity: event.severity,
@@ -30,7 +32,7 @@ class Event::Logger
       session_id: event.session_id,
       request_id: event.request_id,
       job_id: event.job_id,
-      **event.payload.symbolize_keys
+      **truncated_payload.symbolize_keys
     }
   end
 

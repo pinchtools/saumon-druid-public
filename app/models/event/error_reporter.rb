@@ -23,12 +23,15 @@ class Event::ErrorReporter
   end
 
   def sentry_extra
-    {
+    base_extra = {
       event_id: event.id,
       eventable: eventable_identifier,
-      session_id: event.session_id,
-      **event.payload
+      session_id: event.session_id
     }
+
+    truncated_payload = Event::PayloadTruncator.new(event.payload).truncate
+
+    base_extra.merge(truncated_payload)
   end
 
   def sentry_tags
