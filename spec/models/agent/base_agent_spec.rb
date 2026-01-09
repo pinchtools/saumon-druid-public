@@ -311,4 +311,112 @@ RSpec.describe Agent::BaseAgent do
       end
     end
   end
+
+  describe '#call - template method pattern' do
+    let(:test_input) { { question: "test question", message_id: "123", trace_id: "abc" } }
+    let(:test_output) { { answer: "test answer" } }
+
+    # Create a test subclass that implements perform_call
+    let(:test_agent_class) do
+      Class.new(described_class) do
+        def self.agent_name
+          "test_agent"
+        end
+
+        protected
+
+        def perform_call
+          { answer: "test answer" }
+        end
+
+        def input_validator
+          Struct.new(:valid?).new(true)
+        end
+      end
+    end
+
+    let(:test_agent) { test_agent_class.new }
+
+    after { Current.reset }
+
+    it 'calls perform_call and returns its result' do
+      result = test_agent.call(test_input)
+
+      expect(result).to eq(test_output)
+    end
+
+    it 'stores output in @output instance variable' do
+      test_agent.call(test_input)
+
+      expect(test_agent.output).to eq(test_output)
+    end
+
+    it 'validates input before calling perform_call' do
+      invalid_validator = Struct.new(:valid?, :errors).new(
+        false,
+        Struct.new(:full_messages).new(["Question is required"])
+      )
+      allow(test_agent).to receive(:input_validator).and_return(invalid_validator)
+
+      expect { test_agent.call(test_input) }
+        .to raise_error(ArgumentError, /Input validation failed/)
+    end
+
+    it 'creates agent.call_started event' do
+      Current.message_id = "msg-123"
+      Current.conversation_id = "conv-456"
+
+      expect { test_agent.call(test_input) }.to change(Event, :count).by(2)
+
+      started_event = Event.find_by(action: "call_started")
+      expect(started_event.category).to eq("agent")
+      expect(started_event.payload["agent"]).to eq("test_agent")
+      # Convert test_input to match the stored format (stringified keys)
+      expect(started_event.payload["input"]).to eq(test_input.deep_stringify_keys)
+      expect(started_event.payload["message_id"]).to eq("msg-123")
+      expect(started_event.payload["conversation_id"]).to eq("conv-456")
+    end
+
+    it 'creates agent.call_completed event' do
+      test_agent.call(test_input)
+
+      completed_event = Event.find_by(action: "call_completed")
+      expect(completed_event.category).to eq("agent")
+      expect(completed_event.payload["agent"]).to eq("test_agent")
+      # Convert test_output to match the stored format (stringified keys)
+      expect(completed_event.payload["output"]).to eq(test_output.deep_stringify_keys)
+      expect(completed_event.payload["duration_ms"]).to be_a(Integer)
+      expect(completed_event.payload["duration_ms"]).to be >= 0
+    end
+
+    it 'tracks elapsed time in milliseconds' do
+      allow(test_agent).to receive(:perform_call) do
+        sleep(0.01) # 10ms
+        test_output
+      end
+
+      test_agent.call(test_input)
+
+      completed_event = Event.find_by(action: "call_completed")
+      expect(completed_event.payload["duration_ms"]).to be >= 10
+    end
+
+    it 'includes Current context in agent call events' do
+      Current.session_id = SecureRandom.uuid
+      Current.request_id = SecureRandom.uuid
+      Current.job_id = SecureRandom.uuid
+      Current.message_id = "msg-789"
+      Current.conversation_id = "conv-101"
+
+      test_agent.call(test_input)
+
+      Event.where(category: "agent").each do |event|
+        expect(event.session_id).to eq(Current.session_id)
+        expect(event.request_id).to eq(Current.request_id)
+        expect(event.job_id).to eq(Current.job_id)
+        expect(event.payload["message_id"]).to eq("msg-789")
+        expect(event.payload["conversation_id"]).to eq("conv-101")
+      end
+    end
+  end
 end

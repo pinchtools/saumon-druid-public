@@ -1,10 +1,9 @@
 class Agent::QueryPlanner < Agent::BaseAgent
   agent_name "query_planner"
 
+  protected
 
-  def call(input)
-    super
-
+  def perform_call
     response = chat.ask(input_validator.question)
     parse_and_validate_json_response(response)
   end

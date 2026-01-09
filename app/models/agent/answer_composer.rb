@@ -8,9 +8,10 @@ class Agent::AnswerComposer < Agent::BaseAgent
   MAX_INLINE_RESULTS = 10
   SAMPLE_SIZE = 5
 
-  def call(input)
+  protected
+
+  def perform_call
     @start_time = Time.current
-    super
 
     track_composition_started
     chat
@@ -98,14 +99,11 @@ class Agent::AnswerComposer < Agent::BaseAgent
   end
 
   def track_composition_event(action, severity: :info, payload: {})
-    Event.create!(
+    track_event(
       category: "agent",
       action: "answer_composer.#{action}",
-      severity: severity.to_s,
-      payload: payload,
-      session_id: Current.session_id,
-      request_id: Current.request_id,
-      job_id: Current.job_id
+      severity: severity,
+      payload: payload
     )
   end
 

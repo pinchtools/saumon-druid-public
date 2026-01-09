@@ -3,6 +3,8 @@ class Current < ActiveSupport::CurrentAttributes
   attribute :session_id
   attribute :request_id
   attribute :job_id
+  attribute :message_id
+  attribute :conversation_id
 
   def self.with_session(id = nil)
     self.session_id = id || SecureRandom.uuid

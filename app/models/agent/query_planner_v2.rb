@@ -1,9 +1,9 @@
 class Agent::QueryPlannerV2 < Agent::BaseAgent
   agent_name "query_planner_v2"
 
-  def call(input)
-    super
+  protected
 
+  def perform_call
     chat.on_tool_call do |tool_call|
       track_tool_use("tool_call", { name: tool_call, arguments: tool_call.arguments })
     end.on_tool_result do |result|
@@ -14,8 +14,6 @@ class Agent::QueryPlannerV2 < Agent::BaseAgent
     response = ask(input_validator.question)
     parse_and_validate_json_response(response)
   end
-
-  protected
 
   def handle_tool_response_retry(data, original_response)
     # The model returned data (likely from a tool call) instead of the expected format
@@ -47,14 +45,10 @@ class Agent::QueryPlannerV2 < Agent::BaseAgent
   end
 
   def track_tool_use(action, payload)
-    Event.create!(
+    track_event(
       category: "agent",
       action: action,
-      severity: "info",
-      payload: payload,
-      session_id: Current.session_id,
-      request_id: Current.request_id,
-      job_id: Current.job_id
+      payload: payload
     )
   end
 end

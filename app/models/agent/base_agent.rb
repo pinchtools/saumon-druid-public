@@ -13,8 +13,9 @@ class Agent::BaseAgent
   end
 
   define_callbacks :llm_call
+  define_callbacks :agent_call
 
-  attr_reader :agent, :current_version, :enabled_models, :input, :last_response
+  attr_reader :agent, :current_version, :enabled_models, :input, :last_response, :output
 
   delegate :agent_name, to: :class
 
@@ -51,14 +52,27 @@ class Agent::BaseAgent
 
   def call(input)
     @input = input
+    @call_start_time = Time.current
 
     validator = input_validator
     unless validator.valid?
       raise ArgumentError, "Input validation failed: #{validator.errors.full_messages.join(', ')}"
     end
+
+    run_callbacks :agent_call do
+      @output = perform_call
+    end
+
+    @output
   end
 
   protected
+
+  # Subclasses must implement this method to perform the actual agent logic
+  # The return value will be stored in @output and tracked in events
+  def perform_call
+    raise NotImplementedError, "#{self.class.name} must implement #perform_call"
+  end
 
   def parse_and_validate_json_response(response, retry_count: 0)
     data = repair_json(response.content)
@@ -147,39 +161,80 @@ class Agent::BaseAgent
 
   set_callback :llm_call, :before, :track_llm_request
   set_callback :llm_call, :after, :track_llm_response
+  set_callback :agent_call, :before, :track_agent_call_start
+  set_callback :agent_call, :after, :track_agent_call_complete
 
   private
 
-  def track_llm_request
+  # Helper method to create events with automatic context
+  def track_event(category:, action:, payload: {}, severity: :info)
     Event.create!(
-      category: "llm",
-      action: "request",
-      severity: "info",
-      payload: {
-        input: input,
-        agent: agent_name,
-        agent_version: version,
-        model: @current_model&.external_id,
-        hyperparams: hyperparams
-      },
+      category: category,
+      action: action,
+      severity: severity.to_s,
+      payload: payload.merge(
+        message_id: Current.message_id,
+        conversation_id: Current.conversation_id
+      ).compact,
       session_id: Current.session_id,
       request_id: Current.request_id,
       job_id: Current.job_id
     )
   end
 
+  def track_llm_request
+    track_event(
+      category: "llm",
+      action: "request",
+      payload: {
+        input: input,
+        agent: agent_name,
+        agent_version: version,
+        model: @current_model&.external_id,
+        hyperparams: hyperparams
+      }
+    )
+  end
+
   def track_llm_response
     return unless @last_response
 
-    Event.create!(
+    track_event(
       category: "llm",
       action: "response",
-      severity: "info",
-      payload: filter_response_payload(@last_response.raw),
-      session_id: Current.session_id,
-      request_id: Current.request_id,
-      job_id: Current.job_id
+      payload: filter_response_payload(@last_response.raw)
     )
+  end
+
+  def track_agent_call_start
+    track_event(
+      category: "agent",
+      action: "call_started",
+      payload: {
+        agent: agent_name,
+        agent_version: version,
+        input: input
+      }
+    )
+  end
+
+  def track_agent_call_complete
+    track_event(
+      category: "agent",
+      action: "call_completed",
+      payload: {
+        agent: agent_name,
+        agent_version: version,
+        duration_ms: elapsed_call_time_ms,
+        output: output
+      }
+    )
+  end
+
+  def elapsed_call_time_ms
+    return 0 unless @call_start_time
+
+    ((Time.current - @call_start_time) * 1000).round
   end
 
   def filter_response_payload(raw)
