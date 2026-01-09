@@ -354,7 +354,7 @@ RSpec.describe Agent::BaseAgent do
     it 'validates input before calling perform_call' do
       invalid_validator = Struct.new(:valid?, :errors).new(
         false,
-        Struct.new(:full_messages).new(["Question is required"])
+        Struct.new(:full_messages).new([ "Question is required" ])
       )
       allow(test_agent).to receive(:input_validator).and_return(invalid_validator)
 

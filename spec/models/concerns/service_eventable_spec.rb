@@ -139,5 +139,82 @@ RSpec.describe ServiceEventable do
         expect(event.session_id).to eq(service_session_id)
       end
     end
+
+    context "with automatic context from Current" do
+      before do
+        Current.message_id = "msg-123"
+        Current.conversation_id = "conv-456"
+      end
+
+      it "automatically includes message_id in payload" do
+        event = service.track_event(action, payload: { custom: "data" })
+
+        expect(event.payload["message_id"]).to eq("msg-123")
+        expect(event.payload["custom"]).to eq("data")
+      end
+
+      it "automatically includes conversation_id in payload" do
+        event = service.track_event(action, payload: { custom: "data" })
+
+        expect(event.payload["conversation_id"]).to eq("conv-456")
+        expect(event.payload["custom"]).to eq("data")
+      end
+
+      it "allows payload to override automatic context" do
+        event = service.track_event(action, payload: { message_id: "custom-msg" })
+
+        expect(event.payload["message_id"]).to eq("custom-msg")
+        expect(event.payload["conversation_id"]).to eq("conv-456")
+      end
+    end
+  end
+
+  describe "#build_payload" do
+    before do
+      Current.message_id = "msg-789"
+      Current.conversation_id = "conv-101"
+    end
+
+    it "merges automatic context, service context, and provided payload" do
+      test_service_with_context = Class.new do
+        include ServiceEventable
+
+        def self.name() "TestService" end
+        def exposed_build_payload(payload) build_payload(payload) end
+
+        private
+
+        def service_context() { service_info: "metadata" } end
+      end
+
+      service = test_service_with_context.new
+      result = service.exposed_build_payload({ custom: "value" })
+
+      expect(result[:message_id]).to eq("msg-789")
+      expect(result[:conversation_id]).to eq("conv-101")
+      expect(result[:service_info]).to eq("metadata")
+      expect(result[:custom]).to eq("value")
+    end
+  end
+
+  describe "#automatic_context" do
+    it "includes message_id and conversation_id from Current" do
+      Current.message_id = "msg-auto"
+      Current.conversation_id = "conv-auto"
+
+      test_service = Class.new do
+        include ServiceEventable
+
+        def self.name() "TestService" end
+
+        def exposed_automatic_context() automatic_context end
+      end
+
+      service = test_service.new
+      result = service.exposed_automatic_context
+
+      expect(result[:message_id]).to eq("msg-auto")
+      expect(result[:conversation_id]).to eq("conv-auto")
+    end
   end
 end
