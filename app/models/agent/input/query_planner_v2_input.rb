@@ -6,7 +6,7 @@ class Agent::Input::QueryPlannerV2Input < Agent::Input::BaseInput
   def as_json
     {
       **super,
-      question: question.presence.truncate(200)
+      question: question.presence
     }
   end
 end
