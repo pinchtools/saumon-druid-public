@@ -1,0 +1,20 @@
+<%# Sidebar %>
+<aside class="w-72 bg-white border-r border-gray-200 flex flex-col">
+  <div class="p-4 border-b border-gray-200">
+    <h1 class="text-lg font-semibold text-gray-900"><%= t('conversations.sidebar.app_name') %></h1>
+    <p class="text-sm text-gray-500"><%= t('conversations.sidebar.tagline') %></p>
+  </div>
+
+  <div class="p-3">
+    <%= button_to t('conversations.sidebar.new_conversation'), conversations_path, method: :post,
+        class: "w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium" %>
+  </div>
+
+  <%= turbo_frame_tag :conversations, class: "flex-1 overflow-y-auto" do %>
+    <nav class="p-2 space-y-1">
+      <% @conversations.each do |conversation| %>
+        <%= render conversation, selected: local_assigns.fetch(:selected_conversation, nil) == conversation %>
+      <% end %>
+    </nav>
+  <% end %>
+</aside>

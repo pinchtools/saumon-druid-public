@@ -17,6 +17,11 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # Conversations
+  resources :conversations, only: [ :index, :show, :create, :destroy ] do
+    resources :messages, only: [ :create ], module: :conversations
+  end
+
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "conversations#index"
 end

@@ -1,0 +1,20 @@
+<%# locals: (conversation:) %>
+<%= turbo_stream_from conversation %>
+
+<%# Messages area %>
+<div class="flex-1 overflow-y-auto" data-controller="scroll" data-scroll-target="container">
+  <div class="max-w-3xl mx-auto p-4 space-y-4">
+    <%= turbo_frame_tag dom_id(conversation, :messages) do %>
+      <% conversation.messages.chronological.each do |message| %>
+        <%= render partial: "conversations/messages/message", locals: { message: message } %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<%# Input form %>
+<div class="border-t border-gray-200 bg-gray-50">
+  <div class="max-w-3xl mx-auto p-4">
+    <%= render "message_form", conversation: conversation %>
+  </div>
+</div>

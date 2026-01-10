@@ -127,4 +127,43 @@ RSpec.describe Message, type: :model do
       expect(message.reload.metadata["error"]).to eq("Something went wrong")
     end
   end
+
+  describe "callbacks" do
+    describe "enqueue_processing" do
+      let(:conversation) { create(:conversation) }
+
+      context "when creating a pending assistant message" do
+        it "enqueues the processing job" do
+          expect {
+            create(:message, :assistant, :pending, conversation: conversation)
+          }.to have_enqueued_job(Conversation::Response::ProcessingJob)
+        end
+
+        it "enqueues with correct arguments" do
+          message = create(:message, :assistant, :pending, conversation: conversation)
+
+          expect(Conversation::Response::ProcessingJob).to have_been_enqueued.with(
+            conversation.id,
+            message.id
+          )
+        end
+      end
+
+      context "when creating a user message" do
+        it "does not enqueue the processing job" do
+          expect {
+            create(:message, :user, conversation: conversation)
+          }.not_to have_enqueued_job(Conversation::Response::ProcessingJob)
+        end
+      end
+
+      context "when creating an assistant message with non-pending status" do
+        it "does not enqueue the processing job" do
+          expect {
+            create(:message, :assistant, :completed, conversation: conversation)
+          }.not_to have_enqueued_job(Conversation::Response::ProcessingJob)
+        end
+      end
+    end
+  end
 end

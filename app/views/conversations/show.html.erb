@@ -1,0 +1,8 @@
+<div class="flex h-screen">
+  <%= render "sidebar", selected_conversation: @conversation %>
+
+  <%# Main content %>
+  <main class="flex-1 flex flex-col bg-white">
+    <%= render "chat", conversation: @conversation %>
+  </main>
+</div>

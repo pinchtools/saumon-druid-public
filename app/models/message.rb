@@ -2,6 +2,10 @@
 
 class Message < ApplicationRecord
   include Eventable
+  include Message::Broadcastable
+
+  # Enqueue processing job for new assistant messages
+  after_commit :enqueue_processing, on: :create, if: :should_process?
 
   # Role constants
   ROLE_USER = "user"
@@ -75,5 +79,17 @@ class Message < ApplicationRecord
 
   def default_event_category
     "message"
+  end
+
+  def should_process?
+    assistant? && pending?
+  end
+
+  def enqueue_processing
+    Conversation::Response::ProcessingJob.perform_later(conversation_id, id)
+  end
+
+  def to_partial_path
+    "conversations/messages/message"
   end
 end

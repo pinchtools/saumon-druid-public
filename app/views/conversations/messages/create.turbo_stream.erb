@@ -1,0 +1,14 @@
+<%# Append user message %>
+<%= turbo_stream.append dom_id(@conversation, :messages) do %>
+  <%= render partial: "conversations/messages/message", locals: { message: @user_message } %>
+<% end %>
+
+<%# Append pending assistant message %>
+<%= turbo_stream.append dom_id(@conversation, :messages) do %>
+  <%= render partial: "conversations/messages/message", locals: { message: @assistant_message } %>
+<% end %>
+
+<%# Reset the form %>
+<%= turbo_stream.replace dom_id(@conversation, :message_form) do %>
+  <%= render "conversations/message_form", conversation: @conversation %>
+<% end %>

@@ -1,0 +1,15 @@
+<div class="flex-1 flex items-center justify-center">
+  <div class="text-center max-w-md">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+      </svg>
+    </div>
+    <h2 class="text-xl font-semibold text-gray-900 mb-2"><%= t('conversations.empty_state.welcome') %></h2>
+    <p class="text-gray-600 mb-6">
+      <%= t('conversations.empty_state.description') %>
+    </p>
+    <%= button_to t('conversations.empty_state.start_conversation'), conversations_path, method: :post,
+        class: "px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium" %>
+  </div>
+</div>

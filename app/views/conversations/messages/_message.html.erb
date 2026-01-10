@@ -1,0 +1,44 @@
+<%# locals: (message:) %>
+<%= turbo_frame_tag message do %>
+  <div class="flex <%= message.user? ? 'justify-end' : 'justify-start' %>">
+    <div class="max-w-[80%] <%= message.user? ? 'order-2' : '' %>">
+      <%# Avatar %>
+      <% unless message.user? %>
+        <div class="flex items-center gap-2 mb-1">
+          <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+            <span class="text-white text-xs font-medium"><%= t('messages.avatar_label') %></span>
+          </div>
+          <span class="text-xs text-gray-500"><%= t('messages.assistant_label') %></span>
+        </div>
+      <% end %>
+
+      <%# Message bubble %>
+      <div class="<%= message.user? ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm' %> px-4 py-2">
+        <% if message.processing? %>
+          <div class="flex items-center gap-2">
+            <div class="flex gap-1">
+              <span class="w-2 h-2 bg-current rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+              <span class="w-2 h-2 bg-current rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+              <span class="w-2 h-2 bg-current rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+            </div>
+            <span class="text-sm opacity-70"><%= t('messages.processing') %></span>
+          </div>
+        <% elsif message.failed? %>
+          <div class="text-red-600">
+            <p class="font-medium"><%= t('messages.error.title') %></p>
+            <p class="text-sm opacity-80"><%= message.content %></p>
+          </div>
+        <% else %>
+          <div class="prose prose-sm max-w-none <%= message.user? ? 'prose-invert' : '' %>">
+            <%= simple_format(message.content) %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Timestamp %>
+      <div class="mt-1 text-xs text-gray-400 <%= message.user? ? 'text-right' : '' %>">
+        <%= l(message.created_at, format: :short) rescue time_ago_in_words(message.created_at) %>
+      </div>
+    </div>
+  </div>
+<% end %>

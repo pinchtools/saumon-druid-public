@@ -1,0 +1,15 @@
+<%# locals: (conversation:, selected: false) %>
+<%= link_to conversation_path(conversation),
+    class: "block px-3 py-2 rounded-lg text-sm truncate transition-colors #{selected ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}",
+    data: { turbo_frame: "_top" } do %>
+  <% if conversation.title.present? %>
+    <%= conversation.title %>
+  <% elsif conversation.last_user_message&.content.present? %>
+    <%= truncate(conversation.last_user_message.content, length: 40) %>
+  <% else %>
+    <%= t('conversations.conversation.default_title') %>
+  <% end %>
+  <span class="block text-xs text-gray-400 mt-0.5">
+    <%= time_ago_in_words(conversation.created_at) %>
+  </span>
+<% end %>

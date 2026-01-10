@@ -1,0 +1,12 @@
+<div class="flex h-screen">
+  <%= render "sidebar" %>
+
+  <%# Main content %>
+  <main class="flex-1 flex flex-col bg-white">
+    <% if @conversation %>
+      <%= render "chat", conversation: @conversation %>
+    <% else %>
+      <%= render "empty_state" %>
+    <% end %>
+  </main>
+</div>

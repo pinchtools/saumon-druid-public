@@ -116,6 +116,26 @@ fr:
       short: "%d %b %Hh%M"
       month_year: "%B %Y"
       long_date: "%d %B %Y"
+  conversations:
+    sidebar:
+      app_name: "Saumon Druid"
+      tagline: "Assistant Assemblée Nationale"
+      new_conversation: "Nouvelle conversation"
+    conversation:
+      default_title: "Nouvelle conversation"
+    message_form:
+      placeholder: "Posez votre question sur l'Assemblée Nationale..."
+      submit: "Envoyer"
+    empty_state:
+      welcome: "Bienvenue sur Saumon Druid"
+      description: "Posez vos questions sur l'Assemblée Nationale : députés, votes, groupes parlementaires, et plus encore."
+      start_conversation: "Démarrer une conversation"
+  messages:
+    assistant_label: "Assistant"
+    avatar_label: "IA"
+    processing: "Réflexion en cours..."
+    error:
+      title: "Une erreur est survenue"
   an:
     stakeholder:
       vector_search:

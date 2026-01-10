@@ -5,6 +5,26 @@ en:
         answer_required: "Response must contain 'answer'"
         sources_must_be_array: "must be an array"
         source_item_must_be_string: "item %{index} must be a string"
+  conversations:
+    sidebar:
+      app_name: "Saumon Druid"
+      tagline: "National Assembly Assistant"
+      new_conversation: "New conversation"
+    conversation:
+      default_title: "New conversation"
+    message_form:
+      placeholder: "Ask your question about the National Assembly..."
+      submit: "Send"
+    empty_state:
+      welcome: "Welcome to Saumon Druid"
+      description: "Ask your questions about the National Assembly: deputies, votes, parliamentary groups, and more."
+      start_conversation: "Start a conversation"
+  messages:
+    assistant_label: "Assistant"
+    avatar_label: "AI"
+    processing: "Thinking..."
+    error:
+      title: "An error occurred"
   an:
     stakeholder:
       vector_search:
