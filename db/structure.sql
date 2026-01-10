@@ -1196,6 +1196,27 @@ CREATE INDEX index_events_on_payload ON public.events USING gin (payload);
 
 
 --
+-- Name: index_events_on_payload_conversation_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_events_on_payload_conversation_id ON public.events USING btree (((payload ->> 'conversation_id'::text)), created_at);
+
+
+--
+-- Name: index_events_on_payload_message_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_events_on_payload_message_id ON public.events USING btree (((payload ->> 'message_id'::text)), created_at);
+
+
+--
+-- Name: index_events_on_payload_trace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_events_on_payload_trace_id ON public.events USING btree (((payload ->> 'trace_id'::text)), created_at);
+
+
+--
 -- Name: index_events_on_session_id_and_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1400,6 +1421,7 @@ ALTER TABLE ONLY public.an_stakeholder_addresses
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260110070008'),
 ('20260106104740'),
 ('20260106104733'),
 ('20260105123255'),
