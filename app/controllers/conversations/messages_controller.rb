@@ -5,8 +5,10 @@ module Conversations
     before_action :set_conversation
 
     def create
-      @user_message = @conversation.add_user_message(message_params[:content])
-      @assistant_message = @conversation.add_assistant_message
+      Conversation.transaction do
+        @user_message = @conversation.add_user_message(message_params[:content])
+        @assistant_message = @conversation.add_assistant_message
+      end
 
       respond_to do |format|
         format.turbo_stream
