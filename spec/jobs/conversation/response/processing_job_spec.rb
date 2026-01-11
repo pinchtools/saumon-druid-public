@@ -15,10 +15,8 @@ RSpec.describe Conversation::Response::ProcessingJob, type: :job do
 
   describe "#perform" do
     context "when successful" do
-      let(:result) { { success: true, duration_ms: 150 } }
-
       before do
-        allow(orchestrator).to receive(:execute).and_return(result)
+        allow(orchestrator).to receive(:execute)
       end
 
       it "executes the orchestrator" do
@@ -29,35 +27,6 @@ RSpec.describe Conversation::Response::ProcessingJob, type: :job do
           message: message
         )
         expect(orchestrator).to have_received(:execute)
-      end
-
-      it "tracks job_completed event" do
-        expect {
-          described_class.new.perform(conversation.id, message.id)
-        }.to change(Event, :count).by(1)
-
-        event = Event.where(action: "job_completed").last
-        expect(event.payload["conversation_id"]).to eq(conversation.id)
-        expect(event.payload["message_id"]).to eq(message.id)
-        expect(event.payload["duration_ms"]).to eq(150)
-      end
-    end
-
-    context "when orchestrator returns failure" do
-      let(:result) { { success: false, error: "LLM unavailable" } }
-
-      before do
-        allow(orchestrator).to receive(:execute).and_return(result)
-      end
-
-      it "tracks job_failed event" do
-        expect {
-          described_class.new.perform(conversation.id, message.id)
-        }.to change(Event, :count).by(1)
-
-        event = Event.where(action: "job_failed").last
-        expect(event.severity).to eq("error")
-        expect(event.payload["error"]).to eq("LLM unavailable")
       end
     end
 
@@ -123,7 +92,7 @@ RSpec.describe Conversation::Response::ProcessingJob, type: :job do
     end
 
     it "sets Current attributes" do
-      allow(orchestrator).to receive(:execute).and_return({ success: true, duration_ms: 100 })
+      allow(orchestrator).to receive(:execute)
 
       described_class.new.perform(conversation.id, message.id)
 

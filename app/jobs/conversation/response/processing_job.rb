@@ -33,12 +33,10 @@ class Conversation
             return
           end
 
-          result = Orchestrator.new(
+          Orchestrator.new(
             conversation: conversation,
             message: message
           ).execute
-
-          track_job_result(result)
         end
       rescue ActiveRecord::RecordNotFound => e
         track_job_error(e)
@@ -55,18 +53,6 @@ class Conversation
           conversation_id: @conversation_id,
           message_id: @message_id
         }
-      end
-
-      def track_job_result(result)
-        if result[:success]
-          track_event(:job_completed, payload: base_payload.merge(
-            duration_ms: result[:duration_ms]
-          ))
-        else
-          track_event(:job_failed, severity: :error, payload: base_payload.merge(
-            error: result[:error]
-          ))
-        end
       end
 
       def track_job_error(error)

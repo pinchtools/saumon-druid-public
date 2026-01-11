@@ -205,13 +205,11 @@ RSpec.describe Conversation::Response::Orchestrator do
       service.execute
     end
 
-    it "tracks stage events" do
-      allow(service).to receive(:track_event).and_call_original
-
-      expect(service).to receive(:track_event).with("stage.query_planner.started", anything).and_call_original
-      expect(service).to receive(:track_event).with(/stage\.query_planner\.(completed|skipped)/, anything).and_call_original
-
+    it "includes stages_executed in completed event" do
       service.execute
+
+      completed_event = Event.where(category: "orchestrator", action: "completed").last
+      expect(completed_event.payload["stages_executed"]).to include("query_planner", "query_executor", "answer_composer")
     end
   end
 end

@@ -62,7 +62,6 @@ class Message < ApplicationRecord
 
   def mark_processing!
     update!(status: STATUS_PROCESSING)
-    track_event(:processing_started)
   end
 
   def complete!(final_content)
