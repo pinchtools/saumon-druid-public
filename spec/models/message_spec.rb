@@ -23,6 +23,24 @@ RSpec.describe Message, type: :model do
         expect(message).to be_valid
       end
     end
+
+    context "content length" do
+      it "rejects user messages exceeding the limit" do
+        message = build(:message, :user, content: "a" * (Message::USER_CONTENT_MAX_LENGTH + 1))
+        expect(message).not_to be_valid
+        expect(message.errors[:content]).to include(/is too long/)
+      end
+
+      it "accepts user messages at the limit" do
+        message = build(:message, :user, content: "a" * Message::USER_CONTENT_MAX_LENGTH)
+        expect(message).to be_valid
+      end
+
+      it "does not limit assistant message length" do
+        message = build(:message, :assistant, content: "a" * 10_000)
+        expect(message).to be_valid
+      end
+    end
   end
 
   describe "scopes" do

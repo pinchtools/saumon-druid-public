@@ -12,6 +12,9 @@ class Message < ApplicationRecord
   ROLE_ASSISTANT = "assistant"
   ROLES = [ ROLE_USER, ROLE_ASSISTANT ].freeze
 
+  # Content limits
+  USER_CONTENT_MAX_LENGTH = 2_000
+
   # Status constants
   STATUS_PENDING = "pending"
   STATUS_PROCESSING = "processing"
@@ -24,6 +27,7 @@ class Message < ApplicationRecord
   validates :role, inclusion: { in: ROLES }
   validates :status, inclusion: { in: STATUSES }
   validates :content, presence: true, if: :user?
+  validates :content, length: { maximum: USER_CONTENT_MAX_LENGTH }, if: :user?
 
   scope :by_role, ->(role) { where(role: role) }
   scope :pending, -> { where(status: STATUS_PENDING) }
