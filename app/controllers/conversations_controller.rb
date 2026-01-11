@@ -2,15 +2,14 @@
 
 class ConversationsController < ApplicationController
   before_action :set_session_id
+  before_action :set_conversations, only: [ :index, :show ]
   before_action :set_conversation, only: [ :show, :destroy ]
 
   def index
-    @conversations = Conversation.recent.limit(50)
     @conversation = @conversations.first
   end
 
   def show
-    @conversations = Conversation.recent.limit(50)
   end
 
   def create
@@ -32,6 +31,10 @@ class ConversationsController < ApplicationController
   end
 
   private
+
+  def set_conversations
+    @conversations = Conversation.recent.includes(:user_messages).limit(50)
+  end
 
   def set_session_id
     session[:session_id] ||= SecureRandom.uuid

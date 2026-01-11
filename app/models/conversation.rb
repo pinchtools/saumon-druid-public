@@ -11,6 +11,9 @@ class Conversation < ApplicationRecord
   STATUSES = [ STATUS_ACTIVE, STATUS_COMPLETED, STATUS_FAILED, STATUS_CANCELLED ].freeze
 
   has_many :messages, dependent: :destroy
+  has_many :user_messages,
+           -> { where(role: Message::ROLE_USER).order(created_at: :desc) },
+           class_name: "Message"
 
   validates :status, inclusion: { in: STATUSES }
   validates :session_id, presence: true
@@ -47,7 +50,7 @@ class Conversation < ApplicationRecord
   end
 
   def last_user_message
-    messages.where(role: Message::ROLE_USER).order(created_at: :desc).first
+    user_messages.first
   end
 
   def last_message
