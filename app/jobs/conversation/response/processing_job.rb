@@ -24,20 +24,22 @@ class Conversation
         conversation = Conversation.find(conversation_id)
         message = Message.find(message_id)
 
-        unless message.pending?
-          track_event(:job_skipped, payload: base_payload.merge(
-            reason: "already_processed",
-            current_status: message.status
-          ))
-          return
+        message.with_lock do
+          unless message.pending?
+            track_event(:job_skipped, payload: base_payload.merge(
+              reason: "already_processed",
+              current_status: message.status
+            ))
+            return
+          end
+
+          result = Orchestrator.new(
+            conversation: conversation,
+            message: message
+          ).execute
+
+          track_job_result(result)
         end
-
-        result = Orchestrator.new(
-          conversation: conversation,
-          message: message
-        ).execute
-
-        track_job_result(result)
       rescue ActiveRecord::RecordNotFound => e
         track_job_error(e)
       rescue StandardError => e
