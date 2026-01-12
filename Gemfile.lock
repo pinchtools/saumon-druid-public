@@ -84,7 +84,7 @@ GEM
       erubi (>= 1.0.0)
       rack (>= 0.9.0)
       rouge (>= 1.0.0)
-    bigdecimal (3.3.1)
+    bigdecimal (4.0.1)
     bindex (0.8.1)
     bootsnap (1.19.0)
       msgpack (~> 1.2)
@@ -178,7 +178,7 @@ GEM
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
     hashdiff (1.2.1)
-    httparty (0.23.2)
+    httparty (0.24.0)
       csv
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
@@ -230,8 +230,8 @@ GEM
     mini_mime (1.1.5)
     minitest (5.26.2)
     msgpack (1.8.0)
-    multi_xml (0.7.2)
-      bigdecimal (~> 3.1)
+    multi_xml (0.8.1)
+      bigdecimal (>= 3.1, < 5)
     multipart-post (2.4.1)
     neighbor (0.6.0)
       activerecord (>= 7.1)
@@ -529,7 +529,7 @@ DEPENDENCIES
   faker
   foreman
   guard-rspec
-  httparty (~> 0.23.2)
+  httparty (~> 0.24.0)
   importmap-rails
   jbuilder
   kamal
