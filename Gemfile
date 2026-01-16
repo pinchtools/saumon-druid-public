@@ -43,7 +43,7 @@ gem "thruster", require: false
 
 gem "foreman"
 gem "dotenv", "~> 3.2"
-gem "httparty", "~> 0.23.2"
+gem "httparty", "~> 0.24.2"
 gem "decent_exposure"
 
 # Use redis for cache
