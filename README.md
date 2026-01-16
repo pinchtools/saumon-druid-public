@@ -1,42 +1,103 @@
 # Saumon Druid
 
-> Agentic RAG system for querying French National Assembly (Assemblée Nationale) open data using natural language
+**RAG-based Natural Language Query System for Parliamentary Data**
 
+Saumon Druid is a Rails-based application that ingests large volumes of parliamentary data and enables natural-language querying through a hybrid search and LLM-assisted workflow. The project focuses on **data pipelines, search relevance, and observability**, rather than UI polish.
+
+> [!WARNING]
 > **Public Mirror** — This is a read-only snapshot of a private repository, shared for portfolio purposes. Some files are intentionally omitted. The project is under active development.
 
 ---
 
-## Design Principles
+## 🎯 Problem Statement
 
-This project builds on top of Saumon-Net, which is responsible for collecting raw data from the Assemblée Nationale open data APIs and preserving its full history.
+Political information from the French Parliament is **publicly available but difficult to access and understand**.
 
-Saumon-Net provides a reliable, versioned data source. This project focuses on the next step: transforming that raw data into a clean, normalized knowledge base designed for AI agents. The data is structured to make relationships explicit, consistent, and easy to query.
+Citizens, journalists, and political actors who want to follow parliamentary activity or understand political positions face several challenges:
 
-On top of this foundation, an AI-powered question-answering system allows users to explore parliamentary data using natural language. The system retrieves relevant information and generates clear answers, making complex institutional data accessible to non-experts.
+- Parliamentary data is dense, verbose, and often written in **technical or institutional language**
+- Tracking **recent updates** (new debates, amendments, votes) on a specific topic is time-consuming
+- Understanding **context and evolution** ("what changed?", "what is the impact?") requires digging through long documents
+- Raw parliamentary records are not designed for **searchability or synthesis**
 
-The platform is designed with scalability and observability in mind, ensuring that data processing and AI workflows can be monitored, extended, and maintained over time.
+As a result, even engaged users struggle to:
 
-## Engineering Highlights
+- stay informed in a **clear and comprehensible way**
+- quickly identify relevant parliamentary activity
+- understand how debates and positions evolve over time
 
-**Data Lineage** — ETL pipeline with transaction safety: all-or-nothing imports with automatic rollback. Each run tracks processed/created/updated/skipped/failed counts. Supports incremental sync via date filtering.
+**Saumon Druid aims to bridge this gap** by making French parliamentary data searchable, contextualized, and easier to explore.
 
-**Hybrid Search** — Combines French full-text search (stemming, stopwords) with trigram fuzzy matching and pgvector semantic embeddings. Weighted scoring adapts to query type.
+---
 
-**LLM Agents** — YAML-configured agents with schema-validated inputs/outputs. Decouples prompt engineering from code.
+## 🧠 Core Features
 
-**Observability** — Single `track_event` entry point for all instrumentation. Events are persisted to TimescaleDB for audit, then asynchronously routed to Sentry (errors) and New Relic (metrics). No scattered `Rails.logger` or direct SDK calls.
+| Area | What it does |
+|------|--------------|
+| **Data Pipeline** | Batch ingestion from external API with upsert logic and relationship mapping |
+| **Hybrid Search** | Vector (pgvector) + full-text (tsvector) + trigram (pg_trgm) in PostgreSQL |
+| **Agent Orchestration** | Multi-stage LLM pipeline: safety → rewrite → plan → execute → compose |
+| **Query Execution** | Dependency-aware parallel execution with timeout protection |
+| **Observability** | Structured events on every step, stored in TimescaleDB for analysis |
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|-------|--------|
-| Framework | Rails 8.0 |
-| Database | PostgreSQL + pgvector + TimescaleDB |
-| Background Jobs | Sidekiq |
-| Deployment | Docker |
-| Monitoring | Sentry + New Relic |
+## 🏗 Architecture Overview
 
+```
+┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│  Data Ingestion │  →   │  Hybrid Search  │  →   │  Agent Pipeline │
+│  (SaumonNet API)│      │  (pgvector +FTS)│      │  (LLM reasoning)│
+└─────────────────┘      └─────────────────┘      └─────────────────┘
+```
 
-## License
+1. **Ingest** — Fetch parliamentary data, normalize, and embed stakeholder profiles
+2. **Search** — Combine vector similarity + full-text + trigram for hybrid retrieval
+3. **Plan** — LLM generates a structured, dependency-aware query plan
+4. **Execute** — Run query steps in parallel, respecting dependencies
+5. **Compose** — LLM synthesizes results into a French-language answer
 
-Private - All rights reserved
+**Tech:** Rails 8 • PostgreSQL (pgvector, TimescaleDB) • Sidekiq • Docker
+
+---
+
+## 🔍 Observability & Debugging
+
+RAG systems often feel like a black box. This project takes the opposite approach:
+
+- **Full event trail** — Every stage (ingestion, planning, execution, composition) emits structured events
+- **Correlation IDs** — Session, request, job, and conversation IDs propagate through all layers
+- **TimescaleDB storage** — Events are stored as time-series data for efficient querying
+- **Debug-friendly** — Trace why a query failed, which steps timed out, or what the LLM received
+
+---
+
+## 🧪 What This Project Demonstrates
+
+- Designing **data-intensive Rails systems**
+- Applying **modern AI patterns** (RAG, embeddings) pragmatically
+- Using PostgreSQL beyond traditional relational use cases
+- Building **observable, debuggable pipelines**
+- Thinking in terms of **product impact**, not just model accuracy
+
+---
+
+## 📌 Non-goals
+
+- Production-ready UI
+- Turnkey deployment
+- Generic RAG framework
+
+This project is intentionally focused on **engineering decisions and trade-offs**.
+
+---
+
+## 📄 License
+
+MIT (see LICENSE file)
+
+---
+
+## 👤 Author
+
+Vincent Pelle — Senior Software Engineer (Ruby / Rails)
